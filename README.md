@@ -99,10 +99,49 @@ SelfCast Dynamic/
   - Instagram
   - LinkedIn
 - Features:
-  - Profile URL management
-  - Text-only posts with emoji support
-  - Character count tracking
-  - Platform-specific limits
+  - Short description preview in cards
+  - Full content in modal popup
+  - Dynamic content keys:
+    ```
+    Platform Preview:
+    - facebook_excerpt
+    - twitter_excerpt
+    - instagram_excerpt
+    - linkedin_excerpt
+
+    Full Content:
+    - facebook_post
+    - twitter_post
+    - instagram_post
+    - linkedin_post
+
+    Social Links:
+    - facebook_url
+    - twitter_url
+    - instagram_url
+    - linkedin_url
+    ```
+  - Automatic excerpt generation (150 characters)
+  - "Read More" functionality
+  - Platform-specific styling
+  - Direct social profile links
+
+### Content Keys and Data Structure
+- **Social Media Content**
+  - Each platform has three associated keys:
+    1. `*_excerpt`: Short preview shown in the card
+    2. `*_post`: Full content shown in modal
+    3. `*_url`: Link to social profile
+  - Content is dynamically loaded from Supabase
+  - Project-specific content using `project_id`
+
+### Supabase Integration
+- Table: `dynamic_content`
+- Fields:
+  - `key`: Content identifier
+  - `value`: Actual content
+  - `project_id`: Project identifier
+- Content is fetched using project ID from URL or subdomain
 
 ## Database Schema
 

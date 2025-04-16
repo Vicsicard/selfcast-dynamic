@@ -1,7 +1,7 @@
 // Initialize Supabase client
 const supabase = window.supabase.createClient(
-    'https://aqicztygjpmunfljjuto.supabase.co',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxaWN6dHlnanBtdW5mbGpqdXRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3MDU1ODIsImV4cCI6MjA1OTI4MTU4Mn0.5e2hvTckSSbTFLBjQiccrvjoBd6QQDX0X4tccFOc1rs'
+    window.SUPABASE_CONFIG.url,
+    window.SUPABASE_CONFIG.key
 );
 
 // Get project ID from URL parameter or subdomain
@@ -18,7 +18,7 @@ function getProjectId() {
     const subdomain = window.location.hostname.split('.')[0];
     const defaultId = 'annie-sicard-123';
     console.log('Using default project ID:', defaultId);
-    return subdomain === 'localhost' ? defaultId : subdomain;
+    return defaultId; // Always use default for now
 }
 
 // Load Google Fonts
@@ -229,48 +229,77 @@ async function injectDynamicContent() {
     console.log('Loading content for project:', projectId);
     
     try {
+        console.log('Making Supabase query...');
         // Fetch all content for this project from Supabase
         const { data, error } = await supabase
             .from('dynamic_content')
             .select('key, value')
             .eq('project_id', projectId);
 
-        if (error) throw error;
-
-        console.log('Fetched data:', data);
-        
-        // Convert data array to object for easier access
-        const styles = {};
-        data.forEach(item => {
-            styles[item.key] = item.value;
-        });
-
-        // Load fonts first
-        if (styles.heading_font && styles.body_font) {
-            loadFonts(styles.heading_font, styles.body_font);
+        if (error) {
+            console.error('Supabase query error:', error);
+            throw error;
         }
 
-        // Inject styles
+        if (!data || data.length === 0) {
+            console.warn('No data found for project:', projectId);
+            return;
+        }
+
+        console.log('Raw Supabase data:', JSON.stringify(data, null, 2));
+        
+        // Convert data array to object for easier access
+        const contentMap = {};
+        data.forEach(item => {
+            contentMap[item.key] = item.value;
+            console.log(`Content for ${item.key}:`, item.value);
+        });
+
+        // First apply styles if they exist
+        if (contentMap.heading_font && contentMap.body_font) {
+            loadFonts(contentMap.heading_font, contentMap.body_font);
+        }
+
+        const styles = {
+            primary_color: contentMap.primary_color,
+            secondary_color: contentMap.secondary_color,
+            accent_color: contentMap.accent_color,
+            text_color: contentMap.text_color,
+            background_color: contentMap.background_color,
+            heading_font: contentMap.heading_font,
+            body_font: contentMap.body_font
+        };
         injectStyles(styles);
 
-        // Process each content item
-        data.forEach(item => {
-            // Find and update elements with matching data-key
-            const elements = document.querySelectorAll(`[data-key="${item.key}"]`);
-            console.log(`Updating elements with key ${item.key}:`, elements.length);
+        // Update all elements with matching data-keys
+        Object.keys(contentMap).forEach(key => {
+            const value = contentMap[key];
+            const elements = document.querySelectorAll(`[data-key="${key}"]`);
+            console.log(`Found ${elements.length} elements for key "${key}"`);
             
             elements.forEach(element => {
+                console.log(`Updating element:`, element);
                 if (element.tagName === 'A') {
-                    element.href = item.value;
+                    element.href = value;
                 } else {
-                    element.innerHTML = item.value;
+                    element.innerHTML = value;
                 }
             });
+
+            // Also check for excerpt version of the key
+            if (key.includes('_post')) {
+                const excerptKey = key.replace('_post', '_excerpt');
+                const excerptElements = document.querySelectorAll(`[data-key="${excerptKey}"]`);
+                
+                excerptElements.forEach(element => {
+                    const excerpt = value.length > 150 ? value.substring(0, 150) + '...' : value;
+                    element.innerHTML = excerpt;
+                });
+            }
         });
 
     } catch (error) {
         console.error('Error fetching dynamic content:', error);
-        // Display error on page
         const status = document.createElement('div');
         status.style.cssText = 'position:fixed;bottom:10px;right:10px;background:red;color:white;padding:10px;';
         status.textContent = `Error: ${error.message}`;
