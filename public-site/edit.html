@@ -388,14 +388,32 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script type="module">
-        import SUPABASE_CONFIG from '../config.js';
-
-        // Initialize Supabase client
+    <script>
+        // Initialize Supabase client with direct config
         const supabase = window.supabase.createClient(
-            SUPABASE_CONFIG.url,
-            SUPABASE_CONFIG.publicKey
+            'https://aqicztygjpmunfljjuto.supabase.co',
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxaWN6dHlnanBtdW5mbGpqdXRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3MDU1ODIsImV4cCI6MjA1OTI4MTU4Mn0.5e2hvTckSSbTFLBjQiccrvjoBd6QQDX0X4tccFOc1rs'
         );
+
+        // Add connection check
+        async function checkConnection() {
+            try {
+                const { data, error } = await supabase
+                    .from('dynamic_content')
+                    .select('project_id')
+                    .limit(1);
+                
+                if (error) throw error;
+                
+                console.log('Supabase connected successfully');
+                status.textContent = 'Connected to database';
+                status.className = 'status success';
+            } catch (error) {
+                console.error('Supabase connection error:', error);
+                status.textContent = 'Database connection error: ' + error.message;
+                status.className = 'status error';
+            }
+        }
 
         // DOM Elements
         const form = document.getElementById('contentForm');
@@ -405,6 +423,9 @@
         const profilePreview = document.getElementById('profile-preview');
         const profileImageUrl = document.getElementById('profile_image_url');
         const progressBar = document.querySelector('.progress-bar div');
+
+        // Check connection on load
+        checkConnection();
 
         // Handle profile image upload
         profileUpload.addEventListener('change', async (e) => {
@@ -482,6 +503,29 @@
                     status.className = 'status error';
                     return;
                 }
+
+                // Initialize the project with basic fields
+                const { error: insertError } = await supabase
+                    .from('dynamic_content')
+                    .insert([
+                        {
+                            project_id: newProjectId,
+                            key: 'client_name',
+                            value: newProjectId.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+                        },
+                        {
+                            project_id: newProjectId,
+                            key: 'current_year',
+                            value: new Date().getFullYear().toString()
+                        },
+                        {
+                            project_id: newProjectId,
+                            key: 'style_package',
+                            value: 'standard'
+                        }
+                    ]);
+
+                if (insertError) throw insertError;
 
                 const option = new Option(newProjectId, newProjectId);
                 projectSelect.add(option);
@@ -650,8 +694,32 @@
                 const formData = new FormData(form);
                 const updates = [];
 
+                // Process social media fields
+                const socialPlatforms = ['facebook', 'twitter', 'instagram', 'linkedin'];
+                for (const platform of socialPlatforms) {
+                    const url = document.getElementById(`${platform}_url`).value;
+                    const post = document.getElementById(`${platform}_post`).value;
+                    
+                    // Only save if either URL or post is provided
+                    if (url || post) {
+                        updates.push(
+                            {
+                                project_id: projectId,
+                                key: `${platform}_url`,
+                                value: url
+                            },
+                            {
+                                project_id: projectId,
+                                key: `${platform}_post`,
+                                value: post
+                            }
+                        );
+                    }
+                }
+
+                // Add all other form fields
                 for (const [key, value] of formData.entries()) {
-                    if (key === 'project_id') continue;
+                    if (key === 'project_id' || key.endsWith('_url') || key.endsWith('_post')) continue;
                     updates.push({
                         project_id: projectId,
                         key: key,
@@ -670,6 +738,15 @@
 
                 status.textContent = 'Content saved successfully';
                 status.className = 'status success';
+
+                // Update character counts
+                const textareas = document.querySelectorAll('textarea[id$="_post"]');
+                textareas.forEach(textarea => {
+                    const count = textarea.value.length;
+                    const countDisplay = textarea.nextElementSibling;
+                    countDisplay.textContent = count + ' characters';
+                });
+
             } catch (error) {
                 status.textContent = 'Error saving content: ' + error.message;
                 status.className = 'status error';

@@ -3,51 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title data-key="site_title">Dynamic Site</title>
+    <title data-key="rendered_title">Dynamic Site</title>
     <link rel="stylesheet" href="style.css">
+    <style id="dynamic-theme"></style>
 </head>
 <body>
     <!-- Hero Section -->
     <section class="hero">
-        <h1 data-key="hero_title">Welcome</h1>
-        <p data-key="hero_subtitle">Your dynamic content here</p>
+        <h1 data-key="rendered_title">Welcome</h1>
+        <p data-key="rendered_subtitle">Your dynamic content here</p>
     </section>
 
     <!-- Bio Section -->
     <section class="bio">
-        <h2 data-key="bio_title">About</h2>
-        <div data-key="bio_content"></div>
+        <h2>About</h2>
+        <div data-key="rendered_bio_html"></div>
     </section>
 
     <!-- Blog Grid -->
     <section class="blog-grid">
-        <h2 data-key="blog_title">Blog Posts</h2>
+        <h2>Blog Posts</h2>
         <div class="grid">
-            <div data-key="blog_post_1"></div>
-            <div data-key="blog_post_2"></div>
-            <div data-key="blog_post_3"></div>
-            <div data-key="blog_post_4"></div>
+            <div data-key="rendered_blog_post_1"></div>
+            <div data-key="rendered_blog_post_2"></div>
+            <div data-key="rendered_blog_post_3"></div>
+            <div data-key="rendered_blog_post_4"></div>
         </div>
     </section>
 
-    <!-- Social Media Grid -->
-    <section class="social-grid">
-        <h2 data-key="social_title">Connect With Us</h2>
+    <!-- Social Media Posts -->
+    <section class="social-posts">
+        <h2>Latest Updates</h2>
         <div class="grid">
-            <div data-key="social_1"></div>
-            <div data-key="social_2"></div>
-            <div data-key="social_3"></div>
-            <div data-key="social_4"></div>
+            <div class="social-post facebook">
+                <h3>Facebook</h3>
+                <div data-key="facebook_post"></div>
+                <a data-key="facebook_url" href="#" class="social-link">Read more on Facebook</a>
+            </div>
+            <div class="social-post twitter">
+                <h3>Twitter</h3>
+                <div data-key="twitter_post"></div>
+                <a data-key="twitter_url" href="#" class="social-link">Read more on Twitter</a>
+            </div>
+            <div class="social-post instagram">
+                <h3>Instagram</h3>
+                <div data-key="instagram_post"></div>
+                <a data-key="instagram_url" href="#" class="social-link">Read more on Instagram</a>
+            </div>
+            <div class="social-post linkedin">
+                <h3>LinkedIn</h3>
+                <div data-key="linkedin_post"></div>
+                <a data-key="linkedin_url" href="#" class="social-link">Read more on LinkedIn</a>
+            </div>
         </div>
     </section>
 
-    <!-- Contact & Footer -->
+    <!-- Connect Section -->
+    <section class="connect">
+        <h2>Connect With Us</h2>
+        <div class="social-links">
+            <a data-key="facebook_url" href="#" class="social-button facebook">Facebook</a>
+            <a data-key="twitter_url" href="#" class="social-button twitter">Twitter</a>
+            <a data-key="instagram_url" href="#" class="social-button instagram">Instagram</a>
+            <a data-key="linkedin_url" href="#" class="social-button linkedin">LinkedIn</a>
+        </div>
+    </section>
+
+    <!-- Footer -->
     <footer>
-        <div data-key="contact_info"></div>
-        <div data-key="footer_content"></div>
+        <div data-key="rendered_footer_slogan"></div>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script type="module" src="script.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
