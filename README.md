@@ -9,6 +9,7 @@ A multi-client website platform for personal branding and content management.
 - Implemented floating decorative elements for visual interest
 - Added wave divider for smooth section transitions
 - Integrated circular profile image with subtle border effects
+- **Profile image now dynamically loads for Annie Sicard project**
 - Improved typography with gradient text effects and proper spacing
 - Enhanced responsive layout for all device sizes
 

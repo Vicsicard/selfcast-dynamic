@@ -55,6 +55,13 @@ async function loadContent() {
         if (contentError) throw contentError;
         console.log('Content data:', contentData);
 
+        // Manually set profile image for Annie Sicard (temporary fix)
+        const profileImg = document.querySelector('img[data-key="profile_image_url"]');
+        if (profileImg && projectId === 'annie-sicard-123') {
+            console.log('Setting Annie Sicard profile image');
+            profileImg.src = 'https://imagestopost.carrd.co/assets/images/image06.jpg?v=c3e2b96c';
+        }
+
         // Convert array to object for theme styles
         const themeData = {};
         contentData.forEach(item => {
@@ -70,14 +77,37 @@ async function loadContent() {
             // Store content for modal use
             window.siteContent[item.key] = item.value;
             
+            // Debug: Log all keys and values
+            console.log(`Processing key: ${item.key}, value: ${item.value}`);
+            
+            // Special handling for profile image
+            if (item.key === 'profile_image_url') {
+                const profileImg = document.querySelector('img[data-key="profile_image_url"]');
+                if (profileImg) {
+                    console.log('Setting profile image src to:', item.value);
+                    profileImg.src = item.value;
+                } else {
+                    console.error('Profile image element not found');
+                }
+            }
+            
             // Find elements with matching data-key
             const elements = document.querySelectorAll(`[data-key="${item.key}"]`);
+            console.log(`Found ${elements.length} elements with data-key="${item.key}"`);
             
             elements.forEach(element => {
                 if (item.key === 'rendered_bio_html') {
                     element.innerHTML = item.value;
                 } else if (item.key.includes('_url')) {
-                    element.href = item.value;
+                    // Handle URLs differently based on element type
+                    if (element.tagName === 'IMG') {
+                        // For image elements, set the src attribute
+                        console.log(`Setting image src for ${item.key}:`, element, item.value);
+                        element.src = item.value;
+                    } else {
+                        // For link elements, set the href attribute
+                        element.href = item.value;
+                    }
                 } else if (item.key.startsWith('rendered_blog_post_') || item.key.includes('_post')) {
                     // Create excerpt for blog and social posts
                     console.log('Creating excerpt for:', item.key);
