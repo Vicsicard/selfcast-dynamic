@@ -8,73 +8,76 @@
     <style id="dynamic-theme"></style>
 </head>
 <body>
-    <!-- Hero Section -->
-    <section class="hero">
-        <h1 data-key="rendered_title">Welcome</h1>
-        <p data-key="rendered_subtitle">Your dynamic content here</p>
-    </section>
+    <!-- Site Wrapper -->
+    <div class="site-wrapper">
+        <!-- Hero Section -->
+        <section class="hero">
+            <h1 data-key="rendered_title">Welcome</h1>
+            <p data-key="rendered_subtitle">Your dynamic content here</p>
+        </section>
 
-    <!-- Bio Section -->
-    <section class="bio">
-        <h2>About</h2>
-        <div data-key="rendered_bio_html"></div>
-    </section>
+        <!-- Bio Section -->
+        <section class="bio">
+            <h2>About</h2>
+            <div data-key="rendered_bio_html"></div>
+        </section>
 
-    <!-- Blog Grid -->
-    <section class="blog-grid">
-        <h2>Blog Posts</h2>
-        <div class="grid">
-            <div data-key="rendered_blog_post_1"></div>
-            <div data-key="rendered_blog_post_2"></div>
-            <div data-key="rendered_blog_post_3"></div>
-            <div data-key="rendered_blog_post_4"></div>
-        </div>
-    </section>
-
-    <!-- Social Media Posts -->
-    <section class="social-posts">
-        <h2>Latest Updates</h2>
-        <div class="grid">
-            <div class="social-post facebook">
-                <h3>Facebook</h3>
-                <div data-key="facebook_post"></div>
-                <a data-key="facebook_url" href="#" class="social-link">Read more on Facebook</a>
+        <!-- Blog Grid -->
+        <section class="blog-grid">
+            <h2>Blog Posts</h2>
+            <div class="grid-2x2">
+                <div class="grid-item" data-key="rendered_blog_post_1"></div>
+                <div class="grid-item" data-key="rendered_blog_post_2"></div>
+                <div class="grid-item" data-key="rendered_blog_post_3"></div>
+                <div class="grid-item" data-key="rendered_blog_post_4"></div>
             </div>
-            <div class="social-post twitter">
-                <h3>Twitter</h3>
-                <div data-key="twitter_post"></div>
-                <a data-key="twitter_url" href="#" class="social-link">Read more on Twitter</a>
-            </div>
-            <div class="social-post instagram">
-                <h3>Instagram</h3>
-                <div data-key="instagram_post"></div>
-                <a data-key="instagram_url" href="#" class="social-link">Read more on Instagram</a>
-            </div>
-            <div class="social-post linkedin">
-                <h3>LinkedIn</h3>
-                <div data-key="linkedin_post"></div>
-                <a data-key="linkedin_url" href="#" class="social-link">Read more on LinkedIn</a>
-            </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Connect Section -->
-    <section class="connect">
-        <h2>Connect With Us</h2>
-        <div class="social-links">
-            <a data-key="facebook_url" href="#" class="social-button facebook">Facebook</a>
-            <a data-key="twitter_url" href="#" class="social-button twitter">Twitter</a>
-            <a data-key="instagram_url" href="#" class="social-button instagram">Instagram</a>
-            <a data-key="linkedin_url" href="#" class="social-button linkedin">LinkedIn</a>
-        </div>
-    </section>
+        <!-- Social Media Posts -->
+        <section class="social-posts">
+            <h2>Latest Updates</h2>
+            <div class="grid-2x2">
+                <div class="grid-item social-post facebook">
+                    <h3>Facebook</h3>
+                    <div data-key="facebook_post"></div>
+                    <a data-key="facebook_url" href="#" class="social-link">Read more on Facebook</a>
+                </div>
+                <div class="grid-item social-post twitter">
+                    <h3>Twitter</h3>
+                    <div data-key="twitter_post"></div>
+                    <a data-key="twitter_url" href="#" class="social-link">Read more on Twitter</a>
+                </div>
+                <div class="grid-item social-post instagram">
+                    <h3>Instagram</h3>
+                    <div data-key="instagram_post"></div>
+                    <a data-key="instagram_url" href="#" class="social-link">Read more on Instagram</a>
+                </div>
+                <div class="grid-item social-post linkedin">
+                    <h3>LinkedIn</h3>
+                    <div data-key="linkedin_post"></div>
+                    <a data-key="linkedin_url" href="#" class="social-link">Read more on LinkedIn</a>
+                </div>
+            </div>
+        </section>
 
-    <!-- Footer -->
-    <footer>
-        <div data-key="rendered_footer_slogan"></div>
-    </footer>
+        <!-- Connect Section -->
+        <section class="connect">
+            <h2>Connect With Us</h2>
+            <div class="social-links">
+                <a data-key="facebook_url" href="#" class="social-button facebook">Facebook</a>
+                <a data-key="twitter_url" href="#" class="social-button twitter">Twitter</a>
+                <a data-key="instagram_url" href="#" class="social-button instagram">Instagram</a>
+                <a data-key="linkedin_url" href="#" class="social-button linkedin">LinkedIn</a>
+            </div>
+        </section>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="script.js"></script>
+        <!-- Footer -->
+        <footer>
+            <div data-key="rendered_footer_slogan"></div>
+        </footer>
+
+        <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+        <script src="script.js"></script>
+    </div>
 </body>
 </html>

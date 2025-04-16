@@ -5,6 +5,13 @@
     --spacing: 2rem;
 }
 
+/* Site wrapper */
+.site-wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 var(--spacing);
+}
+
 body {
     margin: 0;
     padding: 0;

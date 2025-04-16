@@ -35,6 +35,10 @@ SelfCast Dynamic/
   - Colors (primary, secondary, accent, text, background)
   - Fonts (heading, body)
   - Style package selection
+- Layout:
+  - Centered site design with max-width 1200px
+  - Consistent spacing using CSS variables
+  - Responsive padding and margins
 
 ### Site Sections
 1. **Hero**
