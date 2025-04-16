@@ -39,6 +39,12 @@ SelfCast Dynamic/
   - Centered site design with max-width 1200px
   - Consistent spacing using CSS variables
   - Responsive padding and margins
+- Card Design:
+  - Enhanced visual separation with borders and shadows
+  - Colored accent line at top of cards
+  - Hover effects with subtle elevation
+  - Optimized spacing between grid items
+  - Increased vertical gaps for better readability
 
 ### Site Sections
 1. **Hero**
@@ -53,21 +59,17 @@ SelfCast Dynamic/
 
 3. **Blog Grid (2×2)**
    - Four featured blog posts in grid layout
-   - Modern card design with hover effects
-   - Title, excerpt, and "Read More" link
-   - Equal height cards with flexible content
-   - Smooth hover animations
+   - Preview cards with title and excerpt
+   - Modal popup for full content
+   - Responsive grid with optimized spacing
+   - Interactive hover effects
 
-4. **Social Media Grid (2×2)**
-   - Latest post from each platform:
-     - Facebook (with brand color)
-     - Twitter (with brand color)
-     - Instagram (with brand color)
-     - LinkedIn (with brand color)
-   - Platform icons and headers
-   - Card design with hover effects
-   - "View on Platform" links
-   - Equal height cards with flexible content
+4. **Social Media Grid**
+   - Four social platform updates
+   - Preview cards with platform-specific styling
+   - Modal popup for full content
+   - Consistent layout with blog grid
+   - Enhanced vertical spacing for readability
 
 5. **Connect Section**
    - Social media buttons

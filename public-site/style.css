@@ -3,6 +3,9 @@
     --brand-primary: #007bff;
     --brand-secondary: #6c757d;
     --spacing: 2rem;
+    --grid-spacing: 3.5rem;
+    --vertical-gap: 5rem;  /* New variable for vertical spacing */
+    --card-border: rgba(0,0,0,0.12);  /* New variable for card borders */
 }
 
 /* Site wrapper */
@@ -34,12 +37,53 @@ section {
     padding: var(--spacing) 0;
 }
 
+.grid-2x2 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    column-gap: var(--grid-spacing);
+    row-gap: var(--vertical-gap);  /* Increased vertical gap */
+    padding: var(--grid-spacing) 0;
+    margin: 2rem 0;  /* Added explicit margin */
+}
+
+.grid-item {
+    background: #fff;
+    padding: calc(var(--spacing) * 1.5);
+    border-radius: 12px;  /* Increased border radius */
+    border: 1px solid var(--card-border);  /* Added border */
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.08);  /* Enhanced shadow */
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.grid-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 12px rgba(0,0,0,0.15), 0 3px 6px rgba(0,0,0,0.1);
+    border-color: rgba(0,0,0,0.2);
+}
+
 /* Hero section */
 .hero {
     text-align: center;
     padding: calc(var(--spacing) * 2) var(--spacing);
     background: var(--brand-primary);
     color: white;
+}
+
+/* Read More button */
+.read-more {
+    display: inline-block;
+    padding: 8px 16px;
+    background: var(--brand-primary);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 1rem;
+    transition: background-color 0.3s;
+}
+
+.read-more:hover {
+    background: #0056b3;
 }
 
 /* Footer */
@@ -49,6 +93,134 @@ footer {
     padding: var(--spacing);
     margin-top: var(--spacing);
     text-align: center;
+}
+
+/* Modal styles */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
+}
+
+.modal-content {
+    position: relative;
+    background: white;
+    margin: 15% auto;
+    padding: 20px;
+    width: 70%;
+    max-width: 700px;
+    border-radius: 8px;
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.close-button {
+    position: absolute;
+    right: 20px;
+    top: 10px;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #666;
+}
+
+.close-button:hover {
+    color: #333;
+}
+
+#modal-title {
+    font-size: 24px;
+    margin-bottom: 16px;
+    padding-right: 40px;
+}
+
+.excerpt {
+    color: #666;
+    margin: 1rem 0;
+    line-height: 1.5;
+}
+
+/* Blog and Social Media sections */
+.blog-grid,
+.social-posts {
+    margin: var(--grid-spacing) 0;  /* Increased margin between sections */
+    padding: var(--spacing) var(--spacing);  /* Consistent padding */
+}
+
+.social-posts {
+    padding: var(--vertical-gap) 0;  /* Using vertical gap for section padding */
+    margin: var(--grid-spacing) 0;
+}
+
+.social-posts .grid-2x2 {
+    column-gap: calc(var(--grid-spacing) * 1.2);
+    row-gap: calc(var(--vertical-gap) * 1.2);  /* Even more vertical space for social posts */
+}
+
+.social-post {
+    display: flex;
+    flex-direction: column;
+    height: 100%;      /* Ensure full height */
+    margin-bottom: 0;  /* Reset any default margins */
+}
+
+.social-post h3 {
+    margin-bottom: 1rem;
+}
+
+.social-post .excerpt {
+    flex-grow: 1;
+    margin-bottom: 1.5rem;
+}
+
+/* Blog grid specific spacing */
+.blog-grid .grid-2x2 {
+    row-gap: var(--vertical-gap);  /* Consistent vertical spacing for blog posts */
+}
+
+.blog-grid {
+    padding: var(--vertical-gap) 0;  /* Using vertical gap for section padding */
+    margin: var(--grid-spacing) 0;
+}
+
+/* Blog and Social Media cards */
+.blog-grid .grid-item,
+.social-posts .grid-item {
+    background: #ffffff;
+    position: relative;
+    overflow: hidden;
+}
+
+.blog-grid .grid-item::before,
+.social-posts .grid-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--brand-primary);
+    opacity: 0.7;
+}
+
+.blog-grid h3,
+.social-posts h3 {
+    color: #2c3e50;
+    margin-bottom: 1.2rem;
+    padding-top: 0.5rem;
+}
+
+.blog-grid .excerpt,
+.social-posts .excerpt {
+    color: #505c6e;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin: 1.2rem 0;
 }
 
 /* Responsive adjustments */

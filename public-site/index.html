@@ -26,10 +26,26 @@
         <section class="blog-grid">
             <h2>Blog Posts</h2>
             <div class="grid-2x2">
-                <div class="grid-item" data-key="rendered_blog_post_1"></div>
-                <div class="grid-item" data-key="rendered_blog_post_2"></div>
-                <div class="grid-item" data-key="rendered_blog_post_3"></div>
-                <div class="grid-item" data-key="rendered_blog_post_4"></div>
+                <div class="grid-item" data-key="rendered_blog_post_1">
+                    <h3 data-key="blog_title_1">Blog Title</h3>
+                    <p class="excerpt" data-key="blog_excerpt_1">Short description...</p>
+                    <button class="read-more" onclick="openModal('blog-1')">Read More</button>
+                </div>
+                <div class="grid-item" data-key="rendered_blog_post_2">
+                    <h3 data-key="blog_title_2">Blog Title</h3>
+                    <p class="excerpt" data-key="blog_excerpt_2">Short description...</p>
+                    <button class="read-more" onclick="openModal('blog-2')">Read More</button>
+                </div>
+                <div class="grid-item" data-key="rendered_blog_post_3">
+                    <h3 data-key="blog_title_3">Blog Title</h3>
+                    <p class="excerpt" data-key="blog_excerpt_3">Short description...</p>
+                    <button class="read-more" onclick="openModal('blog-3')">Read More</button>
+                </div>
+                <div class="grid-item" data-key="rendered_blog_post_4">
+                    <h3 data-key="blog_title_4">Blog Title</h3>
+                    <p class="excerpt" data-key="blog_excerpt_4">Short description...</p>
+                    <button class="read-more" onclick="openModal('blog-4')">Read More</button>
+                </div>
             </div>
         </section>
 
@@ -39,23 +55,23 @@
             <div class="grid-2x2">
                 <div class="grid-item social-post facebook">
                     <h3>Facebook</h3>
-                    <div data-key="facebook_post"></div>
-                    <a data-key="facebook_url" href="#" class="social-link">Read more on Facebook</a>
+                    <p class="excerpt" data-key="facebook_excerpt">Latest update...</p>
+                    <button class="read-more" onclick="openModal('facebook')">Read More</button>
                 </div>
                 <div class="grid-item social-post twitter">
                     <h3>Twitter</h3>
-                    <div data-key="twitter_post"></div>
-                    <a data-key="twitter_url" href="#" class="social-link">Read more on Twitter</a>
+                    <p class="excerpt" data-key="twitter_excerpt">Latest update...</p>
+                    <button class="read-more" onclick="openModal('twitter')">Read More</button>
                 </div>
                 <div class="grid-item social-post instagram">
                     <h3>Instagram</h3>
-                    <div data-key="instagram_post"></div>
-                    <a data-key="instagram_url" href="#" class="social-link">Read more on Instagram</a>
+                    <p class="excerpt" data-key="instagram_excerpt">Latest update...</p>
+                    <button class="read-more" onclick="openModal('instagram')">Read More</button>
                 </div>
                 <div class="grid-item social-post linkedin">
                     <h3>LinkedIn</h3>
-                    <div data-key="linkedin_post"></div>
-                    <a data-key="linkedin_url" href="#" class="social-link">Read more on LinkedIn</a>
+                    <p class="excerpt" data-key="linkedin_excerpt">Latest update...</p>
+                    <button class="read-more" onclick="openModal('linkedin')">Read More</button>
                 </div>
             </div>
         </section>
@@ -70,6 +86,15 @@
                 <a data-key="linkedin_url" href="#" class="social-button linkedin">LinkedIn</a>
             </div>
         </section>
+
+        <!-- Modal Structure -->
+        <div id="modal" class="modal">
+            <div class="modal-content">
+                <span class="close-button" onclick="closeModal()">&times;</span>
+                <div id="modal-title"></div>
+                <div id="modal-content"></div>
+            </div>
+        </div>
 
         <!-- Footer -->
         <footer>
