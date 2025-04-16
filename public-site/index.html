@@ -10,6 +10,13 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- Site Configuration -->
     <script src="../config.js"></script>
+    <!-- Initialize Supabase Client -->
+    <script>
+      window.supabase = window.supabase || supabase.createClient(
+        window.SUPABASE_CONFIG.url,
+        window.SUPABASE_CONFIG.key
+      );
+    </script>
     <!-- Site Scripts -->
     <script src="script.js"></script>
 </head>
@@ -18,8 +25,32 @@
     <div class="site-wrapper">
         <!-- Hero Section -->
         <section class="hero">
-            <h1 data-key="rendered_title">Welcome</h1>
-            <p data-key="rendered_subtitle">Your dynamic content here</p>
+            <div class="parallax-layer layer-back"></div>
+            <div class="parallax-layer layer-mid"></div>
+            <div class="floating-elements">
+                <div class="float-circle float-1"></div>
+                <div class="float-circle float-2"></div>
+                <div class="float-square float-3"></div>
+                <div class="float-triangle float-4"></div>
+                <div class="float-dot float-5"></div>
+                <div class="float-dot float-6"></div>
+            </div>
+            <div class="hero-content">
+                <div class="hero-text">
+                    <h1 data-key="rendered_title">Welcome</h1>
+                    <p data-key="rendered_subtitle">Your dynamic content here</p>
+                </div>
+                <div class="hero-image">
+                    <div class="profile-image-container">
+                        <img data-key="profile_image" src="https://via.placeholder.com/300x300" alt="Profile" class="profile-image">
+                    </div>
+                </div>
+            </div>
+            <div class="wave-divider">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 100" preserveAspectRatio="none">
+                    <path fill="#ffffff" d="M0,0 C240,95 480,100 720,85 C960,70 1200,40 1440,95 L1440,100 L0,100 Z"></path>
+                </svg>
+            </div>
         </section>
 
         <!-- Bio Section -->

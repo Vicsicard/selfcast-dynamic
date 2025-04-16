@@ -176,5 +176,32 @@ document.addEventListener('keydown', function(event) {
     }
 });
 
-// Load content when DOM is ready
-document.addEventListener('DOMContentLoaded', loadContent);
+// Initialize content on page load
+document.addEventListener('DOMContentLoaded', function() {
+    loadContent();
+});
+
+// Parallax effect for hero section
+function initParallax() {
+    window.addEventListener('scroll', function() {
+        const scrollPosition = window.pageYOffset;
+        const heroSection = document.querySelector('.hero');
+        const layerBack = document.querySelector('.layer-back');
+        const layerMid = document.querySelector('.layer-mid');
+        
+        // Only apply parallax if hero is in view
+        if (heroSection) {
+            const heroRect = heroSection.getBoundingClientRect();
+            if (heroRect.bottom > 0 && heroRect.top < window.innerHeight) {
+                const scrollSpeed = 0.5; // Adjust for more/less effect
+                if (layerBack) layerBack.style.transform = `translateY(${scrollPosition * scrollSpeed * 0.5}px) translateZ(-10px) scale(2)`;
+                if (layerMid) layerMid.style.transform = `translateY(${scrollPosition * scrollSpeed * 0.3}px) translateZ(-5px) scale(1.5)`;
+            }
+        }
+    });
+}
+
+// Initialize parallax effect
+document.addEventListener('DOMContentLoaded', function() {
+    initParallax();
+});
