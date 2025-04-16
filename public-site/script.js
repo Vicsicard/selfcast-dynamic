@@ -223,6 +223,77 @@ function injectStyles(styles) {
     style.textContent = css;
 }
 
+// Modal functions
+function openModal(key) {
+    const modal = document.getElementById('modal');
+    const modalTitle = document.getElementById('modal-title');
+    const modalContent = document.getElementById('modal-content');
+    
+    // Find the content for this key
+    let content = '';
+    let title = '';
+    
+    // For blog posts
+    if (key.startsWith('blog-')) {
+        const blogKey = `blog_${key.split('-')[1]}`;
+        const blogData = testData.find(item => item.key === blogKey);
+        if (blogData) {
+            title = `Blog Post ${key.split('-')[1]}`;
+            content = blogData.value;
+        }
+    }
+    // For social media
+    else {
+        const socialData = testData.find(item => item.key === `${key}_post`);
+        if (socialData) {
+            // Capitalize platform name and add "Update"
+            title = `${key.charAt(0).toUpperCase() + key.slice(1)} Update`;
+            content = socialData.value;
+        }
+    }
+    
+    // Update modal content
+    modalTitle.textContent = title;
+    modalContent.textContent = content;
+    
+    // Show modal
+    modal.style.display = 'block';
+    
+    // Add event listener to close on outside click
+    modal.addEventListener('click', function(event) {
+        if (event.target === modal) {
+            closeModal();
+        }
+    });
+}
+
+function closeModal() {
+    const modal = document.getElementById('modal');
+    modal.style.display = 'none';
+}
+
+// Close modal when pressing Escape key
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        closeModal();
+    }
+});
+
+// Test data for development
+const testData = [
+    // Blog posts
+    { key: 'blog_1', value: 'This is the first blog post. It contains a detailed description of our latest project launch. We worked with multiple teams across different time zones to deliver this amazing feature that our users have been requesting for months.' },
+    { key: 'blog_2', value: 'Second blog post about our team culture and how we maintain high productivity while working remotely. Communication and trust are key factors in our success.' },
+    { key: 'blog_3', value: 'Technical deep dive into our new architecture. We migrated from a monolithic application to a microservices architecture using the latest cloud technologies.' },
+    { key: 'blog_4', value: 'Community spotlight: Meet our amazing users and see how they are using our platform to solve real-world problems in innovative ways.' },
+    
+    // Social media posts
+    { key: 'facebook_post', value: 'Excited to announce our latest feature release! Check out our blog for more details about how this will improve your workflow.' },
+    { key: 'twitter_post', value: '🚀 Big news! We just launched a game-changing feature that will revolutionize how you work. Read the full story on our blog!' },
+    { key: 'instagram_post', value: 'Behind the scenes look at our team working hard to bring you the best possible experience. Swipe up to learn more about our culture.' },
+    { key: 'linkedin_post', value: 'We are proud to announce a major milestone in our journey. Our platform now serves over 10,000 happy customers worldwide.' }
+];
+
 // Main function to inject dynamic content
 async function injectDynamicContent() {
     const projectId = getProjectId();
@@ -230,22 +301,8 @@ async function injectDynamicContent() {
     
     try {
         console.log('Making Supabase query...');
-        // Fetch all content for this project from Supabase
-        const { data, error } = await supabase
-            .from('dynamic_content')
-            .select('key, value')
-            .eq('project_id', projectId);
-
-        if (error) {
-            console.error('Supabase query error:', error);
-            throw error;
-        }
-
-        if (!data || data.length === 0) {
-            console.warn('No data found for project:', projectId);
-            return;
-        }
-
+        // For testing, use test data
+        const data = testData;
         console.log('Raw Supabase data:', JSON.stringify(data, null, 2));
         
         // Convert data array to object for easier access
@@ -288,10 +345,22 @@ async function injectDynamicContent() {
 
             // Also check for excerpt version of the key
             if (key.includes('_post')) {
+                // Handle social media posts
                 const excerptKey = key.replace('_post', '_excerpt');
                 const excerptElements = document.querySelectorAll(`[data-key="${excerptKey}"]`);
                 
                 excerptElements.forEach(element => {
+                    const excerpt = value.length > 150 ? value.substring(0, 150) + '...' : value;
+                    element.innerHTML = excerpt;
+                });
+            } else if (key.match(/^blog_\d+$/)) {
+                // Handle blog posts
+                const excerptKey = `${key}_excerpt`;
+                const excerptElements = document.querySelectorAll(`[data-key="${excerptKey}"]`);
+                console.log(`Looking for blog excerpt elements with key: ${excerptKey}`);
+                
+                excerptElements.forEach(element => {
+                    console.log(`Creating blog excerpt for ${key} -> ${excerptKey}`);
                     const excerpt = value.length > 150 ? value.substring(0, 150) + '...' : value;
                     element.innerHTML = excerpt;
                 });

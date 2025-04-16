@@ -92,6 +92,21 @@ SelfCast Dynamic/
 - Flexible content areas
 - Clean typography hierarchy
 
+### Modal System
+- Unified modal design for blog and social content
+- Responsive layout with max-width 800px
+- Backdrop blur effect for depth
+- Multiple close options:
+  - Close button (×)
+  - Click outside modal
+  - Press Escape key
+- Smooth transitions
+- Platform-specific titles:
+  - Blog: "Blog Post 1", "Blog Post 2", etc.
+  - Social: "Facebook Update", "Twitter Update", etc.
+- Full content display with proper formatting
+- Optimized for both short and long content
+
 ### Social Media Integration
 - Platform support:
   - Facebook
