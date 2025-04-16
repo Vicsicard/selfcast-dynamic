@@ -1,25 +1,8 @@
 // Initialize Supabase client
-const supabase = window.supabase.createClient(
-    window.SUPABASE_CONFIG.url,
-    window.SUPABASE_CONFIG.key
-);
+const supabase = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.key);
 
-// Get project ID from URL parameter or subdomain
-function getProjectId() {
-    // First try to get from URL parameter
-    const urlParams = new URLSearchParams(window.location.search);
-    const projectId = urlParams.get('project');
-    if (projectId) {
-        console.log('Using project ID from URL:', projectId);
-        return projectId;
-    }
-    
-    // Fallback to subdomain
-    const subdomain = window.location.hostname.split('.')[0];
-    const defaultId = 'annie-sicard-123';
-    console.log('Using default project ID:', defaultId);
-    return defaultId; // Always use default for now
-}
+// Initialize site content storage
+window.siteContent = {};
 
 // Load Google Fonts
 function loadFonts(headingFont, bodyFont) {
@@ -44,337 +27,154 @@ function injectStyles(styles) {
             --heading-font: '${styles.heading_font}', sans-serif;
             --body-font: '${styles.body_font}', sans-serif;
         }
-
-        body {
-            background-color: var(--background-color);
-            color: var(--text-color);
-            font-family: var(--body-font);
-        }
-
-        h1, h2, h3, h4, h5, h6 {
-            font-family: var(--heading-font);
-            color: var(--primary-color);
-        }
-
-        .hero {
-            background-color: var(--primary-color);
-            color: var(--background-color);
-            padding: 4rem 2rem;
-            text-align: center;
-        }
-
-        .hero h1 {
-            color: var(--background-color);
-            font-size: 3rem;
-            margin-bottom: 1rem;
-        }
-
-        .hero p {
-            font-size: 1.5rem;
-            opacity: 0.9;
-        }
-
-        .bio {
-            max-width: 800px;
-            margin: 4rem auto;
-            padding: 0 2rem;
-            line-height: 1.6;
-        }
-
-        .blog-grid .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-            padding: 2rem;
-        }
-
-        .blog-grid .grid > div {
-            background: var(--background-color);
-            padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            border: 1px solid var(--accent-color);
-        }
-
-        .social-grid .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 2rem;
-            padding: 2rem;
-        }
-
-        .social-item {
-            background: var(--background-color);
-            padding: 1.5rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            border: 1px solid var(--secondary-color);
-        }
-
-        .social-item a {
-            color: var(--primary-color);
-            text-decoration: none;
-        }
-
-        .social-posts .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-            padding: 2rem;
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        .social-post {
-            background: var(--background-color);
-            padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .social-post h3 {
-            color: var(--accent-color);
-            margin-bottom: 1rem;
-        }
-
-        .social-link {
-            display: inline-block;
-            margin-top: 1rem;
-            color: var(--primary-color);
-            text-decoration: none;
-            font-weight: bold;
-        }
-
-        .social-link:hover {
-            text-decoration: underline;
-        }
-
-        .connect {
-            background-color: var(--secondary-color);
-            padding: 4rem 2rem;
-            text-align: center;
-        }
-
-        .connect h2 {
-            color: var(--background-color);
-            margin-bottom: 2rem;
-        }
-
-        .social-links {
-            display: flex;
-            justify-content: center;
-            gap: 1.5rem;
-            flex-wrap: wrap;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        .social-button {
-            display: inline-block;
-            padding: 1rem 2rem;
-            background-color: var(--background-color);
-            color: var(--primary-color);
-            text-decoration: none;
-            border-radius: 30px;
-            font-weight: bold;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-
-        .social-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-        }
-
-        footer {
-            background-color: var(--primary-color);
-            color: var(--background-color);
-            padding: 2rem;
-            text-align: center;
-            margin-top: 0;
-        }
-
-        section {
-            margin: 4rem 0;
-        }
-
-        section h2 {
-            text-align: center;
-            margin-bottom: 2rem;
-            color: var(--secondary-color);
-        }
-
-        @media (max-width: 768px) {
-            .social-posts .grid {
-                grid-template-columns: 1fr;
-            }
-
-            .social-links {
-                flex-direction: column;
-                align-items: center;
-            }
-
-            .social-button {
-                width: 80%;
-                max-width: 300px;
-            }
-        }
     `;
 
     style.textContent = css;
 }
 
+// Get project ID from URL or use default
+function getProjectId() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const projectId = urlParams.get('project_id');
+    console.log('Using default project ID: annie-sicard-123');
+    return projectId || 'annie-sicard-123';
+}
+
+// Load and inject content
+async function loadContent() {
+    try {
+        const projectId = getProjectId();
+        console.log('Loading content for project:', projectId);
+
+        // Fetch all content from Supabase
+        const { data: contentData, error: contentError } = await supabase
+            .from('dynamic_content')
+            .select('*')
+            .eq('project_id', projectId);
+
+        if (contentError) throw contentError;
+        console.log('Content data:', contentData);
+
+        // Convert array to object for theme styles
+        const themeData = {};
+        contentData.forEach(item => {
+            themeData[item.key] = item.value;
+        });
+
+        // Load fonts and inject styles
+        loadFonts(themeData.heading_font || 'Roboto', themeData.body_font || 'Open Sans');
+        injectStyles(themeData);
+
+        // Process each content item and store for modal use
+        contentData.forEach(item => {
+            // Store content for modal use
+            window.siteContent[item.key] = item.value;
+            
+            // Find elements with matching data-key
+            const elements = document.querySelectorAll(`[data-key="${item.key}"]`);
+            
+            elements.forEach(element => {
+                if (item.key === 'rendered_bio_html') {
+                    element.innerHTML = item.value;
+                } else if (item.key.includes('_url')) {
+                    element.href = item.value;
+                } else if (item.key.startsWith('rendered_blog_post_') || item.key.includes('_post')) {
+                    // Create excerpt for blog and social posts
+                    console.log('Creating excerpt for:', item.key);
+                    console.log('Full content:', item.value);
+                    
+                    // Try to find first paragraph or description
+                    let excerpt;
+                    if (item.value.includes('Description:')) {
+                        // For blog posts that have a description section
+                        const description = item.value.split('Description:')[1].split('\n\n')[0].trim();
+                        excerpt = description.length > 300 ? description.substring(0, 300) + '...' : description;
+                    } else {
+                        // For social posts or other content
+                        const text = item.value.split('\n')[0];
+                        excerpt = text.length > 300 ? text.substring(0, 300) + '...' : text;
+                    }
+                    console.log('Created excerpt:', excerpt);
+                    element.textContent = excerpt;
+                } else {
+                    // For other content (titles, text, etc.)
+                    element.textContent = item.value;
+                }
+            });
+        });
+
+    } catch (error) {
+        console.error('Error loading content:', error);
+    }
+}
+
 // Modal functions
-function openModal(key) {
+function openModal(type) {
     const modal = document.getElementById('modal');
     const modalTitle = document.getElementById('modal-title');
     const modalContent = document.getElementById('modal-content');
     
-    // Find the content for this key
-    let content = '';
-    let title = '';
-    
-    // For blog posts
-    if (key.startsWith('blog-')) {
-        const blogKey = `blog_${key.split('-')[1]}`;
-        const blogData = testData.find(item => item.key === blogKey);
-        if (blogData) {
-            title = `Blog Post ${key.split('-')[1]}`;
-            content = blogData.value;
-        }
+    // Get content based on type
+    let title, content;
+    if (type.startsWith('blog-')) {
+        // For blog posts
+        const blogNum = type.replace('blog-', '');
+        const blogKey = `rendered_blog_post_${blogNum}`;
+        content = window.siteContent[blogKey];
+        
+        // Split content into sections
+        const sections = content.split('\n\n');
+        title = sections[0].replace(/["]/g, ''); // First line is the title
+        
+        // Format content with proper spacing
+        const formattedContent = sections.slice(1).map(section => {
+            if (section.startsWith('Description:')) {
+                return `<p class="description">${section.replace('Description:', '<strong>Description:</strong>')}</p>`;
+            }
+            return `<p>${section}</p>`;
+        }).join('');
+        
+        modalContent.innerHTML = formattedContent;
+    } else {
+        // For social media posts
+        const postKey = `${type}_post`;
+        content = window.siteContent[postKey];
+        title = type.charAt(0).toUpperCase() + type.slice(1) + ' Update';
+        
+        // Format social media content with line breaks
+        modalContent.innerHTML = content.split('\n').map(line => 
+            line.trim() ? `<p>${line}</p>` : ''
+        ).join('');
     }
-    // For social media
-    else {
-        const socialData = testData.find(item => item.key === `${key}_post`);
-        if (socialData) {
-            // Capitalize platform name and add "Update"
-            title = `${key.charAt(0).toUpperCase() + key.slice(1)} Update`;
-            content = socialData.value;
-        }
-    }
-    
-    // Update modal content
-    modalTitle.textContent = title;
-    modalContent.textContent = content;
+
+    // Set modal title
+    modalTitle.innerHTML = `<h2>${title}</h2>`;
     
     // Show modal
-    modal.style.display = 'block';
-    
-    // Add event listener to close on outside click
-    modal.addEventListener('click', function(event) {
-        if (event.target === modal) {
-            closeModal();
-        }
-    });
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
 }
 
 function closeModal() {
     const modal = document.getElementById('modal');
     modal.style.display = 'none';
+    document.body.style.overflow = 'auto';
 }
 
-// Close modal when pressing Escape key
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const modal = document.getElementById('modal');
+    if (event.target == modal) {
+        closeModal();
+    }
+}
+
+// Close modal on escape key
 document.addEventListener('keydown', function(event) {
     if (event.key === 'Escape') {
         closeModal();
     }
 });
 
-// Test data for development
-const testData = [
-    // Blog posts
-    { key: 'blog_1', value: 'This is the first blog post. It contains a detailed description of our latest project launch. We worked with multiple teams across different time zones to deliver this amazing feature that our users have been requesting for months.' },
-    { key: 'blog_2', value: 'Second blog post about our team culture and how we maintain high productivity while working remotely. Communication and trust are key factors in our success.' },
-    { key: 'blog_3', value: 'Technical deep dive into our new architecture. We migrated from a monolithic application to a microservices architecture using the latest cloud technologies.' },
-    { key: 'blog_4', value: 'Community spotlight: Meet our amazing users and see how they are using our platform to solve real-world problems in innovative ways.' },
-    
-    // Social media posts
-    { key: 'facebook_post', value: 'Excited to announce our latest feature release! Check out our blog for more details about how this will improve your workflow.' },
-    { key: 'twitter_post', value: '🚀 Big news! We just launched a game-changing feature that will revolutionize how you work. Read the full story on our blog!' },
-    { key: 'instagram_post', value: 'Behind the scenes look at our team working hard to bring you the best possible experience. Swipe up to learn more about our culture.' },
-    { key: 'linkedin_post', value: 'We are proud to announce a major milestone in our journey. Our platform now serves over 10,000 happy customers worldwide.' }
-];
-
-// Main function to inject dynamic content
-async function injectDynamicContent() {
-    const projectId = getProjectId();
-    console.log('Loading content for project:', projectId);
-    
-    try {
-        console.log('Making Supabase query...');
-        // For testing, use test data
-        const data = testData;
-        console.log('Raw Supabase data:', JSON.stringify(data, null, 2));
-        
-        // Convert data array to object for easier access
-        const contentMap = {};
-        data.forEach(item => {
-            contentMap[item.key] = item.value;
-            console.log(`Content for ${item.key}:`, item.value);
-        });
-
-        // First apply styles if they exist
-        if (contentMap.heading_font && contentMap.body_font) {
-            loadFonts(contentMap.heading_font, contentMap.body_font);
-        }
-
-        const styles = {
-            primary_color: contentMap.primary_color,
-            secondary_color: contentMap.secondary_color,
-            accent_color: contentMap.accent_color,
-            text_color: contentMap.text_color,
-            background_color: contentMap.background_color,
-            heading_font: contentMap.heading_font,
-            body_font: contentMap.body_font
-        };
-        injectStyles(styles);
-
-        // Update all elements with matching data-keys
-        Object.keys(contentMap).forEach(key => {
-            const value = contentMap[key];
-            const elements = document.querySelectorAll(`[data-key="${key}"]`);
-            console.log(`Found ${elements.length} elements for key "${key}"`);
-            
-            elements.forEach(element => {
-                console.log(`Updating element:`, element);
-                if (element.tagName === 'A') {
-                    element.href = value;
-                } else {
-                    element.innerHTML = value;
-                }
-            });
-
-            // Also check for excerpt version of the key
-            if (key.includes('_post')) {
-                // Handle social media posts
-                const excerptKey = key.replace('_post', '_excerpt');
-                const excerptElements = document.querySelectorAll(`[data-key="${excerptKey}"]`);
-                
-                excerptElements.forEach(element => {
-                    const excerpt = value.length > 150 ? value.substring(0, 150) + '...' : value;
-                    element.innerHTML = excerpt;
-                });
-            } else if (key.match(/^blog_\d+$/)) {
-                // Handle blog posts
-                const excerptKey = `${key}_excerpt`;
-                const excerptElements = document.querySelectorAll(`[data-key="${excerptKey}"]`);
-                console.log(`Looking for blog excerpt elements with key: ${excerptKey}`);
-                
-                excerptElements.forEach(element => {
-                    console.log(`Creating blog excerpt for ${key} -> ${excerptKey}`);
-                    const excerpt = value.length > 150 ? value.substring(0, 150) + '...' : value;
-                    element.innerHTML = excerpt;
-                });
-            }
-        });
-
-    } catch (error) {
-        console.error('Error fetching dynamic content:', error);
-        const status = document.createElement('div');
-        status.style.cssText = 'position:fixed;bottom:10px;right:10px;background:red;color:white;padding:10px;';
-        status.textContent = `Error: ${error.message}`;
-        document.body.appendChild(status);
-    }
-}
-
-// Initialize when DOM is ready
-document.addEventListener('DOMContentLoaded', injectDynamicContent);
+// Load content when DOM is ready
+document.addEventListener('DOMContentLoaded', loadContent);

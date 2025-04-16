@@ -6,6 +6,12 @@
     <title data-key="rendered_title">Dynamic Site</title>
     <link rel="stylesheet" href="style.css">
     <style id="dynamic-theme"></style>
+    <!-- Supabase Client Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Site Configuration -->
+    <script src="../config.js"></script>
+    <!-- Site Scripts -->
+    <script src="script.js"></script>
 </head>
 <body>
     <!-- Site Wrapper -->
@@ -28,22 +34,22 @@
             <div class="grid-2x2">
                 <div class="grid-item">
                     <h3>Blog Post 1</h3>
-                    <p class="excerpt" data-key="blog_1_excerpt">Latest update...</p>
+                    <p class="excerpt" data-key="rendered_blog_post_1">Latest update...</p>
                     <button class="action-button" onclick="openModal('blog-1')">Read More</button>
                 </div>
                 <div class="grid-item">
                     <h3>Blog Post 2</h3>
-                    <p class="excerpt" data-key="blog_2_excerpt">Latest update...</p>
+                    <p class="excerpt" data-key="rendered_blog_post_2">Latest update...</p>
                     <button class="action-button" onclick="openModal('blog-2')">Read More</button>
                 </div>
                 <div class="grid-item">
                     <h3>Blog Post 3</h3>
-                    <p class="excerpt" data-key="blog_3_excerpt">Latest update...</p>
+                    <p class="excerpt" data-key="rendered_blog_post_3">Latest update...</p>
                     <button class="action-button" onclick="openModal('blog-3')">Read More</button>
                 </div>
                 <div class="grid-item">
                     <h3>Blog Post 4</h3>
-                    <p class="excerpt" data-key="blog_4_excerpt">Latest update...</p>
+                    <p class="excerpt" data-key="rendered_blog_post_4">Latest update...</p>
                     <button class="action-button" onclick="openModal('blog-4')">Read More</button>
                 </div>
             </div>
@@ -55,22 +61,22 @@
             <div class="grid-2x2">
                 <div class="grid-item social-post facebook">
                     <h3>Facebook</h3>
-                    <p class="excerpt" data-key="facebook_excerpt">Latest update...</p>
+                    <p class="excerpt" data-key="facebook_post">Latest update...</p>
                     <button class="action-button" onclick="openModal('facebook')">Read More</button>
                 </div>
                 <div class="grid-item social-post twitter">
                     <h3>Twitter</h3>
-                    <p class="excerpt" data-key="twitter_excerpt">Latest update...</p>
+                    <p class="excerpt" data-key="twitter_post">Latest update...</p>
                     <button class="action-button" onclick="openModal('twitter')">Read More</button>
                 </div>
                 <div class="grid-item social-post instagram">
                     <h3>Instagram</h3>
-                    <p class="excerpt" data-key="instagram_excerpt">Latest update...</p>
+                    <p class="excerpt" data-key="instagram_post">Latest update...</p>
                     <button class="action-button" onclick="openModal('instagram')">Read More</button>
                 </div>
                 <div class="grid-item social-post linkedin">
                     <h3>LinkedIn</h3>
-                    <p class="excerpt" data-key="linkedin_excerpt">Latest update...</p>
+                    <p class="excerpt" data-key="linkedin_post">Latest update...</p>
                     <button class="action-button" onclick="openModal('linkedin')">Read More</button>
                 </div>
             </div>
@@ -98,13 +104,8 @@
 
         <!-- Footer -->
         <footer>
-            <div data-key="rendered_footer_slogan"></div>
+            <p data-key="rendered_footer_slogan"></p>
         </footer>
-
-        <!-- Supabase and Configuration -->
-        <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-        <script src="config.js"></script>
-        <script src="script.js"></script>
     </div>
 </body>
 </html>

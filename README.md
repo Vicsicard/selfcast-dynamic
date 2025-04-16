@@ -96,16 +96,30 @@ SelfCast Dynamic/
 - Unified modal design for blog and social content
 - Responsive layout with max-width 800px
 - Backdrop blur effect for depth
+- Scrollable content for long posts
+- Smart content formatting:
+  - Blog posts: Description sections with special styling
+  - Social posts: Paragraph breaks and hashtag formatting
 - Multiple close options:
   - Close button (×)
   - Click outside modal
   - Press Escape key
-- Smooth transitions
-- Platform-specific titles:
-  - Blog: "Blog Post 1", "Blog Post 2", etc.
-  - Social: "Facebook Update", "Twitter Update", etc.
-- Full content display with proper formatting
-- Optimized for both short and long content
+- Accessibility features:
+  - Keyboard navigation
+  - Proper focus management
+  - Semantic HTML structure
+
+### Content Display
+- Blog posts:
+  - Title extraction from content
+  - Description section with special styling
+  - Full content with proper paragraph spacing
+  - 300-character excerpts in preview cards
+- Social media posts:
+  - Platform-specific formatting
+  - Emoji and hashtag support
+  - Line break preservation
+  - 300-character excerpts in preview cards
 
 ### Social Media Integration
 - Platform support:
