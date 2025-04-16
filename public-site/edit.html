@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Site Content Editor</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            background: #f5f5f5;
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            color: #333;
+        }
+        input[type="text"],
+        input[type="email"],
+        input[type="url"],
+        textarea {
+            width: 100%;
+            padding: 0.5rem;
+            margin-bottom: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        textarea {
+            min-height: 100px;
+            font-family: inherit;
+        }
+        .color-input {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .color-input input[type="color"] {
+            width: 50px;
+            height: 50px;
+            padding: 0;
+            border: none;
+        }
+        .section {
+            background: white;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .section h2 {
+            margin-top: 0;
+            color: #333;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 0.5rem;
+        }
+        button {
+            background: #3399FF;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+        .status {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 4px;
+        }
+        .success { 
+            background: #d4edda;
+            color: #155724;
+        }
+        .error { 
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .profile-upload {
+            margin-top: 1rem;
+        }
+        .image-preview {
+            margin: 0.5rem 0;
+            background: #f8f9fa;
+            padding: 0.5rem;
+            border-radius: 4px;
+        }
+        .image-preview img {
+            max-width: 150px;
+            max-height: 150px;
+            display: block;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: #eee;
+            margin-top: 0.5rem;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        .progress-bar div {
+            height: 100%;
+            background: #3399FF;
+            width: 0;
+            transition: width 0.3s ease;
+        }
+        .style-preview {
+            margin-top: 1rem;
+        }
+        .color-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 1rem;
+        }
+        .color-sample {
+            padding: 1rem;
+            border-radius: 4px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+        .color-sample span {
+            font-size: 0.75rem;
+        }
+        .primary-color {
+            background: #3498db;
+        }
+        .secondary-color {
+            background: #f1c40f;
+        }
+        .accent-color {
+            background: #e74c3c;
+        }
+        .text-color {
+            background: #333;
+        }
+        .background-color {
+            background: #f9f9f9;
+        }
+        .font-preview {
+            margin-top: 1rem;
+        }
+        .preview-heading {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        .preview-body {
+            font-size: 1rem;
+        }
+        .social-section {
+            margin-bottom: 2rem;
+        }
+        .post-preview {
+            margin-top: 1rem;
+            padding: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .upload-media-btn {
+            margin-top: 1rem;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            background: #3399FF;
+            color: white;
+        }
+        .upload-media-btn:hover {
+            background: #2980b9;
+        }
+        .character-count {
+            font-size: 0.75rem;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="section">
+        <h1>Site Content Editor</h1>
+        
+        <form id="contentForm">
+            <!-- Project Selection -->
+            <div class="form-group">
+                <label for="project_id">Project ID:</label>
+                <select name="project_id" id="project_id" required>
+                    <option value="">Select Project</option>
+                    <option value="new">+ Create New Project</option>
+                    <option value="default-project">Default Project</option>
+                </select>
+                <div id="new-project-form" style="display: none; margin-top: 1rem;">
+                    <input type="text" id="new-project-id" placeholder="Enter new project ID (e.g., client-name)" 
+                           pattern="[a-z0-9-]+" title="Only lowercase letters, numbers, and hyphens allowed">
+                    <button type="button" onclick="createNewProject()" style="background: #28a745;">Create Project</button>
+                </div>
+            </div>
+
+            <!-- Basic Information -->
+            <div class="section">
+                <h2>Basic Information</h2>
+                <div class="form-group">
+                    <label for="client_name">Name:</label>
+                    <input type="text" name="client_name" id="client_name" required>
+                    
+                    <div class="profile-upload">
+                        <label>Profile Image:</label>
+                        <div class="image-preview">
+                            <img id="profile-preview" src="" alt="" style="display: none;">
+                        </div>
+                        <input type="file" id="profile-upload" accept="image/*">
+                        <div class="progress-bar"><div></div></div>
+                        <input type="hidden" name="profile_image_url" id="profile_image_url">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="rendered_title">Page Title:</label>
+                    <input type="text" name="rendered_title" id="rendered_title" required>
+                </div>
+                <div class="form-group">
+                    <label for="rendered_subtitle">Subtitle/Tagline:</label>
+                    <input type="text" name="rendered_subtitle" id="rendered_subtitle">
+                </div>
+            </div>
+
+            <!-- Brand & Style -->
+            <div class="section">
+                <h2>Brand & Style</h2>
+                <div class="form-group">
+                    <label for="style_package">Style Package:</label>
+                    <select name="style_package" id="style_package" onchange="applyStylePreset()">
+                        <option value="standard">Standard Professional</option>
+                        <option value="professional-her">Professional Her</option>
+                        <option value="professional-his">Professional His</option>
+                    </select>
+                </div>
+
+                <!-- Style Preview -->
+                <div class="style-preview">
+                    <h3>Style Preview</h3>
+                    <div class="color-grid">
+                        <div class="color-sample primary-color"><span>Primary</span></div>
+                        <div class="color-sample secondary-color"><span>Secondary</span></div>
+                        <div class="color-sample accent-color"><span>Accent</span></div>
+                        <div class="color-sample text-color"><span>Text</span></div>
+                        <div class="color-sample background-color"><span>Background</span></div>
+                    </div>
+                    <div class="font-preview">
+                        <h4 class="preview-heading">Heading Font Preview</h4>
+                        <p class="preview-body">Body Font Preview</p>
+                    </div>
+                </div>
+
+                <!-- Hidden inputs to store the actual values -->
+                <input type="hidden" name="primary_color" id="primary_color">
+                <input type="hidden" name="secondary_color" id="secondary_color">
+                <input type="hidden" name="accent_color" id="accent_color">
+                <input type="hidden" name="text_color" id="text_color">
+                <input type="hidden" name="background_color" id="background_color">
+                <input type="hidden" name="heading_font" id="heading_font">
+                <input type="hidden" name="body_font" id="body_font">
+            </div>
+
+            <!-- Bio Content -->
+            <div class="section">
+                <h2>Bio Content</h2>
+                <div class="form-group">
+                    <label for="rendered_bio_html">Bio:</label>
+                    <textarea name="rendered_bio_html" id="rendered_bio_html" 
+                              placeholder="Enter your bio with HTML formatting"></textarea>
+                </div>
+            </div>
+
+            <!-- Blog Posts -->
+            <div class="section">
+                <h2>Blog Posts</h2>
+                <div class="form-group">
+                    <label for="rendered_blog_post_1">Blog Post 1:</label>
+                    <textarea name="rendered_blog_post_1" id="rendered_blog_post_1" 
+                              placeholder="Enter blog post 1 content with HTML formatting"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="rendered_blog_post_2">Blog Post 2:</label>
+                    <textarea name="rendered_blog_post_2" id="rendered_blog_post_2" 
+                              placeholder="Enter blog post 2 content with HTML formatting"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="rendered_blog_post_3">Blog Post 3:</label>
+                    <textarea name="rendered_blog_post_3" id="rendered_blog_post_3" 
+                              placeholder="Enter blog post 3 content with HTML formatting"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="rendered_blog_post_4">Blog Post 4:</label>
+                    <textarea name="rendered_blog_post_4" id="rendered_blog_post_4" 
+                              placeholder="Enter blog post 4 content with HTML formatting"></textarea>
+                </div>
+            </div>
+
+            <!-- Social Media Feed -->
+            <div class="section">
+                <h2>Social Media Feed</h2>
+                
+                <!-- Facebook -->
+                <div class="social-section">
+                    <h3>Facebook</h3>
+                    <div class="form-group">
+                        <label for="facebook_url">Profile URL:</label>
+                        <input type="url" name="facebook_url" id="facebook_url" placeholder="https://facebook.com/username">
+                    </div>
+                    <div class="form-group">
+                        <label for="facebook_post">Post:</label>
+                        <textarea name="facebook_post" id="facebook_post" 
+                                placeholder="Enter your Facebook post text (emojis allowed)"></textarea>
+                        <div class="character-count">0 characters</div>
+                    </div>
+                </div>
+
+                <!-- Twitter -->
+                <div class="social-section">
+                    <h3>Twitter</h3>
+                    <div class="form-group">
+                        <label for="twitter_url">Profile URL:</label>
+                        <input type="url" name="twitter_url" id="twitter_url" placeholder="https://twitter.com/username">
+                    </div>
+                    <div class="form-group">
+                        <label for="twitter_post">Post:</label>
+                        <textarea name="twitter_post" id="twitter_post" 
+                                placeholder="Enter your tweet text (emojis allowed)"></textarea>
+                        <div class="character-count">0 characters</div>
+                    </div>
+                </div>
+
+                <!-- Instagram -->
+                <div class="social-section">
+                    <h3>Instagram</h3>
+                    <div class="form-group">
+                        <label for="instagram_url">Profile URL:</label>
+                        <input type="url" name="instagram_url" id="instagram_url" placeholder="https://instagram.com/username">
+                    </div>
+                    <div class="form-group">
+                        <label for="instagram_post">Post:</label>
+                        <textarea name="instagram_post" id="instagram_post" 
+                                placeholder="Enter your Instagram post text (emojis allowed)"></textarea>
+                        <div class="character-count">0 characters</div>
+                    </div>
+                </div>
+
+                <!-- LinkedIn -->
+                <div class="social-section">
+                    <h3>LinkedIn</h3>
+                    <div class="form-group">
+                        <label for="linkedin_url">Profile URL:</label>
+                        <input type="url" name="linkedin_url" id="linkedin_url" placeholder="https://linkedin.com/in/username">
+                    </div>
+                    <div class="form-group">
+                        <label for="linkedin_post">Post:</label>
+                        <textarea name="linkedin_post" id="linkedin_post" 
+                                placeholder="Enter your LinkedIn post text (emojis allowed)"></textarea>
+                        <div class="character-count">0 characters</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="section">
+                <h2>Footer</h2>
+                <div class="form-group">
+                    <label for="rendered_footer_slogan">Footer Slogan:</label>
+                    <input type="text" name="rendered_footer_slogan" id="rendered_footer_slogan">
+                </div>
+                <input type="hidden" name="current_year" id="current_year" value="2025">
+            </div>
+
+            <button type="submit">Save Changes</button>
+        </form>
+
+        <div id="status" class="status"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script type="module">
+        import SUPABASE_CONFIG from '../config.js';
+
+        // Initialize Supabase client
+        const supabase = window.supabase.createClient(
+            SUPABASE_CONFIG.url,
+            SUPABASE_CONFIG.publicKey
+        );
+
+        // DOM Elements
+        const form = document.getElementById('contentForm');
+        const status = document.getElementById('status');
+        const projectSelect = document.getElementById('project_id');
+        const profileUpload = document.getElementById('profile-upload');
+        const profilePreview = document.getElementById('profile-preview');
+        const profileImageUrl = document.getElementById('profile_image_url');
+        const progressBar = document.querySelector('.progress-bar div');
+
+        // Handle profile image upload
+        profileUpload.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const projectId = projectSelect.value;
+            if (!projectId) {
+                status.textContent = 'Please select a project first';
+                status.className = 'status error';
+                return;
+            }
+
+            try {
+                const timestamp = new Date().getTime();
+                const filePath = `${projectId}/profile-${timestamp}-${file.name}`;
+
+                const { data, error } = await supabase.storage
+                    .from('images')
+                    .upload(filePath, file, {
+                        onUploadProgress: (progress) => {
+                            const percent = (progress.loaded / progress.total) * 100;
+                            progressBar.style.width = percent + '%';
+                        }
+                    });
+
+                if (error) throw error;
+
+                const { data: { publicUrl } } = supabase.storage
+                    .from('images')
+                    .getPublicUrl(filePath);
+
+                profilePreview.src = publicUrl;
+                profilePreview.style.display = 'block';
+                profileImageUrl.value = publicUrl;
+
+                setTimeout(() => {
+                    progressBar.style.width = '0';
+                }, 1000);
+
+            } catch (error) {
+                status.textContent = `Error uploading profile image: ${error.message}`;
+                status.className = 'status error';
+            }
+        });
+
+        // Create new project
+        window.createNewProject = async function() {
+            const newProjectInput = document.getElementById('new-project-id');
+            const newProjectId = newProjectInput.value.trim();
+            
+            if (!newProjectId) {
+                status.textContent = 'Please enter a project ID';
+                status.className = 'status error';
+                return;
+            }
+
+            if (!/^[a-z0-9-]+$/.test(newProjectId)) {
+                status.textContent = 'Project ID can only contain lowercase letters, numbers, and hyphens';
+                status.className = 'status error';
+                return;
+            }
+
+            try {
+                const { data, error } = await supabase
+                    .from('dynamic_content')
+                    .select('project_id')
+                    .eq('project_id', newProjectId)
+                    .limit(1);
+
+                if (error) throw error;
+                
+                if (data.length > 0) {
+                    status.textContent = 'Project ID already exists';
+                    status.className = 'status error';
+                    return;
+                }
+
+                const option = new Option(newProjectId, newProjectId);
+                projectSelect.add(option);
+                projectSelect.value = newProjectId;
+
+                document.getElementById('new-project-form').style.display = 'none';
+                
+                status.textContent = 'New project created successfully';
+                status.className = 'status success';
+
+                loadContent();
+            } catch (error) {
+                status.textContent = 'Error creating project: ' + error.message;
+                status.className = 'status error';
+            }
+        };
+
+        // Load content
+        async function loadContent() {
+            const projectId = projectSelect.value;
+            if (!projectId || projectId === 'new') return;
+
+            try {
+                const { data, error } = await supabase
+                    .from('dynamic_content')
+                    .select('key, value')
+                    .eq('project_id', projectId);
+
+                if (error) throw error;
+
+                // Reset form
+                form.reset();
+                projectSelect.value = projectId;
+                profilePreview.style.display = 'none';
+
+                // Populate form fields
+                data.forEach(({ key, value }) => {
+                    const element = document.getElementById(key);
+                    if (element) {
+                        if (key === 'profile_image_url' && value) {
+                            profilePreview.src = value;
+                            profilePreview.style.display = 'block';
+                        }
+                        element.value = value;
+                    }
+                });
+
+                // If style_package is set, apply the preset
+                const stylePackage = data.find(item => item.key === 'style_package');
+                if (stylePackage) {
+                    document.getElementById('style_package').value = stylePackage.value;
+                    await applyStylePreset(stylePackage.value);
+                }
+
+            } catch (error) {
+                status.textContent = 'Error loading content: ' + error.message;
+                status.className = 'status error';
+            }
+        }
+
+        // Apply style preset
+        async function applyStylePreset(presetName) {
+            const preset = presetName || document.getElementById('style_package').value;
+            
+            try {
+                const { data, error } = await supabase
+                    .from('dynamic_content')
+                    .select('key, value')
+                    .eq('project_id', preset + '-preset');
+
+                if (error) throw error;
+
+                // Update hidden inputs and preview
+                data.forEach(({ key, value }) => {
+                    const element = document.getElementById(key);
+                    if (element) {
+                        element.value = value;
+                    }
+
+                    // Update preview
+                    if (key.endsWith('_color')) {
+                        const previewElement = document.querySelector('.' + key.replace('_', '-'));
+                        if (previewElement) {
+                            previewElement.style.backgroundColor = value;
+                            // Set text color based on background brightness
+                            const brightness = getBrightness(value);
+                            previewElement.style.color = brightness > 128 ? '#000' : '#fff';
+                        }
+                    } else if (key === 'heading_font') {
+                        loadFont(value);
+                        document.querySelector('.preview-heading').style.fontFamily = value;
+                    } else if (key === 'body_font') {
+                        loadFont(value);
+                        document.querySelector('.preview-body').style.fontFamily = value;
+                    }
+                });
+
+            } catch (error) {
+                status.textContent = 'Error applying style preset: ' + error.message;
+                status.className = 'status error';
+            }
+        }
+
+        // Helper function to calculate color brightness
+        function getBrightness(color) {
+            const hex = color.replace('#', '');
+            const r = parseInt(hex.substr(0, 2), 16);
+            const g = parseInt(hex.substr(2, 2), 16);
+            const b = parseInt(hex.substr(4, 2), 16);
+            return (r * 299 + g * 587 + b * 114) / 1000;
+        }
+
+        // Load Google Fonts
+        function loadFont(fontName) {
+            const link = document.createElement('link');
+            link.href = `https://fonts.googleapis.com/css2?family=${fontName.replace(' ', '+')}:wght@400;700&display=swap`;
+            link.rel = 'stylesheet';
+            document.head.appendChild(link);
+        }
+
+        // Event Listeners
+        projectSelect.addEventListener('change', () => {
+            if (projectSelect.value === 'new') {
+                document.getElementById('new-project-form').style.display = 'block';
+            } else {
+                document.getElementById('new-project-form').style.display = 'none';
+                loadContent();
+            }
+        });
+
+        // Initial load
+        loadContent();
+
+        // Handle character counts
+        const textareas = document.querySelectorAll('textarea[id$="_post"]');
+        textareas.forEach(textarea => {
+            textarea.addEventListener('input', function() {
+                const count = this.value.length;
+                const countDisplay = this.nextElementSibling;
+                countDisplay.textContent = count + ' characters';
+                
+                // Optional: Add warning colors for platform limits
+                if (this.id === 'twitter_post' && count > 280) {
+                    countDisplay.style.color = '#dc3545';
+                } else if (count > 2000) { // General limit for other platforms
+                    countDisplay.style.color = '#dc3545';
+                } else {
+                    countDisplay.style.color = '#666';
+                }
+            });
+        });
+
+        // Save content
+        async function saveContent(event) {
+            event.preventDefault();
+            
+            const projectId = projectSelect.value;
+            if (!projectId || projectId === 'new') {
+                status.textContent = 'Please select or create a project first';
+                status.className = 'status error';
+                return;
+            }
+
+            try {
+                // Gather all form data
+                const formData = new FormData(form);
+                const updates = [];
+
+                for (const [key, value] of formData.entries()) {
+                    if (key === 'project_id') continue;
+                    updates.push({
+                        project_id: projectId,
+                        key: key,
+                        value: value
+                    });
+                }
+
+                // Insert or update all values
+                const { error } = await supabase
+                    .from('dynamic_content')
+                    .upsert(updates, {
+                        onConflict: 'project_id,key'
+                    });
+
+                if (error) throw error;
+
+                status.textContent = 'Content saved successfully';
+                status.className = 'status success';
+            } catch (error) {
+                status.textContent = 'Error saving content: ' + error.message;
+                status.className = 'status error';
+            }
+        }
+
+        // Attach form submit handler
+        form.addEventListener('submit', saveContent);
+
+        // Set current year
+        document.getElementById('current_year').value = new Date().getFullYear();
+    </script>
+</body>
+</html>

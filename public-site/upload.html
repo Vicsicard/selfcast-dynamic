@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Upload</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            background: #f5f5f5;
+        }
+        .upload-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            margin-bottom: 2rem;
+            color: #333;
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            color: #555;
+        }
+        select {
+            width: 100%;
+            padding: 0.5rem;
+            margin-bottom: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        .dropzone {
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 1rem;
+        }
+        .dropzone.dragover {
+            border-color: #007bff;
+            background: #f0f7ff;
+        }
+        .dropzone p {
+            margin: 0;
+            color: #666;
+        }
+        .file-list {
+            margin-top: 1rem;
+        }
+        .file-item {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem;
+            background: #f8f9fa;
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+        }
+        .file-item .file-name {
+            flex-grow: 1;
+        }
+        .file-item .file-size {
+            color: #666;
+            margin: 0 1rem;
+        }
+        .progress-container {
+            flex-grow: 1;
+            height: 4px;
+            background: #eee;
+            border-radius: 2px;
+            margin: 0 1rem;
+        }
+        .progress-bar {
+            height: 100%;
+            background: #007bff;
+            border-radius: 2px;
+            width: 0;
+            transition: width 0.3s ease;
+        }
+        .remove-file {
+            background: none;
+            border: none;
+            color: #dc3545;
+            cursor: pointer;
+            padding: 0.25rem 0.5rem;
+            font-size: 1.25rem;
+        }
+        .upload-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.3s ease;
+        }
+        .upload-btn:hover {
+            background: #0056b3;
+        }
+        .upload-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .status {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 4px;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <div class="upload-container">
+        <h1>File Upload</h1>
+        
+        <div class="form-group">
+            <label for="project_id">Project:</label>
+            <select id="project_id" required>
+                <option value="">Select Project</option>
+                <option value="client-x">Client X</option>
+                <option value="client-y">Client Y</option>
+            </select>
+        </div>
+
+        <div class="dropzone" id="dropzone">
+            <p>Drag & drop files here or click to select</p>
+            <input type="file" id="file-input" multiple style="display: none">
+        </div>
+
+        <div class="file-list" id="file-list"></div>
+
+        <button class="upload-btn" id="upload-btn" disabled>Upload Files</button>
+
+        <div id="status"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script type="module">
+        import SUPABASE_CONFIG from '../config.js';
+
+        // Initialize Supabase client
+        const supabase = window.supabase.createClient(
+            SUPABASE_CONFIG.url,
+            SUPABASE_CONFIG.publicKey
+        );
+
+        // DOM Elements
+        const dropzone = document.getElementById('dropzone');
+        const fileInput = document.getElementById('file-input');
+        const fileList = document.getElementById('file-list');
+        const uploadBtn = document.getElementById('upload-btn');
+        const projectSelect = document.getElementById('project_id');
+        const status = document.getElementById('status');
+
+        // File queue
+        let files = [];
+
+        // Drag and drop handlers
+        dropzone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropzone.classList.add('dragover');
+        });
+
+        dropzone.addEventListener('dragleave', () => {
+            dropzone.classList.remove('dragover');
+        });
+
+        dropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropzone.classList.remove('dragover');
+            handleFiles(e.dataTransfer.files);
+        });
+
+        dropzone.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            handleFiles(e.target.files);
+        });
+
+        projectSelect.addEventListener('change', () => {
+            uploadBtn.disabled = !projectSelect.value || files.length === 0;
+        });
+
+        function handleFiles(newFiles) {
+            for (const file of newFiles) {
+                if (!files.some(f => f.name === file.name)) {
+                    files.push(file);
+                    addFileToList(file);
+                }
+            }
+            uploadBtn.disabled = !projectSelect.value || files.length === 0;
+        }
+
+        function addFileToList(file) {
+            const item = document.createElement('div');
+            item.className = 'file-item';
+            item.innerHTML = `
+                <span class="file-name">${file.name}</span>
+                <span class="file-size">${formatSize(file.size)}</span>
+                <div class="progress-container">
+                    <div class="progress-bar"></div>
+                </div>
+                <button class="remove-file" data-name="${file.name}">×</button>
+            `;
+            fileList.appendChild(item);
+
+            item.querySelector('.remove-file').addEventListener('click', () => {
+                files = files.filter(f => f.name !== file.name);
+                item.remove();
+                uploadBtn.disabled = !projectSelect.value || files.length === 0;
+            });
+        }
+
+        function formatSize(bytes) {
+            const units = ['B', 'KB', 'MB', 'GB'];
+            let size = bytes;
+            let unit = 0;
+            while (size >= 1024 && unit < units.length - 1) {
+                size /= 1024;
+                unit++;
+            }
+            return `${size.toFixed(1)} ${units[unit]}`;
+        }
+
+        uploadBtn.addEventListener('click', async () => {
+            const projectId = projectSelect.value;
+            if (!projectId || files.length === 0) return;
+
+            uploadBtn.disabled = true;
+            let successCount = 0;
+            let errorCount = 0;
+
+            for (const file of files) {
+                try {
+                    const timestamp = new Date().getTime();
+                    const filePath = `${projectId}/${timestamp}-${file.name}`;
+                    const fileItem = fileList.querySelector(`[data-name="${file.name}"]`).parentElement;
+                    const progressBar = fileItem.querySelector('.progress-bar');
+
+                    const { error } = await supabase.storage
+                        .from('images')
+                        .upload(filePath, file, {
+                            onUploadProgress: (progress) => {
+                                const percent = (progress.loaded / progress.total) * 100;
+                                progressBar.style.width = `${percent}%`;
+                            }
+                        });
+
+                    if (error) throw error;
+                    successCount++;
+                    
+                    // Get public URL
+                    const { data: { publicUrl } } = supabase.storage
+                        .from('images')
+                        .getPublicUrl(filePath);
+
+                    // Store URL in dynamic_content
+                    await supabase.from('dynamic_content').upsert({
+                        project_id: projectId,
+                        key: `file_${timestamp}`,
+                        value: publicUrl
+                    });
+
+                } catch (error) {
+                    console.error(`Error uploading ${file.name}:`, error);
+                    errorCount++;
+                }
+            }
+
+            // Show final status
+            const message = `Upload complete. ${successCount} files uploaded successfully` +
+                          (errorCount > 0 ? `, ${errorCount} files failed` : '');
+            
+            status.className = 'status ' + (errorCount > 0 ? 'error' : 'success');
+            status.textContent = message;
+
+            // Reset the form
+            files = [];
+            fileList.innerHTML = '';
+            uploadBtn.disabled = true;
+        });
+    </script>
+</body>
+</html>
