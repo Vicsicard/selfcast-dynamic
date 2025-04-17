@@ -29,9 +29,53 @@ body {
 
 /* Section spacing */
 section {
-    padding: var(--spacing);
-    margin: 0 auto;
+    padding: 2rem var(--spacing);
+    margin: 0 auto 0.5rem;
     max-width: 1200px;
+}
+
+/* Quote cards styling */
+.quote-card {
+    width: 100%;
+    max-width: 900px;
+    margin: 1.5rem auto;
+    padding: 0 var(--spacing);
+    position: relative;
+    z-index: 10;
+}
+
+.quote-content {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 12px;
+    padding: 2.5rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    position: relative;
+}
+
+.quote-content::before {
+    content: '"';
+    position: absolute;
+    top: 0.5rem;
+    left: 1.5rem;
+    font-size: 5rem;
+    font-family: serif;
+    color: rgba(0, 123, 255, 0.15);
+    line-height: 1;
+}
+
+.quote-text {
+    font-size: 1.4rem;
+    line-height: 1.6;
+    color: rgba(0, 0, 0, 0.8);
+    font-weight: 300;
+    font-style: italic;
+    margin: 0;
+    position: relative;
+    z-index: 2;
+    text-align: center;
 }
 
 /* Grid layouts */
@@ -450,11 +494,42 @@ section {
 
 /* Footer */
 footer {
-    background: var(--brand-secondary);
-    color: white;
-    padding: var(--spacing);
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+    color: rgba(255, 255, 255, 0.9);
+    padding: 2rem;
     margin-top: var(--spacing);
     text-align: center;
+    position: relative;
+}
+
+footer p {
+    margin-bottom: 1rem;
+    position: relative;
+    z-index: 2;
+}
+
+footer a {
+    color: white;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+footer a:hover {
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: underline;
+}
+
+.copyright {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.footer-divider {
+    height: 1px;
+    background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.3), transparent);
+    margin: 2rem auto 0;
+    width: 80%;
 }
 
 /* Modal styles */
@@ -716,4 +791,381 @@ footer {
     .section-divider {
         height: 60px;
     }
+}
+
+/* Social Media section styling */
+.social-divider {
+    margin-top: 2rem;
+}
+
+.social-posts {
+    position: relative;
+    padding: var(--vertical-gap) 0;
+    margin: 0;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(0, 123, 255, 0.05) 100%);
+}
+
+.social-posts h2 {
+    font-size: 2.5rem;
+    text-align: center;
+    margin-bottom: 2.5rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+.social-card {
+    display: flex;
+    flex-direction: column;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+    overflow: hidden;
+    position: relative;
+}
+
+.social-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+}
+
+.social-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 5px;
+    height: 100%;
+    background: linear-gradient(to bottom, var(--primary-color), var(--accent-color));
+    opacity: 0.7;
+}
+
+.social-card.facebook::before {
+    background: linear-gradient(to bottom, #3b5998, #8b9dc3);
+}
+
+.social-card.twitter::before {
+    background: linear-gradient(to bottom, #000000, #14171A);
+}
+
+.social-card.instagram::before {
+    background: linear-gradient(to bottom, #833AB4, #FD1D1D, #FCAF45);
+}
+
+.social-card.linkedin::before {
+    background: linear-gradient(to bottom, #0A66C2, #004182);
+}
+
+.social-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    line-height: 1.2;
+    position: relative;
+    z-index: 1;
+    font-family: var(--heading-font, sans-serif);
+}
+
+.facebook .social-title {
+    color: #3b5998;
+}
+
+.twitter .social-title {
+    color: #000000;
+}
+
+.instagram .social-title {
+    background: linear-gradient(135deg, #833AB4, #FD1D1D, #FCAF45);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.linkedin .social-title {
+    color: #0A66C2;
+}
+
+.social-excerpt {
+    font-style: italic;
+    color: rgba(0, 0, 0, 0.7);
+    margin-bottom: 1.5rem;
+    padding-left: 1rem;
+    flex-grow: 1;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.6;
+}
+
+.social-card .action-button {
+    align-self: flex-start;
+    border: none;
+    padding: 0.7rem 1.5rem;
+    border-radius: 50px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    color: white;
+}
+
+.facebook .action-button {
+    background: linear-gradient(135deg, #3b5998, #8b9dc3);
+}
+
+.twitter .action-button {
+    background: linear-gradient(135deg, #000000, #14171A);
+}
+
+.instagram .action-button {
+    background: linear-gradient(135deg, #833AB4, #FD1D1D, #FCAF45);
+}
+
+.linkedin .action-button {
+    background: linear-gradient(135deg, #0A66C2, #004182);
+}
+
+.social-card .action-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+}
+
+/* Media queries for responsiveness */
+@media (max-width: 768px) {
+    .social-title {
+        font-size: 1.5rem;
+    }
+}
+
+/* Connect section styling */
+.connect-divider {
+    margin-top: 2rem;
+}
+
+.connect {
+    position: relative;
+    padding: var(--vertical-gap) 0;
+    margin: 0;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(0, 123, 255, 0.03) 100%);
+    overflow: hidden;
+}
+
+.connect-card {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 3rem;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    text-align: center;
+    position: relative;
+    z-index: 10;
+}
+
+.connect h2 {
+    font-size: 2.5rem;
+    text-align: center;
+    margin-bottom: 1.5rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    position: relative;
+}
+
+.connect-subtitle {
+    font-size: 1.2rem;
+    color: rgba(0, 0, 0, 0.7);
+    margin-bottom: 2rem;
+    font-style: italic;
+}
+
+.social-links {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.social-button {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: white;
+    font-weight: 700;
+    transition: all 0.3s ease;
+    font-size: 1.5rem;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+}
+
+.social-button:hover, .social-button:focus {
+    transform: translateY(-5px) scale(1.1);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.social-button.facebook {
+    background: linear-gradient(135deg, #3b5998, #8b9dc3);
+}
+
+.social-button.twitter {
+    background: linear-gradient(135deg, #000000, #14171A);
+}
+
+.social-button.instagram {
+    background: linear-gradient(135deg, #833AB4, #FD1D1D, #FCAF45);
+}
+
+.social-button.linkedin {
+    background: linear-gradient(135deg, #0A66C2, #004182);
+}
+
+/* Floating social icons */
+.floating-icons {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    z-index: 1;
+}
+
+.floating-icon {
+    position: absolute;
+    opacity: 0.07;
+    border-radius: 50%;
+    width: 80px;
+    height: 80px;
+    animation-duration: 15s;
+    animation-iteration-count: infinite;
+    animation-timing-function: ease-in-out;
+}
+
+.facebook-icon {
+    background-color: #3b5998;
+    top: 20%;
+    left: 15%;
+    animation-name: float-1;
+}
+
+.twitter-icon {
+    background-color: #000000;
+    top: 70%;
+    left: 25%;
+    animation-name: float-2;
+}
+
+.instagram-icon {
+    background: linear-gradient(135deg, #833AB4, #FD1D1D, #FCAF45);
+    top: 30%;
+    right: 15%;
+    animation-name: float-3;
+}
+
+.linkedin-icon {
+    background-color: #0A66C2;
+    top: 60%;
+    right: 25%;
+    animation-name: float-4;
+}
+
+@keyframes float-1 {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    25% { transform: translate(15px, 15px) rotate(5deg); }
+    50% { transform: translate(0, 30px) rotate(0deg); }
+    75% { transform: translate(-15px, 15px) rotate(-5deg); }
+}
+
+@keyframes float-2 {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    25% { transform: translate(-15px, 10px) rotate(-5deg); }
+    50% { transform: translate(0, 20px) rotate(0deg); }
+    75% { transform: translate(15px, 10px) rotate(5deg); }
+}
+
+@keyframes float-3 {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    25% { transform: translate(-10px, -10px) rotate(-5deg); }
+    50% { transform: translate(0, -20px) rotate(0deg); }
+    75% { transform: translate(10px, -10px) rotate(5deg); }
+}
+
+@keyframes float-4 {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    25% { transform: translate(10px, -15px) rotate(5deg); }
+    50% { transform: translate(0, -30px) rotate(0deg); }
+    75% { transform: translate(-10px, -15px) rotate(-5deg); }
+}
+
+/* Footer styling */
+.footer-divider {
+    height: 1px;
+    background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.3), transparent);
+    margin: 2rem auto 0;
+    width: 80%;
+}
+
+/* Responsive adjustments for connect section */
+@media (max-width: 768px) {
+    .connect-card {
+        padding: 2rem 1.5rem;
+    }
+    
+    .social-button {
+        width: 50px;
+        height: 50px;
+        font-size: 1.3rem;
+    }
+    
+    .floating-icon {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .social-title {
+        font-size: 1.5rem;
+    }
+    
+    .section-divider {
+        height: 60px;
+    }
+}
+
+/* Responsive adjustments for quotes */
+@media (max-width: 768px) {
+    .quote-text {
+        font-size: 1.2rem;
+    }
+
+    .quote-content {
+        padding: 2rem 1.5rem;
+    }
+
+    .quote-content::before {
+        font-size: 4rem;
+        top: 0.3rem;
+        left: 1rem;
+    }
+}
+
+/* Adjust section spacing */
+.section-divider {
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.blog-divider, .social-divider, .connect-divider {
+    margin-top: 1rem;
 }

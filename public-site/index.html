@@ -59,6 +59,13 @@
             <div data-key="rendered_bio_html"></div>
         </section>
 
+        <!-- Quote Card 1 -->
+        <div class="quote-card">
+            <div class="quote-content">
+                <p class="quote-text" data-key="quote_1">"Softness is not a weakness. It's what happens when you've survived — and still choose to stay open."</p>
+            </div>
+        </div>
+
         <!-- Blog Section Divider -->
         <div class="section-divider blog-divider">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 100" preserveAspectRatio="none">
@@ -93,43 +100,91 @@
             </div>
         </section>
 
+        <!-- Quote Card 2 -->
+        <div class="quote-card">
+            <div class="quote-content">
+                <p class="quote-text" data-key="quote_2">"Your truth doesn't have to be loud to be real. The quiet parts of you deserve to be heard, too."</p>
+            </div>
+        </div>
+
+        <!-- Social Media Section Divider -->
+        <div class="section-divider social-divider">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 100" preserveAspectRatio="none">
+                <path class="divider-fill" d="M0,60 C240,20 480,80 720,40 C960,0 1200,60 1440,30 L1440,100 L0,100 Z"></path>
+            </svg>
+        </div>
+
         <!-- Social Media Posts -->
         <section class="social-posts">
             <h2>Latest Updates</h2>
             <div class="grid-2x2">
-                <div class="grid-item social-post facebook">
-                    <h3>Facebook</h3>
-                    <p class="excerpt" data-key="facebook_post">Latest update...</p>
+                <div class="grid-item social-card facebook">
+                    <h3 class="social-title">Facebook</h3>
+                    <p class="excerpt social-excerpt" data-key="facebook_post">Latest update...</p>
                     <button class="action-button" onclick="openModal('facebook')">Read More</button>
                 </div>
-                <div class="grid-item social-post twitter">
-                    <h3>Twitter</h3>
-                    <p class="excerpt" data-key="twitter_post">Latest update...</p>
+                <div class="grid-item social-card twitter">
+                    <h3 class="social-title">Twitter</h3>
+                    <p class="excerpt social-excerpt" data-key="twitter_post">Latest update...</p>
                     <button class="action-button" onclick="openModal('twitter')">Read More</button>
                 </div>
-                <div class="grid-item social-post instagram">
-                    <h3>Instagram</h3>
-                    <p class="excerpt" data-key="instagram_post">Latest update...</p>
+                <div class="grid-item social-card instagram">
+                    <h3 class="social-title">Instagram</h3>
+                    <p class="excerpt social-excerpt" data-key="instagram_post">Latest update...</p>
                     <button class="action-button" onclick="openModal('instagram')">Read More</button>
                 </div>
-                <div class="grid-item social-post linkedin">
-                    <h3>LinkedIn</h3>
-                    <p class="excerpt" data-key="linkedin_post">Latest update...</p>
+                <div class="grid-item social-card linkedin">
+                    <h3 class="social-title">LinkedIn</h3>
+                    <p class="excerpt social-excerpt" data-key="linkedin_post">Latest update...</p>
                     <button class="action-button" onclick="openModal('linkedin')">Read More</button>
                 </div>
             </div>
         </section>
 
+        <!-- Quote Card 3 -->
+        <div class="quote-card">
+            <div class="quote-content">
+                <p class="quote-text" data-key="quote_3">"The moment I stopped performing strength and started trusting my sensitivity… everything began to shift."</p>
+            </div>
+        </div>
+
+        <!-- Connect Section Divider -->
+        <div class="section-divider connect-divider">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 100" preserveAspectRatio="none">
+                <path class="divider-fill" d="M0,40 C240,80 480,20 720,60 C960,100 1200,30 1440,70 L1440,100 L0,100 Z"></path>
+            </svg>
+        </div>
+
         <!-- Connect Section -->
         <section class="connect">
-            <h2>Connect With Us</h2>
-            <div class="social-links">
-                <a data-key="facebook_url" href="#" class="social-button facebook">Facebook</a>
-                <a data-key="twitter_url" href="#" class="social-button twitter">Twitter</a>
-                <a data-key="instagram_url" href="#" class="social-button instagram">Instagram</a>
-                <a data-key="linkedin_url" href="#" class="social-button linkedin">LinkedIn</a>
+            <div class="floating-icons">
+                <div class="floating-icon facebook-icon"></div>
+                <div class="floating-icon twitter-icon"></div>
+                <div class="floating-icon instagram-icon"></div>
+                <div class="floating-icon linkedin-icon"></div>
+            </div>
+            <div class="connect-card">
+                <h2>Connect with Me</h2>
+                <p class="connect-subtitle">I would love to connect with you on social media!</p>
+                <div class="social-links">
+                    <a data-key="facebook_url" href="#" class="social-button facebook" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+                        <span class="social-icon">f</span>
+                    </a>
+                    <a data-key="twitter_url" href="#" class="social-button twitter" target="_blank" rel="noopener noreferrer" aria-label="Twitter">
+                        <span class="social-icon">t</span>
+                    </a>
+                    <a data-key="instagram_url" href="#" class="social-button instagram" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+                        <span class="social-icon">i</span>
+                    </a>
+                    <a data-key="linkedin_url" href="#" class="social-button linkedin" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+                        <span class="social-icon">in</span>
+                    </a>
+                </div>
             </div>
         </section>
+
+        <!-- Footer Divider -->
+        <div class="footer-divider"></div>
 
         <!-- Modal Structure -->
         <div id="modal" class="modal">
@@ -143,6 +198,7 @@
         <!-- Footer -->
         <footer>
             <p data-key="rendered_footer_slogan"></p>
+            <p class="copyright">&copy; 2025 All rights reserved anniesicard.com - Built by <a href="https://www.selfcaststudios.com/" target="_blank" rel="noopener noreferrer">Self Cast Studio</a></p>
         </footer>
     </div>
 </body>
