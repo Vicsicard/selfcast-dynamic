@@ -2,16 +2,14 @@
 
 A multi-client website platform for personal branding and content management.
 
-## Latest Updates (April 16, 2025)
+## Latest Updates (April 17, 2025)
 
-- Enhanced hero section with modern UI elements
-- Added animated gradient background with parallax effect
-- Implemented floating decorative elements for visual interest
-- Added wave divider for smooth section transitions
-- Integrated circular profile image with subtle border effects
-- **Profile image now dynamically loads for Annie Sicard project**
-- Improved typography with gradient text effects and proper spacing
-- Enhanced responsive layout for all device sizes
+- Enhanced blog section with bold, gradient typography and glassmorphism cards
+- Added wavy SVG divider for seamless section transitions
+- Unified color scheme: header now uses the same blue gradient as blog and buttons
+- Improved modal functionality for blog and social posts (responsive, accessible, error-free)
+- Fixed CSS compatibility issues with gradients and line clamping
+- All blog and social content remains fully dynamic from Supabase
 
 ## Project Structure
 

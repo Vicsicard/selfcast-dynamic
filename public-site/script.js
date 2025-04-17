@@ -97,7 +97,11 @@ async function loadContent() {
             
             elements.forEach(element => {
                 if (item.key === 'rendered_bio_html') {
+                    // Store original bio content
                     element.innerHTML = item.value;
+                    
+                    // Create fun fact cards from bio content
+                    createBioCards(item.value, element);
                 } else if (item.key.includes('_url')) {
                     // Handle URLs differently based on element type
                     if (element.tagName === 'IMG') {
@@ -136,6 +140,33 @@ async function loadContent() {
     } catch (error) {
         console.error('Error loading content:', error);
     }
+}
+
+// Create fun fact cards from bio content
+function createBioCards(bioContent, element) {
+    // Use static words for the cards
+    const words = ['Mind', 'Body', 'Soul'];
+    
+    // Create a container for the cards
+    const cardsContainer = document.createElement('div');
+    cardsContainer.className = 'bio-cards';
+    
+    // Create a card for each word
+    words.forEach(word => {
+        const card = document.createElement('div');
+        card.className = 'bio-card';
+        
+        // Gradient styled word
+        const wordElem = document.createElement('span');
+        wordElem.className = 'bio-card-title';
+        wordElem.textContent = word;
+        card.appendChild(wordElem);
+        
+        cardsContainer.appendChild(card);
+    });
+    
+    // Insert the cards after the bio content
+    element.parentNode.insertBefore(cardsContainer, element.nextSibling);
 }
 
 // Modal functions
