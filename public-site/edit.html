@@ -184,6 +184,37 @@
             font-size: 0.75rem;
             color: #666;
         }
+        .blog-section {
+            margin-bottom: 2rem;
+        }
+        .action-button {
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 0.5rem;
+        }
+        .action-button:hover {
+            background-color: #5a6268;
+        }
+        .form-actions {
+            margin-top: 2rem;
+            text-align: center;
+        }
+        .form-actions button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 0.75rem 2rem;
+            font-size: 1.1rem;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .form-actions button:hover {
+            background-color: #0069d9;
+        }
     </style>
 </head>
 <body>
@@ -218,9 +249,15 @@
                         <div class="image-preview">
                             <img id="profile-preview" src="" alt="" style="display: none;">
                         </div>
+                        <div class="form-group" style="margin-top: 0.5rem;">
+                            <label for="profile_image_url">Image URL:</label>
+                            <input type="url" name="profile_image_url" id="profile_image_url" placeholder="https://example.com/image.jpg">
+                            <small>Enter direct image URL or use file upload below</small>
+                        </div>
+                        <p style="margin: 0.5rem 0;">-- OR --</p>
+                        <label>Upload Image File:</label>
                         <input type="file" id="profile-upload" accept="image/*">
                         <div class="progress-bar"><div></div></div>
-                        <input type="hidden" name="profile_image_url" id="profile_image_url">
                     </div>
                 </div>
                 <div class="form-group">
@@ -281,6 +318,95 @@
                 </div>
             </div>
 
+            <!-- Blog Posts -->
+            <div class="section">
+                <h2>Blog Posts</h2>
+                
+                <!-- Blog Post 1 -->
+                <div class="blog-section">
+                    <h3>Blog Post 1</h3>
+                    <div class="form-group">
+                        <label for="blog_1_title">Title:</label>
+                        <input type="text" name="blog_1_title" id="blog_1_title" 
+                               placeholder="Enter blog post 1 title">
+                    </div>
+                    <div class="form-group">
+                        <label for="blog_1_short">Short Description:</label>
+                        <textarea name="blog_1_short" id="blog_1_short" 
+                                  placeholder="Enter a brief description or excerpt (max 150 characters)" maxlength="150"></textarea>
+                        <div class="character-count">0 characters</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="blog_1_post">Full Content:</label>
+                        <textarea name="blog_1_post" id="blog_1_post" 
+                                  placeholder="Enter full blog post 1 content with HTML formatting"></textarea>
+                    </div>
+                </div>
+                
+                <!-- Blog Post 2 -->
+                <div class="blog-section">
+                    <h3>Blog Post 2</h3>
+                    <div class="form-group">
+                        <label for="blog_2_title">Title:</label>
+                        <input type="text" name="blog_2_title" id="blog_2_title" 
+                               placeholder="Enter blog post 2 title">
+                    </div>
+                    <div class="form-group">
+                        <label for="blog_2_short">Short Description:</label>
+                        <textarea name="blog_2_short" id="blog_2_short" 
+                                  placeholder="Enter a brief description or excerpt (max 150 characters)" maxlength="150"></textarea>
+                        <div class="character-count">0 characters</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="blog_2_post">Full Content:</label>
+                        <textarea name="blog_2_post" id="blog_2_post" 
+                                  placeholder="Enter full blog post 2 content with HTML formatting"></textarea>
+                    </div>
+                </div>
+                
+                <!-- Blog Post 3 -->
+                <div class="blog-section">
+                    <h3>Blog Post 3</h3>
+                    <div class="form-group">
+                        <label for="blog_3_title">Title:</label>
+                        <input type="text" name="blog_3_title" id="blog_3_title" 
+                               placeholder="Enter blog post 3 title">
+                    </div>
+                    <div class="form-group">
+                        <label for="blog_3_short">Short Description:</label>
+                        <textarea name="blog_3_short" id="blog_3_short" 
+                                  placeholder="Enter a brief description or excerpt (max 150 characters)" maxlength="150"></textarea>
+                        <div class="character-count">0 characters</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="blog_3_post">Full Content:</label>
+                        <textarea name="blog_3_post" id="blog_3_post" 
+                                  placeholder="Enter full blog post 3 content with HTML formatting"></textarea>
+                    </div>
+                </div>
+                
+                <!-- Blog Post 4 -->
+                <div class="blog-section">
+                    <h3>Blog Post 4</h3>
+                    <div class="form-group">
+                        <label for="blog_4_title">Title:</label>
+                        <input type="text" name="blog_4_title" id="blog_4_title" 
+                               placeholder="Enter blog post 4 title">
+                    </div>
+                    <div class="form-group">
+                        <label for="blog_4_short">Short Description:</label>
+                        <textarea name="blog_4_short" id="blog_4_short" 
+                                  placeholder="Enter a brief description or excerpt (max 150 characters)" maxlength="150"></textarea>
+                        <div class="character-count">0 characters</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="blog_4_post">Full Content:</label>
+                        <textarea name="blog_4_post" id="blog_4_post" 
+                                  placeholder="Enter full blog post 4 content with HTML formatting"></textarea>
+                    </div>
+                </div>
+            </div>
+
             <!-- Quote Cards -->
             <div class="section">
                 <h2>Inspirational Quotes</h2>
@@ -301,31 +427,6 @@
                 </div>
             </div>
 
-            <!-- Blog Posts -->
-            <div class="section">
-                <h2>Blog Posts</h2>
-                <div class="form-group">
-                    <label for="rendered_blog_post_1">Blog Post 1:</label>
-                    <textarea name="rendered_blog_post_1" id="rendered_blog_post_1" 
-                              placeholder="Enter blog post 1 content with HTML formatting"></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="rendered_blog_post_2">Blog Post 2:</label>
-                    <textarea name="rendered_blog_post_2" id="rendered_blog_post_2" 
-                              placeholder="Enter blog post 2 content with HTML formatting"></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="rendered_blog_post_3">Blog Post 3:</label>
-                    <textarea name="rendered_blog_post_3" id="rendered_blog_post_3" 
-                              placeholder="Enter blog post 3 content with HTML formatting"></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="rendered_blog_post_4">Blog Post 4:</label>
-                    <textarea name="rendered_blog_post_4" id="rendered_blog_post_4" 
-                              placeholder="Enter blog post 4 content with HTML formatting"></textarea>
-                </div>
-            </div>
-
             <!-- Social Media Feed -->
             <div class="section">
                 <h2>Social Media Feed</h2>
@@ -338,9 +439,20 @@
                         <input type="url" name="facebook_url" id="facebook_url" placeholder="https://facebook.com/username">
                     </div>
                     <div class="form-group">
-                        <label for="facebook_post">Post:</label>
+                        <label for="facebook_title">Title:</label>
+                        <input type="text" name="facebook_title" id="facebook_title" 
+                               placeholder="Enter a title for this Facebook post">
+                    </div>
+                    <div class="form-group">
+                        <label for="facebook_short">Short Description:</label>
+                        <textarea name="facebook_short" id="facebook_short" 
+                                placeholder="Enter a brief description or excerpt (max 150 characters)" maxlength="150"></textarea>
+                        <div class="character-count">0 characters</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="facebook_post">Full Content:</label>
                         <textarea name="facebook_post" id="facebook_post" 
-                                placeholder="Enter your Facebook post text (emojis allowed)"></textarea>
+                                placeholder="Enter your full Facebook post text (emojis allowed)"></textarea>
                         <div class="character-count">0 characters</div>
                     </div>
                 </div>
@@ -353,9 +465,20 @@
                         <input type="url" name="twitter_url" id="twitter_url" placeholder="https://twitter.com/username">
                     </div>
                     <div class="form-group">
-                        <label for="twitter_post">Post:</label>
+                        <label for="twitter_title">Title:</label>
+                        <input type="text" name="twitter_title" id="twitter_title" 
+                               placeholder="Enter a title for this Twitter post">
+                    </div>
+                    <div class="form-group">
+                        <label for="twitter_short">Short Description:</label>
+                        <textarea name="twitter_short" id="twitter_short" 
+                                placeholder="Enter a brief description or excerpt (max 150 characters)" maxlength="150"></textarea>
+                        <div class="character-count">0 characters</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="twitter_post">Full Content:</label>
                         <textarea name="twitter_post" id="twitter_post" 
-                                placeholder="Enter your tweet text (emojis allowed)"></textarea>
+                                placeholder="Enter your full tweet text (emojis allowed)"></textarea>
                         <div class="character-count">0 characters</div>
                     </div>
                 </div>
@@ -368,9 +491,20 @@
                         <input type="url" name="instagram_url" id="instagram_url" placeholder="https://instagram.com/username">
                     </div>
                     <div class="form-group">
-                        <label for="instagram_post">Post:</label>
+                        <label for="instagram_title">Title:</label>
+                        <input type="text" name="instagram_title" id="instagram_title" 
+                               placeholder="Enter a title for this Instagram post">
+                    </div>
+                    <div class="form-group">
+                        <label for="instagram_short">Short Description:</label>
+                        <textarea name="instagram_short" id="instagram_short" 
+                                placeholder="Enter a brief description or excerpt (max 150 characters)" maxlength="150"></textarea>
+                        <div class="character-count">0 characters</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="instagram_post">Full Content:</label>
                         <textarea name="instagram_post" id="instagram_post" 
-                                placeholder="Enter your Instagram post text (emojis allowed)"></textarea>
+                                placeholder="Enter your full Instagram post text (emojis allowed)"></textarea>
                         <div class="character-count">0 characters</div>
                     </div>
                 </div>
@@ -383,9 +517,20 @@
                         <input type="url" name="linkedin_url" id="linkedin_url" placeholder="https://linkedin.com/in/username">
                     </div>
                     <div class="form-group">
-                        <label for="linkedin_post">Post:</label>
+                        <label for="linkedin_title">Title:</label>
+                        <input type="text" name="linkedin_title" id="linkedin_title" 
+                               placeholder="Enter a title for this LinkedIn post">
+                    </div>
+                    <div class="form-group">
+                        <label for="linkedin_short">Short Description:</label>
+                        <textarea name="linkedin_short" id="linkedin_short" 
+                                placeholder="Enter a brief description or excerpt (max 150 characters)" maxlength="150"></textarea>
+                        <div class="character-count">0 characters</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="linkedin_post">Full Content:</label>
                         <textarea name="linkedin_post" id="linkedin_post" 
-                                placeholder="Enter your LinkedIn post text (emojis allowed)"></textarea>
+                                placeholder="Enter your full LinkedIn post text (emojis allowed)"></textarea>
                         <div class="character-count">0 characters</div>
                     </div>
                 </div>
@@ -401,7 +546,25 @@
                 <input type="hidden" name="current_year" id="current_year" value="2025">
             </div>
 
-            <button type="submit">Save Changes</button>
+            <!-- Import/Export -->
+            <div class="section">
+                <h2>Import/Export</h2>
+                <div class="form-group">
+                    <label for="csv-upload">Import Content from CSV:</label>
+                    <input type="file" id="csv-upload" accept=".csv">
+                    <p><small>Upload a CSV file with project_id, key, value columns to quickly import content</small></p>
+                    <button type="button" id="import-csv-btn" class="action-button">Import CSV</button>
+                    <div id="import-status" class="status" style="display: none;"></div>
+                </div>
+                <div class="form-group">
+                    <button type="button" id="download-template-btn" class="action-button">Download CSV Template</button>
+                    <p><small>Download a template CSV file with all available fields</small></p>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit">Save Changes</button>
+            </div>
         </form>
 
         <div id="status" class="status"></div>
@@ -411,7 +574,7 @@
     <script>
         // Initialize Supabase client with direct config
         const supabase = window.supabase.createClient(
-            'https://aqicztygjpmunfljjjuto.supabase.co',
+            'https://aqicztygjpmunfljjuto.supabase.co',
             'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxaWN6dHlnanBtdW5mbGpqdXRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3MDU1ODIsImV4cCI6MjA1OTI4MTU4Mn0.5e2hvTckSSbTFLBjQiccrvjoBd6QQDX0X4tccFOc1rs'
         );
 
@@ -446,6 +609,80 @@
 
         // Check connection on load
         checkConnection();
+
+        // Load available projects
+        async function loadProjects() {
+            try {
+                // Clear existing options except the first two (Select Project and Create New)
+                while (projectSelect.options.length > 2) {
+                    projectSelect.remove(2);
+                }
+
+                // Add option group for existing projects
+                const existingGroup = document.createElement('optgroup');
+                existingGroup.label = 'Existing Projects';
+                projectSelect.appendChild(existingGroup);
+
+                // Fetch all unique project IDs
+                const { data, error } = await supabase
+                    .from('dynamic_content')
+                    .select('project_id')
+                    .order('project_id')
+                    .limit(100);
+
+                if (error) throw error;
+
+                // Get unique project IDs
+                const projectIds = [...new Set(data.map(item => item.project_id))];
+                
+                // Add each project to the dropdown
+                projectIds.forEach(projectId => {
+                    // Skip empty or special values
+                    if (!projectId || projectId === 'new' || projectId === 'default-project') return;
+                    
+                    const option = document.createElement('option');
+                    option.value = projectId;
+                    option.textContent = projectId;
+                    existingGroup.appendChild(option);
+                });
+
+                // Add default project under existing projects if it exists
+                if (projectIds.includes('default-project')) {
+                    // Remove default project from main list if it exists
+                    for (let i = 0; i < projectSelect.options.length; i++) {
+                        if (projectSelect.options[i].value === 'default-project') {
+                            projectSelect.remove(i);
+                            break;
+                        }
+                    }
+                    
+                    const option = document.createElement('option');
+                    option.value = 'default-project';
+                    option.textContent = 'Default Project';
+                    existingGroup.appendChild(option);
+                }
+
+                console.log(`Loaded ${projectIds.length} projects`);
+            } catch (error) {
+                console.error('Error loading projects:', error);
+                status.textContent = 'Error loading projects: ' + error.message;
+                status.className = 'status error';
+            }
+        }
+
+        // Load projects on page load
+        loadProjects();
+
+        // Handle profile image URL input
+        profileImageUrl.addEventListener('input', (e) => {
+            const url = e.target.value.trim();
+            if (url) {
+                profilePreview.src = url;
+                profilePreview.style.display = 'block';
+            } else {
+                profilePreview.style.display = 'none';
+            }
+        });
 
         // Handle profile image upload
         profileUpload.addEventListener('change', async (e) => {
@@ -680,7 +917,7 @@
         loadContent();
 
         // Handle character counts
-        const textareas = document.querySelectorAll('textarea[id$="_post"]');
+        const textareas = document.querySelectorAll('textarea[id$="_post"], textarea[id$="_short"]');
         textareas.forEach(textarea => {
             textarea.addEventListener('input', function() {
                 const count = this.value.length;
@@ -714,6 +951,34 @@
                 const formData = new FormData(form);
                 const updates = [];
 
+                // Process blog posts
+                for (let i = 1; i <= 4; i++) {
+                    const title = document.getElementById(`blog_${i}_title`).value;
+                    const short = document.getElementById(`blog_${i}_short`).value;
+                    const post = document.getElementById(`blog_${i}_post`).value;
+                    
+                    // Only save if any content is provided
+                    if (title || short || post) {
+                        updates.push(
+                            {
+                                project_id: projectId,
+                                key: `blog_${i}_title`,
+                                value: title
+                            },
+                            {
+                                project_id: projectId,
+                                key: `blog_${i}_short`,
+                                value: short
+                            },
+                            {
+                                project_id: projectId,
+                                key: `blog_${i}_post`,
+                                value: post
+                            }
+                        );
+                    }
+                }
+
                 // Process social media fields
                 const socialPlatforms = ['facebook', 'twitter', 'instagram', 'linkedin'];
                 for (const platform of socialPlatforms) {
@@ -732,6 +997,16 @@
                                 project_id: projectId,
                                 key: `${platform}_post`,
                                 value: post
+                            },
+                            {
+                                project_id: projectId,
+                                key: `${platform}_title`,
+                                value: document.getElementById(`${platform}_title`).value
+                            },
+                            {
+                                project_id: projectId,
+                                key: `${platform}_short`,
+                                value: document.getElementById(`${platform}_short`).value
                             }
                         );
                     }
@@ -739,7 +1014,13 @@
 
                 // Add all other form fields
                 for (const [key, value] of formData.entries()) {
-                    if (key === 'project_id' || key.endsWith('_url') || key.endsWith('_post')) continue;
+                    // Skip fields we've already processed
+                    if (key === 'project_id' || 
+                        key.endsWith('_url') || 
+                        key.endsWith('_post') || 
+                        key.endsWith('_title') || 
+                        key.endsWith('_short')) continue;
+                    
                     updates.push({
                         project_id: projectId,
                         key: key,
@@ -760,11 +1041,13 @@
                 status.className = 'status success';
 
                 // Update character counts
-                const textareas = document.querySelectorAll('textarea[id$="_post"]');
+                const textareas = document.querySelectorAll('textarea[id$="_post"], textarea[id$="_short"]');
                 textareas.forEach(textarea => {
                     const count = textarea.value.length;
                     const countDisplay = textarea.nextElementSibling;
-                    countDisplay.textContent = count + ' characters';
+                    if (countDisplay && countDisplay.classList.contains('character-count')) {
+                        countDisplay.textContent = count + ' characters';
+                    }
                 });
 
             } catch (error) {
@@ -778,6 +1061,270 @@
 
         // Set current year
         document.getElementById('current_year').value = new Date().getFullYear();
+
+        // Add style for action buttons
+        document.head.insertAdjacentHTML('beforeend', `
+            <style>
+                .action-button {
+                    background-color: #6c757d;
+                    color: white;
+                    border: none;
+                    padding: 0.5rem 1rem;
+                    border-radius: 4px;
+                    cursor: pointer;
+                    margin-top: 0.5rem;
+                }
+                .action-button:hover {
+                    background-color: #5a6268;
+                }
+                .form-actions {
+                    margin-top: 2rem;
+                    text-align: center;
+                }
+                .form-actions button {
+                    background-color: #007bff;
+                    color: white;
+                    border: none;
+                    padding: 0.75rem 2rem;
+                    font-size: 1.1rem;
+                    border-radius: 4px;
+                    cursor: pointer;
+                }
+                .form-actions button:hover {
+                    background-color: #0069d9;
+                }
+            </style>
+        `);
+
+        // CSV Import/Export functionality
+        const csvUpload = document.getElementById('csv-upload');
+        const importCsvBtn = document.getElementById('import-csv-btn');
+        const downloadTemplateBtn = document.getElementById('download-template-btn');
+        const importStatus = document.getElementById('import-status');
+
+        // Parse CSV function
+        function parseCSV(text) {
+            // Simple CSV parser
+            const lines = text.split('\n');
+            const result = [];
+            const headers = lines[0].split(',');
+            
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line) continue; // Skip empty lines
+                
+                const values = line.split(',');
+                const entry = {};
+                
+                // Handle quoted values with commas inside
+                let j = 0;
+                let currentValue = '';
+                let insideQuotes = false;
+                
+                for (let k = 0; k < values.length; k++) {
+                    let value = values[k];
+                    
+                    // Check for opening quote
+                    if (!insideQuotes && value.startsWith('"')) {
+                        insideQuotes = true;
+                        value = value.substring(1);
+                    }
+                    
+                    // Check for closing quote
+                    if (insideQuotes && value.endsWith('"')) {
+                        insideQuotes = false;
+                        value = value.substring(0, value.length - 1);
+                        currentValue += value;
+                        
+                        // We've completed a quoted value
+                        if (j < headers.length) {
+                            entry[headers[j].trim()] = currentValue.trim();
+                            j++;
+                        }
+                        
+                        currentValue = '';
+                        continue;
+                    }
+                    
+                    // Add to current value
+                    if (insideQuotes) {
+                        currentValue += value + ',';
+                    } else {
+                        // Regular unquoted value
+                        if (j < headers.length) {
+                            entry[headers[j].trim()] = value.trim();
+                            j++;
+                        }
+                    }
+                }
+                
+                result.push(entry);
+            }
+            
+            return result;
+        }
+
+        // Import CSV button click handler
+        importCsvBtn.addEventListener('click', async () => {
+            const file = csvUpload.files[0];
+            if (!file) {
+                importStatus.textContent = 'Please select a CSV file first';
+                importStatus.className = 'status error';
+                importStatus.style.display = 'block';
+                return;
+            }
+
+            try {
+                const text = await file.text();
+                const data = parseCSV(text);
+                
+                if (!data.length) throw new Error('No data found in CSV');
+                
+                // Validate required columns
+                if (!data[0].project_id || !data[0].key || !data[0].value === undefined) {
+                    throw new Error('CSV must contain project_id, key, and value columns');
+                }
+                
+                importStatus.textContent = `Processing ${data.length} entries...`;
+                importStatus.className = 'status';
+                importStatus.style.display = 'block';
+                
+                // Group entries by project
+                const projects = {};
+                data.forEach(entry => {
+                    if (!projects[entry.project_id]) {
+                        projects[entry.project_id] = [];
+                    }
+                    projects[entry.project_id].push({
+                        project_id: entry.project_id,
+                        key: entry.key,
+                        value: entry.value
+                    });
+                });
+                
+                // Get current project
+                const selectedProjectId = projectSelect.value;
+                let targetProjectId = selectedProjectId;
+                
+                // If there's only one project in the CSV and none selected, use that
+                const projectIds = Object.keys(projects);
+                if (projectIds.length === 1 && (!selectedProjectId || selectedProjectId === 'new')) {
+                    targetProjectId = projectIds[0];
+                    
+                    // Check if project exists
+                    const { data: existingProjects } = await supabase
+                        .from('dynamic_content')
+                        .select('project_id')
+                        .eq('project_id', targetProjectId)
+                        .limit(1);
+                    
+                    if (!existingProjects.length) {
+                        // Create the project
+                        const { error } = await supabase
+                            .from('dynamic_content')
+                            .insert({ project_id: targetProjectId, key: 'project_created', value: new Date().toISOString() });
+                        
+                        if (error) throw error;
+                        
+                        // Update project select dropdown
+                        const option = document.createElement('option');
+                        option.value = targetProjectId;
+                        option.textContent = targetProjectId;
+                        projectSelect.appendChild(option);
+                        projectSelect.value = targetProjectId;
+                    }
+                }
+                
+                if (!targetProjectId || targetProjectId === 'new') {
+                    throw new Error('Please select a project first or upload CSV with a single project');
+                }
+                
+                // Import data for the target project
+                const updates = projects[targetProjectId] || [];
+                if (!updates.length) {
+                    throw new Error(`No data found for project ${targetProjectId} in CSV`);
+                }
+                
+                // Upsert all values
+                const { error } = await supabase
+                    .from('dynamic_content')
+                    .upsert(updates, {
+                        onConflict: 'project_id,key'
+                    });
+                
+                if (error) throw error;
+                
+                importStatus.textContent = `Successfully imported ${updates.length} entries for project ${targetProjectId}`;
+                importStatus.className = 'status success';
+                
+                // Reload content for the current project
+                loadContent();
+                
+            } catch (error) {
+                importStatus.textContent = 'Error importing CSV: ' + error.message;
+                importStatus.className = 'status error';
+            }
+        });
+
+        // Download CSV template button click handler
+        downloadTemplateBtn.addEventListener('click', () => {
+            const templateContent = `project_id,key,value
+example-project,client_name,Client Name
+example-project,profile_image_url,https://example.com/image.jpg
+example-project,rendered_title,Site Title
+example-project,rendered_subtitle,Site Subtitle
+example-project,rendered_bio_html,Bio content
+example-project,style_package,professional-his
+example-project,primary_color,#4a6fa5
+example-project,secondary_color,#6c8eb4
+example-project,accent_color,#f9a03f
+example-project,text_color,#333333
+example-project,background_color,#f5f5f5
+example-project,heading_font,Montserrat
+example-project,body_font,Open Sans
+example-project,quote_1,Quote 1 content
+example-project,quote_2,Quote 2 content
+example-project,quote_3,Quote 3 content
+example-project,blog_1_title,First Blog Post Title
+example-project,blog_1_short,Short description of first blog post
+example-project,blog_1_post,Full content of first blog post
+example-project,blog_2_title,Second Blog Post Title
+example-project,blog_2_short,Short description of second blog post
+example-project,blog_2_post,Full content of second blog post
+example-project,blog_3_title,Third Blog Post Title
+example-project,blog_3_short,Short description of third blog post
+example-project,blog_3_post,Full content of third blog post
+example-project,blog_4_title,Fourth Blog Post Title
+example-project,blog_4_short,Short description of fourth blog post
+example-project,blog_4_post,Full content of fourth blog post
+example-project,facebook_url,https://facebook.com/username
+example-project,facebook_title,Latest Facebook Update
+example-project,facebook_short,Brief excerpt of the Facebook post
+example-project,facebook_post,Full Facebook post content
+example-project,twitter_url,https://twitter.com/username
+example-project,twitter_title,Latest Tweet
+example-project,twitter_short,Brief excerpt of the tweet
+example-project,twitter_post,Full tweet content
+example-project,instagram_url,https://instagram.com/username
+example-project,instagram_title,Latest Instagram Post
+example-project,instagram_short,Brief excerpt of the Instagram post
+example-project,instagram_post,Full Instagram post content
+example-project,linkedin_url,https://linkedin.com/in/username
+example-project,linkedin_title,Latest LinkedIn Article
+example-project,linkedin_short,Brief excerpt of the LinkedIn post
+example-project,linkedin_post,Full LinkedIn post content
+example-project,rendered_footer_slogan,Footer slogan content
+example-project,current_year,2025`;
+            
+            // Create a download link
+            const element = document.createElement('a');
+            element.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURIComponent(templateContent));
+            element.setAttribute('download', 'selfcast-content-template.csv');
+            element.style.display = 'none';
+            document.body.appendChild(element);
+            element.click();
+            document.body.removeChild(element);
+        });
     </script>
 </body>
 </html>

@@ -23,6 +23,33 @@ A multi-client website platform for personal branding and content management.
 - **Footer:**
   - Updated to match header gradient and includes copyright with link to Self Cast Studio
 
+## April 17, 2025 – Major Content and Logic Update
+
+### CSV Import & Project Management
+- Added CSV import/export for bulk content management in `edit.html`.
+- Project dropdown dynamically loads all project IDs from Supabase.
+- Fixed Supabase URL typo that caused persistent connection errors.
+- Ensured correct project selection and editing for all projects, including `adam-hyp-1`.
+
+### Public Site Dynamic Loading
+- Public site (`index.html`) now loads content strictly for the selected `project_id` (e.g., `?project_id=adam-hyp-1`).
+- **No more fallback content:** If a data-key is missing for the project, the element is blank, never showing default/"annie" content.
+- All `[data-key]` elements are cleared if the key is not present for the selected project.
+- Modal and excerpt logic maintained for blog/social posts.
+
+### Bug Fixes
+- Character count update now checks for element existence to prevent JS errors.
+- Fixed all issues with duplicate keys and project creation in Supabase.
+
+### How to View a Project
+- To view a specific project, use:
+  `http://localhost:8000/index.html?project_id=adam-hyp-1`
+- Only content for that project will be shown; missing fields will appear blank.
+
+### Developer Notes
+- See `script.js` for the updated logic that enforces strict project-based content injection.
+- See `edit.html` for CSV import/export and project management improvements.
+
 ## Project Structure
 
 ```

@@ -61,6 +61,28 @@ async function loadContent() {
             themeData[item.key] = item.value;
         });
 
+        // For every element with a data-key, set its content to the project value or blank if missing
+        document.querySelectorAll('[data-key]').forEach(element => {
+            const key = element.getAttribute('data-key');
+            if (themeData[key] !== undefined && themeData[key] !== null && themeData[key] !== '') {
+                // If the key exists for this project, set the value
+                if (element.tagName === 'IMG') {
+                    element.src = themeData[key];
+                } else if (key.endsWith('_html')) {
+                    element.innerHTML = themeData[key];
+                } else {
+                    element.textContent = themeData[key];
+                }
+            } else {
+                // If the key is missing, clear the content
+                if (element.tagName === 'IMG') {
+                    element.src = '';
+                } else {
+                    element.textContent = '';
+                }
+            }
+        });
+
         // Load fonts and inject styles
         loadFonts(themeData.heading_font || 'Roboto', themeData.body_font || 'Open Sans');
         injectStyles(themeData);
