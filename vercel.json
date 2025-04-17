@@ -1,8 +1,7 @@
 {
   "version": 2,
-  "framework": "static",
-  "buildCommand": false,
-  "outputDirectory": "public-site",
+  "buildCommand": null,
+  "outputDirectory": "static-sites/annie-sicard-123",
   "public": true,
   "cleanUrls": true,
   "trailingSlash": false,

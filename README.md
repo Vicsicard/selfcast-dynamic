@@ -400,5 +400,61 @@ vercel --name annie-sicard-123 static-sites/annie-sicard-123
 
 ---
 
+## Static Site Deployment to Vercel (2025-04-17 Update)
+
+### Deploying a Client Site
+To deploy a generated static site for a client (e.g., `annie-sicard-123`) to Vercel:
+
+1. **Ensure the static site is built:**
+   - Run `node static-build.js <project_id>` (e.g., `annie-sicard-123`).
+   - The output will be in `static-sites/<project_id>`.
+
+2. **Update `vercel.json`:**
+   - Set `outputDirectory` to `static-sites/<project_id>`
+   - Set `buildCommand` to `null`.
+   - Remove the `framework` property if present.
+
+3. **Deploy with Vercel CLI:**
+   ```sh
+   vercel --yes static-sites/<project_id>
+   ```
+   - The CLI will prompt for project setup if it's a new deployment.
+   - Use the relative path only (e.g., `static-sites/annie-sicard-123`).
+
+4. **Access the deployed site:**
+   - The CLI will show the live URL (e.g., `https://annie-sicard-123-xxxx.vercel.app`).
+
+### Notes
+- Each client site should be deployed as a separate Vercel project for subdomain separation.
+- To update a site, rebuild the static content and redeploy with the same command.
+- The static site does not require Supabase or any backend after deployment.
+
+### Example `vercel.json` for Static Deployments
+```json
+{
+  "version": 2,
+  "buildCommand": null,
+  "outputDirectory": "static-sites/annie-sicard-123",
+  "public": true,
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "github": {
+    "silent": true
+  }
+}
+```
+
+---
+
+## Troubleshooting
+- If you see errors about the framework or build command, check your `vercel.json` for typos or extra properties.
+- Always use a relative path for the deployment directory.
+
+## Useful Links
+- [Vercel Dashboard](https://vercel.com/dashboard)
+- [Vercel CLI Documentation](https://vercel.com/docs/cli)
+
+---
+
 ## Contact & Support
 For questions or support, contact the SelfCast Dynamic engineering team.
