@@ -1,0 +1,14 @@
+{
+  "name": "selfcast-dynamic",
+  "version": "1.0.0",
+  "description": "Multi-client website platform with static site generation",
+  "main": "index.js",
+  "scripts": {
+    "build-static": "node static-build.js",
+    "deploy": "node static-build.js && vercel --prod static-sites"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.0.0",
+    "cheerio": "^1.0.0-rc.12"
+  }
+}

@@ -230,10 +230,10 @@ SelfCast Dynamic/
 ### Supabase Integration
 - Table: `dynamic_content`
 - Fields:
-  - `key`: Content identifier
-  - `value`: Actual content
-  - `project_id`: Project identifier
-- Content is fetched using project ID from URL or subdomain
+  - `project_id` (text, required)
+  - `key` (text, required)
+  - `value` (text, required)
+  - Primary Key: (project_id, key)
 
 ## Database Schema
 
@@ -298,3 +298,107 @@ Using Supabase with table `dynamic_content`:
 - Emoji picker integration
 - Rich text formatting
 - Image gallery support
+
+## SelfCast Dynamic Platform
+
+### Overview
+SelfCast Dynamic is a multi-client website platform that allows you to:
+- Easily create and manage content for multiple client sites using an editor and Supabase
+- Generate ultra-fast, fully static sites for each client with all interactive features preserved
+- Deploy each static site to Vercel, using subdomains for client isolation
+
+---
+
+## Workflow
+
+### 1. Content Creation & Editing
+- Use `public-site/edit.html` to create or update content for a client
+- Assign a unique `project_id` for each client (e.g., `annie-sicard-123`)
+- Content is saved to the Supabase `dynamic_content` table
+
+### 2. Static Site Generation
+- Run the static site generator to fetch all content from Supabase and embed it directly in the HTML
+- Command:
+  ```sh
+  node static-build.js <project_id>
+  ```
+  Example:
+  ```sh
+  node static-build.js annie-sicard-123
+  ```
+- Output is saved in `static-sites/<project_id>`
+
+### 3. Local Preview
+- Preview the static site locally:
+  ```sh
+  cd static-sites/<project_id>
+  python -m http.server 8080
+  ```
+  Visit [http://localhost:8080](http://localhost:8080)
+
+### 4. Deployment to Vercel
+- Deploy the static site to Vercel:
+  ```sh
+  vercel --name <project_id> static-sites/<project_id>
+  ```
+- For subdomain-based deployments, configure Vercel with the appropriate subdomain for each client
+
+### 5. Updating Content
+- Make changes in the editor (edit.html)
+- Re-run the static site generator
+- Re-deploy to Vercel
+
+---
+
+## Features
+- **Content isolation**: Each client site is isolated by `project_id`
+- **Static generation**: All content is embedded, no Supabase dependency after deployment
+- **Full interactivity**: Modals, parallax, and all JavaScript features preserved
+- **Easy updates**: Update content in Supabase, regenerate static site, redeploy
+- **Scalable**: Supports many clients using subdomains (Vercel paid plans recommended for >50 subdomains)
+
+---
+
+## Static Site Generator Details
+- File: `static-build.js`
+- Uses Node.js, Cheerio, and @supabase/supabase-js
+- Copies all assets from `public-site` to output
+- Embeds content as `window.siteContent` for modal support
+- Removes all Supabase dependencies from the final build
+
+---
+
+## Example Commands
+
+Install dependencies:
+```sh
+npm install
+```
+
+Build static site:
+```sh
+node static-build.js annie-sicard-123
+```
+
+Preview locally:
+```sh
+cd static-sites/annie-sicard-123
+python -m http.server 8080
+```
+
+Deploy to Vercel:
+```sh
+vercel --name annie-sicard-123 static-sites/annie-sicard-123
+```
+
+---
+
+## Notes
+- The editor form (`edit.html`) must include all new content keys (e.g., quote cards) to stay in sync with Supabase and the static site
+- The static site generator will preserve all modal and interactive JavaScript features
+- For new clients, repeat the workflow with a new `project_id`
+
+---
+
+## Contact & Support
+For questions or support, contact the SelfCast Dynamic engineering team.
