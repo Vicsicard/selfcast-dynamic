@@ -222,54 +222,75 @@
         }
         .style-package-selector {
             display: flex;
-            gap: 1rem;
+            gap: 10px;
+            margin-bottom: 15px;
         }
         .style-button {
-            padding: 0.75rem 1.5rem;
-            border-radius: 4px;
+            flex: 1;
+            padding: 15px;
+            border: 3px solid transparent;
+            border-radius: 8px;
+            background: #fff;
             cursor: pointer;
-            font-size: 1rem;
-            transition: all 0.2s ease;
-            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            font-size: 16px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .style-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
         }
         .style-button.active {
-            border: 2px solid #333;
-            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+            border-color: #333;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            transform: translateY(-3px);
         }
-        .standard-style {
+        .style-button span {
+            position: relative;
+            z-index: 2;
+            font-weight: bold;
+        }
+        .style-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.85;
+            z-index: 1;
+        }
+        .standard-style::before {
             background: #3498db;
+        }
+        .standard-style span {
             color: white;
         }
-        .standard-style:hover {
-            background: #2980b9;
-        }
-        .dark-style {
+        .dark-style::before {
             background: #2c3e50;
+        }
+        .dark-style span {
             color: white;
         }
-        .dark-style:hover {
-            background: #1a252f;
-        }
-        .light-style {
+        .light-style::before {
             background: #f1c40f;
+        }
+        .light-style span {
             color: #333;
         }
-        .light-style:hover {
-            background: #e0b604;
+        .green-style::before {
+            background: #28a745;
         }
-        .green-style {
-            background-color: #28a745;
+        .green-style span {
             color: white;
         }
-        .green-style:hover {
-            background-color: #218838;
+        .red-style::before {
+            background: #dc3545;
         }
-        .red-style {
-            background-color: #dc3545;
+        .red-style span {
             color: white;
-        }
-        .red-style:hover {
-            background-color: #c82333;
         }
         /* View Site Button */
         .view-site-button {
@@ -345,43 +366,6 @@
             100% {
                 stroke-dashoffset: 0;
             }
-        }
-        
-        /* Style Button Styles */
-        .style-package-selector {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-        .style-button {
-            flex: 1;
-            padding: 15px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            background: #fff;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 16px;
-            text-align: center;
-        }
-        .style-button:hover {
-            border-color: #aaa;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        .style-button.active {
-            border-color: #007bff;
-            box-shadow: 0 2px 8px rgba(0,123,255,0.3);
-        }
-        .standard-style {
-            background-color: #f8f9fa;
-        }
-        .dark-style {
-            background-color: #343a40;
-            color: white;
-        }
-        .light-style {
-            background-color: #ffffff;
-            border-color: #e9ecef;
         }
     </style>
 </head>
