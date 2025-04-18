@@ -1173,6 +1173,50 @@ section {
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
+/* Special handling for dark themes in bio section */
+:root[style*="--background-color: #0d1117"], 
+:root[style*="--background-color:#0d1117"] {
+    /* Adjust bio main content for dark themes */
+    .bio-main-content {
+        background: rgba(30, 40, 60, 0.9);
+        border: 1px solid rgba(70, 80, 120, 0.3);
+    }
+    
+    /* Ensure text is visible on dark backgrounds */
+    .bio-text, .bio-text p {
+        color: rgba(255, 255, 255, 0.9);
+    }
+    
+    /* Adjust bio cards for dark themes */
+    .bio-card {
+        background: rgba(30, 40, 60, 0.9);
+        border: 1px solid rgba(70, 80, 120, 0.3);
+    }
+    
+    .bio-card-content {
+        color: rgba(255, 255, 255, 0.9);
+    }
+    
+    .bio-card-content h3 {
+        color: rgba(255, 255, 255, 0.95);
+    }
+    
+    .bio-card-content p {
+        color: rgba(255, 255, 255, 0.8);
+    }
+    
+    /* Adjust section title for dark themes */
+    .section-title {
+        color: rgba(255, 255, 255, 0.95);
+    }
+    
+    /* Ensure quotes are visible in dark themes */
+    .bio-text p:has(q), .bio-text p:has(blockquote) {
+        color: var(--accent-color);
+        border-left-color: var(--primary-color);
+    }
+}
+
 .bio-main-content:hover {
     transform: translateY(-5px);
     box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
