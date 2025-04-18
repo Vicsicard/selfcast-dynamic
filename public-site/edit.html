@@ -714,18 +714,6 @@
             }
         }
 
-        // DOM Elements
-        const form = document.getElementById('contentForm');
-        const status = document.getElementById('status');
-        const projectSelect = document.getElementById('project_id');
-        const profileUpload = document.getElementById('profile-upload');
-        const profilePreview = document.getElementById('profile-preview');
-        const profileImageUrl = document.getElementById('profile_image_url');
-        const progressBar = document.querySelector('.progress-bar div');
-
-        // Check connection on load
-        checkConnection();
-
         // Load available projects
         async function loadProjects() {
             try {
@@ -786,7 +774,19 @@
             }
         }
 
-        // Load projects on page load
+        // DOM Elements
+        const form = document.getElementById('contentForm');
+        const status = document.getElementById('status');
+        const projectSelect = document.getElementById('project_id');
+        const profileUpload = document.getElementById('profile-upload');
+        const profilePreview = document.getElementById('profile-preview');
+        const profileImageUrl = document.getElementById('profile_image_url');
+        const progressBar = document.querySelector('.progress-bar div');
+
+        // Check connection on load
+        checkConnection();
+        
+        // Load available projects on initialization
         loadProjects();
 
         // Handle profile image URL input
