@@ -134,6 +134,19 @@ async function loadContent() {
                         if (item.key === 'instagram_url') socialIcon.textContent = 'i';
                         if (item.key === 'linkedin_url') socialIcon.textContent = 'in';
                     }
+                    // Don't display the URL text on the button
+                    if (socialLink.classList.contains('social-button')) {
+                        // Keep only the icon visible
+                        const iconElement = socialLink.querySelector('.social-icon');
+                        if (iconElement) {
+                            // Make sure we don't show the URL text
+                            Array.from(socialLink.childNodes).forEach(node => {
+                                if (node.nodeType === Node.TEXT_NODE) {
+                                    socialLink.removeChild(node);
+                                }
+                            });
+                        }
+                    }
                 }
             }
             
@@ -145,9 +158,6 @@ async function loadContent() {
                 if (item.key === 'rendered_bio_html') {
                     // Store original bio content
                     element.innerHTML = item.value;
-                    
-                    // Create fun fact cards from bio content
-                    createBioCards(item.value, element);
                 } else if (item.key === 'email_address') {
                     // Handle email links specially
                     const mailtoLink = `mailto:${item.value}`;
