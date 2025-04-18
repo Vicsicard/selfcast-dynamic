@@ -953,8 +953,9 @@ footer a:hover {
     box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
 }
 
-.social-card-icon i {
-    font-size: 20px;
+.social-card-icon svg {
+    width: 20px;
+    height: 20px;
 }
 
 .social-card-header h3 {
@@ -1026,6 +1027,11 @@ footer a:hover {
 .social-button:hover {
     transform: translateY(-5px);
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.social-icon {
+    width: 24px;
+    height: 24px;
 }
 
 .social-button .social-card-icon {
