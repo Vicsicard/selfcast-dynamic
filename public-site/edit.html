@@ -628,8 +628,8 @@
                         <p class="help-text">This will appear as the title of your Facebook card and post.</p>
                     </div>
                     <div class="form-group">
-                        <label for="facebook_post">Facebook Post: <span class="character-count">0/500 characters</span></label>
-                        <textarea name="facebook_post" id="facebook_post" placeholder="Your Facebook post content here..." maxlength="500"></textarea>
+                        <label for="facebook_post">Facebook Post: <span class="character-count">0/1000 characters</span></label>
+                        <textarea name="facebook_post" id="facebook_post" placeholder="Your Facebook post content here..." maxlength="1000"></textarea>
                         <p class="help-text">This content will be displayed in your social media feed section. The first 150 characters will be shown as a preview.</p>
                     </div>
                 </div>
@@ -647,8 +647,8 @@
                         <p class="help-text">This will appear as the title of your Twitter card and post.</p>
                     </div>
                     <div class="form-group">
-                        <label for="twitter_post">Twitter Post: <span class="character-count">0/500 characters</span></label>
-                        <textarea name="twitter_post" id="twitter_post" placeholder="Your Twitter post content here..." maxlength="500"></textarea>
+                        <label for="twitter_post">Twitter Post: <span class="character-count">0/1000 characters</span></label>
+                        <textarea name="twitter_post" id="twitter_post" placeholder="Your Twitter post content here..." maxlength="1000"></textarea>
                         <p class="help-text">This content will be displayed in your social media feed section. The first 150 characters will be shown as a preview.</p>
                     </div>
                 </div>
@@ -666,8 +666,8 @@
                         <p class="help-text">This will appear as the title of your Instagram card and post.</p>
                     </div>
                     <div class="form-group">
-                        <label for="instagram_post">Instagram Post: <span class="character-count">0/500 characters</span></label>
-                        <textarea name="instagram_post" id="instagram_post" placeholder="Your Instagram post content here..." maxlength="500"></textarea>
+                        <label for="instagram_post">Instagram Post: <span class="character-count">0/1000 characters</span></label>
+                        <textarea name="instagram_post" id="instagram_post" placeholder="Your Instagram post content here..." maxlength="1000"></textarea>
                         <p class="help-text">This content will be displayed in your social media feed section. The first 150 characters will be shown as a preview.</p>
                     </div>
                 </div>
@@ -685,8 +685,8 @@
                         <p class="help-text">This will appear as the title of your LinkedIn card and post.</p>
                     </div>
                     <div class="form-group">
-                        <label for="linkedin_post">LinkedIn Post: <span class="character-count">0/500 characters</span></label>
-                        <textarea name="linkedin_post" id="linkedin_post" placeholder="Your LinkedIn post content here..." maxlength="500"></textarea>
+                        <label for="linkedin_post">LinkedIn Post: <span class="character-count">0/1000 characters</span></label>
+                        <textarea name="linkedin_post" id="linkedin_post" placeholder="Your LinkedIn post content here..." maxlength="1000"></textarea>
                         <p class="help-text">This content will be displayed in your social media feed section. The first 150 characters will be shown as a preview.</p>
                     </div>
                 </div>
@@ -985,6 +985,46 @@
                 
                 return; // Skip database lookup
             } 
+            else if (preset === 'dark-professional') {
+                // Apply navy theme defaults with a modern, sophisticated palette
+                document.getElementById('primary_color').value = '#1a237e'; // Deep navy blue
+                document.getElementById('secondary_color').value = '#283593'; // Royal blue
+                document.getElementById('accent_color').value = '#7986cb'; // Periwinkle accent
+                document.getElementById('text_color').value = '#f5f5f5'; // Light text for contrast
+                document.getElementById('background_color').value = '#121212'; // Near black background
+                document.getElementById('heading_font').value = 'Playfair Display'; // Elegant serif font
+                document.getElementById('body_font').value = 'Source Sans Pro'; // Clean sans-serif
+                
+                // Update font selectors
+                document.getElementById('heading_font_select').value = 'Playfair Display';
+                document.getElementById('body_font_select').value = 'Source Sans Pro';
+                
+                // Load fonts
+                loadFont('Playfair Display');
+                loadFont('Source Sans Pro');
+                
+                return; // Skip database lookup
+            }
+            else if (preset === 'light-professional') {
+                // Apply gold theme defaults with a luxurious, warm palette
+                document.getElementById('primary_color').value = '#d4af37'; // Classic gold
+                document.getElementById('secondary_color').value = '#f9a825'; // Amber gold
+                document.getElementById('accent_color').value = '#795548'; // Rich brown accent
+                document.getElementById('text_color').value = '#3e2723'; // Deep brown text
+                document.getElementById('background_color').value = '#fffdf7'; // Cream background
+                document.getElementById('heading_font').value = 'Merriweather'; // Elegant serif
+                document.getElementById('body_font').value = 'Nunito'; // Rounded, friendly sans-serif
+                
+                // Update font selectors
+                document.getElementById('heading_font_select').value = 'Merriweather';
+                document.getElementById('body_font_select').value = 'Nunito';
+                
+                // Load fonts
+                loadFont('Merriweather');
+                loadFont('Nunito');
+                
+                return; // Skip database lookup
+            }
             else if (preset === 'red-professional') {
                 // Apply red theme defaults directly
                 document.getElementById('primary_color').value = '#dc3545';
