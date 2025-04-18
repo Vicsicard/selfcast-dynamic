@@ -133,16 +133,6 @@ async function loadContent() {
                 if (socialLink && item.value) {
                     socialLink.href = item.value;
                     
-                    // Ensure the social icon is displayed properly
-                    const socialIcon = socialLink.querySelector('.social-icon');
-                    if (socialIcon) {
-                        // Set appropriate icon character
-                        if (item.key === 'facebook_url') socialIcon.textContent = 'f';
-                        if (item.key === 'twitter_url') socialIcon.textContent = 't';
-                        if (item.key === 'instagram_url') socialIcon.textContent = 'i';
-                        if (item.key === 'linkedin_url') socialIcon.textContent = 'in';
-                    }
-                    
                     // Clear any text nodes to prevent URL from showing
                     Array.from(socialLink.childNodes).forEach(node => {
                         if (node.nodeType === Node.TEXT_NODE) {
