@@ -146,6 +146,70 @@ section {
     max-width: 100%;
 }
 
+/* Improved text wrapping for titles */
+.blog-title,
+.social-title,
+.bio-card-content h3,
+.section-title,
+.modal-content h2,
+.modal-content #modal-title {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+    max-width: 100%;
+    line-height: 1.3;
+}
+
+/* Small screen title adjustments */
+@media (max-width: 768px) {
+    .blog-title,
+    .social-title {
+        font-size: 1.4rem;
+        line-height: 1.3;
+        margin-bottom: 0.8rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    
+    .bio-card-content h3 {
+        font-size: 1.3rem;
+        line-height: 1.3;
+    }
+    
+    .modal-content #modal-title,
+    .modal-content h2 {
+        font-size: 1.6rem;
+        line-height: 1.3;
+        padding-right: 2.5rem;
+    }
+}
+
+/* Extra small screens */
+@media (max-width: 480px) {
+    .blog-title,
+    .social-title {
+        font-size: 1.2rem;
+        margin-bottom: 0.7rem;
+    }
+    
+    .bio-card-content h3 {
+        font-size: 1.2rem;
+    }
+    
+    .modal-content #modal-title,
+    .modal-content h2 {
+        font-size: 1.4rem;
+    }
+    
+    .hero-content h1 {
+        font-size: 2.8rem;
+        word-break: break-word;
+    }
+}
+
 /* Hero section */
 .hero {
     position: relative;
