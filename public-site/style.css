@@ -104,6 +104,8 @@ section {
     border: 1px solid var(--card-border);  /* Added border */
     box-shadow: 0 4px 6px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.08);  /* Enhanced shadow */
     transition: transform 0.2s, box-shadow 0.2s;
+    height: 100%;
+    box-sizing: border-box;
 }
 
 .grid-item:hover {
@@ -246,6 +248,194 @@ section {
     }
 }
 
+/* Responsive Grid Improvements */
+@media (max-width: 992px) {
+    .grid-2x2 {
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+    }
+    
+    .hero-content h1 {
+        font-size: 4.5rem;
+    }
+    
+    .hero-content p {
+        font-size: 1.8rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .grid-2x2 {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .modal-content {
+        margin: 1rem;
+        padding: 1.5rem;
+        width: 95%;
+        max-height: 80vh;
+    }
+    
+    .modal-content #modal-title,
+    .modal-content h2 {
+        font-size: 1.8rem;
+        padding-right: 2rem;
+    }
+    
+    .close-button {
+        top: 1rem;
+        right: 1rem;
+    }
+    
+    .bio-text {
+        font-size: 1rem;
+        line-height: 1.6;
+    }
+    
+    .bio-text p:has(q), .bio-text p:has(blockquote),
+    .modal-content #modal-content p:has(q),
+    .modal-content #modal-content p:has(blockquote),
+    .modal-content .blog-content p:has(q),
+    .modal-content .blog-content p:has(blockquote) {
+        font-size: 1.1rem;
+        padding-left: 1rem;
+    }
+    
+    .section-title {
+        font-size: 2rem;
+    }
+    
+    .bio-main-content {
+        padding: 1rem;
+    }
+    
+    .bio-cards-row {
+        display: block;
+        border-spacing: 0;
+        margin: 0;
+    }
+    
+    .bio-card {
+        display: block;
+        width: 100%;
+        margin-bottom: 1.5rem;
+    }
+    
+    .shape1, .shape2, .shape3 {
+        opacity: 0.4;
+    }
+}
+
+/* Small mobile devices */
+@media (max-width: 480px) {
+    .hero-content h1 {
+        font-size: 3.2rem;
+    }
+    
+    .hero-content p {
+        font-size: 1.5rem;
+    }
+    
+    .profile-image-container {
+        width: 160px;
+        height: 160px;
+    }
+    
+    .section-title {
+        font-size: 1.8rem;
+    }
+    
+    .section-title::after {
+        width: 60px;
+        height: 3px;
+    }
+    
+    .modal-content {
+        padding: 1.2rem;
+    }
+    
+    .modal-content #modal-title,
+    .modal-content h2 {
+        font-size: 1.6rem;
+        margin-bottom: 1rem;
+    }
+    
+    .modal-content #modal-content,
+    .modal-content .blog-content {
+        font-size: 1rem;
+    }
+    
+    .blog-title, .social-title {
+        font-size: 1.5rem;
+    }
+    
+    .quote-text {
+        font-size: 1.1rem;
+    }
+    
+    .quote-content {
+        padding: 1.5rem 1rem;
+    }
+    
+    .quote-content::before {
+        font-size: 3.5rem;
+        top: 0.2rem;
+        left: 0.8rem;
+    }
+    
+    .connect-card {
+        padding: 1.5rem 1rem;
+    }
+    
+    .social-buttons {
+        gap: 0.8rem;
+    }
+    
+    .social-button {
+        width: 45px;
+        height: 45px;
+        font-size: 1.2rem;
+    }
+}
+
+/* Fix for modals on all screen sizes */
+.modal.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    box-sizing: border-box;
+}
+
+.modal-content {
+    margin: 0;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-sizing: border-box;
+    transform: translateY(20px);
+    opacity: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.modal.active .modal-content {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+/* Ensure images are responsive */
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Ensure proper text wrapping */
+h1, h2, h3, p {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+/* Parallax layer */
 .parallax-layer {
     position: absolute;
     top: 0;
@@ -522,7 +712,7 @@ section {
 
 .bio-main-content {
     max-width: 800px;
-    margin: 0 auto 2rem;
+    margin: 0 auto 3rem; /* Increased bottom margin from 2rem to 3rem */
     padding: 1.5rem;
     background: rgba(255, 255, 255, 0.8);
     backdrop-filter: blur(10px);
@@ -543,6 +733,26 @@ section {
     font-size: 1.1rem;
     line-height: 1.7;
     color: var(--text-color);
+    text-align: left;
+}
+
+.bio-text p {
+    margin-bottom: 1.5rem;
+}
+
+.bio-text p:last-child {
+    margin-bottom: 0;
+}
+
+/* Style for quotes within bio text */
+.bio-text p:has(q), .bio-text p:has(blockquote) {
+    font-style: italic;
+    font-size: 1.2rem;
+    line-height: 1.8;
+    color: var(--accent-color);
+    padding-left: 1.5rem;
+    border-left: 3px solid var(--primary-color);
+    margin: 2rem 0;
 }
 
 .bio-cards-container {
@@ -744,19 +954,25 @@ footer a:hover {
     backdrop-filter: blur(5px);
     align-items: center;
     justify-content: center;
+    overflow-y: auto;
+}
+
+.modal.active {
+    display: flex;
 }
 
 .modal-content {
     background-color: var(--background-color);
-    margin: 2rem;
     padding: 2rem;
     border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
     position: relative;
     width: 90%;
     max-width: 800px;
     max-height: 85vh;
     overflow-y: auto;
+    transform: translateY(0);
+    transition: transform 0.3s ease;
 }
 
 .modal-content #modal-title {
@@ -765,11 +981,44 @@ footer a:hover {
 }
 
 .modal-content #modal-content {
-    line-height: 1.6;
+    line-height: 1.7;
+    font-size: 1.1rem;
+    color: var(--text-color);
+    text-align: left;
 }
 
-.modal-content #modal-content p {
+.modal-content #modal-content p,
+.modal-content .blog-content p {
     margin-bottom: 1.5rem;
+    line-height: 1.7;
+}
+
+.modal-content #modal-content p:last-child,
+.modal-content .blog-content p:last-child {
+    margin-bottom: 0;
+}
+
+/* Style for quotes within modal content */
+.modal-content #modal-content p:has(q),
+.modal-content #modal-content p:has(blockquote),
+.modal-content .blog-content p:has(q),
+.modal-content .blog-content p:has(blockquote) {
+    font-style: italic;
+    font-size: 1.2rem;
+    line-height: 1.8;
+    color: var(--accent-color);
+    padding-left: 1.5rem;
+    border-left: 3px solid var(--primary-color);
+    margin: 2rem 0;
+}
+
+.modal-content #modal-title,
+.modal-content h2 {
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    color: var(--primary-color);
+    line-height: 1.3;
 }
 
 .modal-content #modal-content .description {
@@ -783,15 +1032,8 @@ footer a:hover {
 .modal-content #modal-content h3 {
     color: var(--primary-color);
     margin: 2rem 0 1rem 0;
-}
-
-.social-post .modal-content #modal-content p {
-    margin-bottom: 1rem;
-}
-
-.modal-content #modal-content p:last-child {
-    color: var(--secondary-color);
-    font-size: 0.9em;
+    font-size: 1.5rem;
+    font-weight: 600;
 }
 
 .close-button {

@@ -157,8 +157,17 @@ async function loadContent() {
             
             elements.forEach(element => {
                 if (item.key === 'rendered_bio_html') {
-                    // Store original bio content
-                    element.innerHTML = item.value;
+                    // Format bio content with proper paragraph breaks
+                    if (item.value) {
+                        // Split content by newline characters and create paragraphs
+                        const paragraphs = item.value.split(/\n\s*\n/);
+                        const formattedContent = paragraphs
+                            .map(p => `<p>${p.trim().replace(/\n/g, '<br>')}</p>`)
+                            .join('');
+                        element.innerHTML = formattedContent;
+                    } else {
+                        element.innerHTML = '';
+                    }
                 } else if (item.key === 'email_address') {
                     // Handle email links specially
                     const mailtoLink = `mailto:${item.value}`;
@@ -243,6 +252,17 @@ function createBioCards(bioContent, element) {
 function openModal(modalId) {
     console.log('Opening modal:', modalId);
     
+    // Format content with proper paragraph breaks
+    function formatContent(content) {
+        if (!content) return '';
+        
+        // Split content by double line breaks (paragraphs)
+        const paragraphs = content.split(/\n\s*\n/);
+        return paragraphs
+            .map(p => `<p>${p.trim().replace(/\n/g, '<br>')}</p>`)
+            .join('');
+    }
+    
     // Handle blog posts
     if (modalId.startsWith('blog-')) {
         const blogNumber = modalId.split('-')[1];
@@ -264,10 +284,23 @@ function openModal(modalId) {
         }
         
         if (contentElement && window.siteContent[contentKey]) {
-            contentElement.innerHTML = window.siteContent[contentKey];
+            // Format content with proper paragraph breaks
+            contentElement.innerHTML = formatContent(window.siteContent[contentKey]);
         }
         
-        modal.style.display = 'block';
+        // Use the active class for flexbox centering
+        modal.classList.add('active');
+        
+        // Add a small delay to trigger the transform animation
+        setTimeout(() => {
+            const modalContent = modal.querySelector('.modal-content');
+            if (modalContent) {
+                modalContent.style.transform = 'translateY(0)';
+            }
+        }, 10);
+        
+        // Prevent body scrolling when modal is open
+        document.body.style.overflow = 'hidden';
     }
     // Handle social media posts
     else if (['facebook', 'twitter', 'instagram', 'linkedin'].includes(modalId)) {
@@ -287,11 +320,26 @@ function openModal(modalId) {
             modalTitle.textContent = window.siteContent[titleKey] || `${modalId.charAt(0).toUpperCase() + modalId.slice(1)} Update`;
         }
         
-        if (modalContent) {
-            modalContent.innerHTML = window.siteContent[contentKey] || '';
+        if (modalContent && window.siteContent[contentKey]) {
+            // Format content with proper paragraph breaks
+            modalContent.innerHTML = formatContent(window.siteContent[contentKey]);
+        } else if (modalContent) {
+            modalContent.innerHTML = '';
         }
         
-        modal.style.display = 'block';
+        // Use the active class for flexbox centering
+        modal.classList.add('active');
+        
+        // Add a small delay to trigger the transform animation
+        setTimeout(() => {
+            const modalContent = modal.querySelector('.modal-content');
+            if (modalContent) {
+                modalContent.style.transform = 'translateY(0)';
+            }
+        }, 10);
+        
+        // Prevent body scrolling when modal is open
+        document.body.style.overflow = 'hidden';
     }
 }
 
@@ -299,13 +347,11 @@ function closeModal(modalId) {
     if (modalId) {
         const modal = document.getElementById(modalId);
         if (modal) {
-            modal.style.display = 'none';
-        }
-    } else {
-        // Close the generic modal
-        const modal = document.getElementById('modal');
-        if (modal) {
-            modal.style.display = 'none';
+            // Remove the active class instead of setting display to none
+            modal.classList.remove('active');
+            
+            // Restore body scrolling
+            document.body.style.overflow = '';
         }
     }
 }
