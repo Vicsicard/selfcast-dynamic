@@ -717,60 +717,94 @@
         // Load available projects
         async function loadProjects() {
             try {
+                console.log('Loading projects...');
+                
                 // Clear existing options except the first two (Select Project and Create New)
                 while (projectSelect.options.length > 2) {
                     projectSelect.remove(2);
                 }
+                
+                console.log('Cleared existing options, current count:', projectSelect.options.length);
 
                 // Add option group for existing projects
                 const existingGroup = document.createElement('optgroup');
                 existingGroup.label = 'Existing Projects';
                 projectSelect.appendChild(existingGroup);
+                
+                console.log('Added option group for existing projects');
 
                 // Fetch all unique project IDs
                 const { data, error } = await supabase
                     .from('dynamic_content')
                     .select('project_id')
-                    .order('project_id')
+                    .order('project_id', { ascending: true })
                     .limit(100);
+                
+                console.log('Supabase query result:', { data, error });
 
                 if (error) throw error;
+                
+                if (!data || data.length === 0) {
+                    console.log('No projects found in database');
+                    const option = document.createElement('option');
+                    option.value = 'adam-hyp-1';
+                    option.textContent = 'adam-hyp-1 (Default)';
+                    existingGroup.appendChild(option);
+                    return;
+                }
 
                 // Get unique project IDs
                 const projectIds = [...new Set(data.map(item => item.project_id))];
+                console.log('Unique project IDs:', projectIds);
                 
                 // Add each project to the dropdown
                 projectIds.forEach(projectId => {
                     // Skip empty or special values
-                    if (!projectId || projectId === 'new' || projectId === 'default-project') return;
+                    if (!projectId || projectId === 'new' || projectId === 'default-project') {
+                        console.log('Skipping special project ID:', projectId);
+                        return;
+                    }
                     
                     const option = document.createElement('option');
                     option.value = projectId;
                     option.textContent = projectId;
                     existingGroup.appendChild(option);
+                    console.log('Added project to dropdown:', projectId);
                 });
 
-                // Add default project under existing projects if it exists
-                if (projectIds.includes('default-project')) {
-                    // Remove default project from main list if it exists
-                    for (let i = 0; i < projectSelect.options.length; i++) {
-                        if (projectSelect.options[i].value === 'default-project') {
-                            projectSelect.remove(i);
-                            break;
-                        }
-                    }
-                    
+                // Ensure adam-hyp-1 is always available
+                if (!projectIds.includes('adam-hyp-1')) {
                     const option = document.createElement('option');
-                    option.value = 'default-project';
-                    option.textContent = 'Default Project';
+                    option.value = 'adam-hyp-1';
+                    option.textContent = 'adam-hyp-1 (Default)';
                     existingGroup.appendChild(option);
+                    console.log('Added default adam-hyp-1 project');
                 }
 
                 console.log(`Loaded ${projectIds.length} projects`);
+                
+                // Log the final state of the dropdown
+                console.log('Final dropdown options:', Array.from(projectSelect.options).map(opt => opt.value));
+                
             } catch (error) {
                 console.error('Error loading projects:', error);
                 status.textContent = 'Error loading projects: ' + error.message;
                 status.className = 'status error';
+                
+                // Add adam-hyp-1 as a fallback
+                const existingGroup = projectSelect.querySelector('optgroup') || 
+                    (() => {
+                        const group = document.createElement('optgroup');
+                        group.label = 'Existing Projects';
+                        projectSelect.appendChild(group);
+                        return group;
+                    })();
+                
+                const option = document.createElement('option');
+                option.value = 'adam-hyp-1';
+                option.textContent = 'adam-hyp-1 (Fallback)';
+                existingGroup.appendChild(option);
+                console.log('Added fallback adam-hyp-1 project due to error');
             }
         }
 
@@ -922,164 +956,6 @@
             if (!projectId || projectId === 'new') return;
 
             try {
-                const { data, error } = await supabase
-                    .from('dynamic_content')
-                    .select('key, value')
-                    .eq('project_id', projectId);
-
-                if (error) throw error;
-
-                // Reset form
-                form.reset();
-                projectSelect.value = projectId;
-                profilePreview.style.display = 'none';
-
-                // Populate form fields
-                data.forEach(({ key, value }) => {
-                    const element = document.getElementById(key);
-                    if (element) {
-                        if (key === 'profile_image_url' && value) {
-                            profilePreview.src = value;
-                            profilePreview.style.display = 'block';
-                        }
-                        element.value = value;
-                    }
-                });
-
-                // If style_package is set, apply the preset
-                const stylePackage = data.find(item => item.key === 'style_package');
-                if (stylePackage) {
-                    document.getElementById('style_package').value = stylePackage.value;
-                    await applyStylePreset(stylePackage.value);
-                }
-
-            } catch (error) {
-                status.textContent = 'Error loading content: ' + error.message;
-                status.className = 'status error';
-            }
-        }
-
-        // Apply style preset
-        async function applyStylePreset(presetName) {
-            const preset = presetName || document.getElementById('style_package').value;
-            
-            // Update the hidden input with the selected style
-            document.getElementById('style_package').value = preset;
-            
-            // Add active class to the selected button
-            document.querySelectorAll('.style-button').forEach(button => {
-                if (button.getAttribute('data-style') === preset) {
-                    button.classList.add('active');
-                } else {
-                    button.classList.remove('active');
-                }
-            });
-            
-            try {
-                // Map old preset names to new ones if needed (for backward compatibility)
-                let lookupPreset = preset;
-                if (preset === 'standard-professional') lookupPreset = 'professional-his-preset';
-                else if (preset === 'dark-professional') lookupPreset = 'professional-her-preset';
-                else if (preset === 'light-professional') lookupPreset = 'standard-preset';
-                else lookupPreset = preset + '-preset';
-                
-                const { data, error } = await supabase
-                    .from('dynamic_content')
-                    .select('key, value')
-                    .eq('project_id', lookupPreset);
-
-                if (error) throw error;
-
-                // Update hidden inputs and preview
-                data.forEach(({ key, value }) => {
-                    const element = document.getElementById(key);
-                    if (element) {
-                        element.value = value;
-                    }
-
-                    // Update preview
-                    if (key.endsWith('_color')) {
-                        const previewElement = document.querySelector('.' + key.replace('_', '-'));
-                        if (previewElement) {
-                            previewElement.style.backgroundColor = value;
-                            // Set text color based on background brightness
-                            const brightness = getBrightness(value);
-                            previewElement.style.color = brightness > 128 ? '#000' : '#fff';
-                        }
-                    } else if (key === 'heading_font') {
-                        loadFont(value);
-                        document.querySelector('.preview-heading').style.fontFamily = value;
-                    } else if (key === 'body_font') {
-                        loadFont(value);
-                        document.querySelector('.preview-body').style.fontFamily = value;
-                    }
-                });
-
-            } catch (error) {
-                status.textContent = 'Error applying style preset: ' + error.message;
-                status.className = 'status error';
-            }
-        }
-
-        // Helper function to calculate color brightness
-        function getBrightness(color) {
-            const hex = color.replace('#', '');
-            const r = parseInt(hex.substr(0, 2), 16);
-            const g = parseInt(hex.substr(2, 2), 16);
-            const b = parseInt(hex.substr(4, 2), 16);
-            return (r * 299 + g * 587 + b * 114) / 1000;
-        }
-
-        // Load Google Fonts
-        function loadFont(fontName) {
-            const link = document.createElement('link');
-            link.href = `https://fonts.googleapis.com/css2?family=${fontName.replace(' ', '+')}:wght@400;700&display=swap`;
-            link.rel = 'stylesheet';
-            document.head.appendChild(link);
-        }
-
-        // Initialize the style buttons with the correct fonts
-        function initializeStyleButtons() {
-            // Set the fonts for the style buttons
-            const standardButton = document.querySelector('.standard-style');
-            const darkButton = document.querySelector('.dark-style');
-            const lightButton = document.querySelector('.light-style');
-            
-            // Load the fonts
-            loadFont('Montserrat');  // Standard Professional
-            loadFont('Raleway');     // Dark Professional
-            loadFont('Roboto');      // Light Professional
-            
-            // Apply the fonts to the buttons
-            if (standardButton) standardButton.style.fontFamily = "'Montserrat', sans-serif";
-            if (darkButton) darkButton.style.fontFamily = "'Raleway', sans-serif";
-            if (lightButton) lightButton.style.fontFamily = "'Roboto', sans-serif";
-            
-            // Mark the default style as active
-            const defaultStyle = document.querySelector('.style-button[data-style="standard-professional"]');
-            if (defaultStyle) defaultStyle.classList.add('active');
-        }
-
-        // Event Listeners
-        projectSelect.addEventListener('change', async function() {
-            const selectedProject = this.value;
-            
-            // Hide view site button initially
-            document.getElementById('view-site-container').style.display = 'none';
-            
-            // Reset form if "Select Project" is chosen
-            if (selectedProject === '') {
-                form.reset();
-                return;
-            }
-            
-            // Handle "Create New Project" option
-            if (selectedProject === 'new') {
-                document.getElementById('new-project-form').style.display = 'block';
-                return;
-            }
-            
-            try {
                 status.textContent = 'Loading project content...';
                 status.className = 'status info';
                 
@@ -1087,8 +963,10 @@
                 const { data, error } = await supabase
                     .from('dynamic_content')
                     .select('*')
-                    .eq('project_id', selectedProject);
+                    .eq('project_id', projectId);
                 
+                console.log('Supabase query result:', { data, error });
+
                 if (error) throw error;
                 
                 // Reset form first
@@ -1097,7 +975,7 @@
                 // Populate form with project data
                 populateForm(data);
                 
-                status.textContent = `Loaded project: ${selectedProject}`;
+                status.textContent = `Loaded project: ${projectId}`;
                 status.className = 'status success';
                 
                 // Show the view site button for existing projects
@@ -1106,7 +984,7 @@
                 // Set up the view site button with the current project ID
                 const viewSiteButton = document.getElementById('view-site-button');
                 viewSiteButton.onclick = function() {
-                    const siteUrl = window.location.origin + '/index.html?project_id=' + selectedProject;
+                    const siteUrl = window.location.origin + '/index.html?project_id=' + projectId;
                     window.open(siteUrl, '_blank');
                 };
                 
@@ -1115,7 +993,7 @@
                 status.textContent = 'Error loading project: ' + error.message;
                 status.className = 'status error';
             }
-        });
+        }
 
         // Initial load
         loadContent();
@@ -1334,6 +1212,87 @@
                 }
             </style>
         `);
+
+        // Initialize the style buttons with the correct fonts
+        function initializeStyleButtons() {
+            // Set the fonts for the style buttons
+            const standardButton = document.querySelector('.standard-style');
+            const darkButton = document.querySelector('.dark-style');
+            const lightButton = document.querySelector('.light-style');
+            
+            // Load the fonts
+            loadFont('Montserrat');  // Standard Professional
+            loadFont('Raleway');     // Dark Professional
+            loadFont('Roboto');      // Light Professional
+            
+            // Apply the fonts to the buttons
+            if (standardButton) standardButton.style.fontFamily = "'Montserrat', sans-serif";
+            if (darkButton) darkButton.style.fontFamily = "'Raleway', sans-serif";
+            if (lightButton) lightButton.style.fontFamily = "'Roboto', sans-serif";
+            
+            // Mark the default style as active
+            const defaultStyle = document.querySelector('.style-button[data-style="standard-professional"]');
+            if (defaultStyle) defaultStyle.classList.add('active');
+        }
+
+        // Event Listeners
+        projectSelect.addEventListener('change', async function() {
+            const selectedProject = this.value;
+            
+            // Hide view site button initially
+            document.getElementById('view-site-container').style.display = 'none';
+            
+            // Reset form if "Select Project" is chosen
+            if (selectedProject === '') {
+                form.reset();
+                return;
+            }
+            
+            // Handle "Create New Project" option
+            if (selectedProject === 'new') {
+                document.getElementById('new-project-form').style.display = 'block';
+                return;
+            }
+            
+            try {
+                status.textContent = 'Loading project content...';
+                status.className = 'status info';
+                
+                // Fetch content for the selected project
+                const { data, error } = await supabase
+                    .from('dynamic_content')
+                    .select('*')
+                    .eq('project_id', selectedProject);
+                
+                console.log('Supabase query result:', { data, error });
+
+                if (error) throw error;
+                
+                // Reset form first
+                form.reset();
+                
+                // Populate form with project data
+                populateForm(data);
+                
+                status.textContent = `Loaded project: ${selectedProject}`;
+                status.className = 'status success';
+                
+                // Show the view site button for existing projects
+                document.getElementById('view-site-container').style.display = 'block';
+                
+                // Set up the view site button with the current project ID
+                const viewSiteButton = document.getElementById('view-site-button');
+                viewSiteButton.onclick = function() {
+                    const siteUrl = window.location.origin + '/index.html?project_id=' + selectedProject;
+                    window.open(siteUrl, '_blank');
+                };
+                
+            } catch (error) {
+                console.error('Error loading project:', error);
+                status.textContent = 'Error loading project: ' + error.message;
+                status.className = 'status error';
+            }
+        });
 
         initializeStyleButtons();
 
