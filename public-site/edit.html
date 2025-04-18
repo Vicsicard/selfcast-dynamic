@@ -488,13 +488,13 @@
                     <label>Style Package:</label>
                     <div class="style-package-selector">
                         <button type="button" class="style-button standard-style active" data-style="standard-professional" onclick="applyStylePreset('standard-professional')">
-                            <span>Professional</span>
+                            <span>Blue</span>
                         </button>
                         <button type="button" class="style-button dark-style" data-style="dark-professional" onclick="applyStylePreset('dark-professional')">
-                            <span>Dark</span>
+                            <span>Navy</span>
                         </button>
                         <button type="button" class="style-button light-style" data-style="light-professional" onclick="applyStylePreset('light-professional')">
-                            <span>Light</span>
+                            <span>Gold</span>
                         </button>
                         <button type="button" class="style-button green-style" data-style="green-professional" onclick="applyStylePreset('green-professional')">
                             <span>Green</span>
@@ -506,20 +506,33 @@
                     <input type="hidden" name="style_package" id="style_package" value="standard-professional">
                 </div>
 
-                <!-- Style Preview -->
-                <div class="style-preview">
-                    <h3>Style Preview</h3>
-                    <div class="color-grid">
-                        <div class="color-sample primary-color"><span>Primary</span></div>
-                        <div class="color-sample secondary-color"><span>Secondary</span></div>
-                        <div class="color-sample accent-color"><span>Accent</span></div>
-                        <div class="color-sample text-color"><span>Text</span></div>
-                        <div class="color-sample background-color"><span>Background</span></div>
-                    </div>
-                    <div class="font-preview">
-                        <h4 class="preview-heading">Heading Font Preview</h4>
-                        <p class="preview-body">Body Font Preview</p>
-                    </div>
+                <!-- Font Selection -->
+                <div class="form-group">
+                    <label for="heading_font_select">Heading Font:</label>
+                    <select id="heading_font_select" onchange="updateFont('heading')">
+                        <option value="Montserrat">Montserrat</option>
+                        <option value="Raleway">Raleway</option>
+                        <option value="Playfair Display">Playfair Display</option>
+                        <option value="Roboto Slab">Roboto Slab</option>
+                        <option value="Merriweather">Merriweather</option>
+                        <option value="Poppins">Poppins</option>
+                        <option value="Oswald">Oswald</option>
+                        <option value="Lora">Lora</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="body_font_select">Body Font:</label>
+                    <select id="body_font_select" onchange="updateFont('body')">
+                        <option value="Open Sans">Open Sans</option>
+                        <option value="Roboto">Roboto</option>
+                        <option value="Lato">Lato</option>
+                        <option value="Source Sans Pro">Source Sans Pro</option>
+                        <option value="Nunito">Nunito</option>
+                        <option value="Work Sans">Work Sans</option>
+                        <option value="PT Sans">PT Sans</option>
+                        <option value="Mulish">Mulish</option>
+                    </select>
                 </div>
 
                 <!-- Hidden inputs to store the actual values -->
@@ -745,8 +758,8 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
         // Supabase Configuration (hardcoded to ensure consistency)
-        const SUPABASE_URL = 'https://aqicztygjpmunfljjuto.supabase.co';
-        const SUPABASE_PROJECT_ID = 'aqicztygjpmunfljjuto';
+        const SUPABASE_URL = 'https://aqicztygjpmunfljjjuto.supabase.co';
+        const SUPABASE_PROJECT_ID = 'aqicztygjpmunfljjjuto';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxaWN6dHlnanBtdW5mbGpqdXRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3MDU1ODIsImV4cCI6MjA1OTI4MTU4Mn0.5e2hvTckSSbTFLBjQiccrvjoBd6QQDX0X4tccFOc1rs';
         
         // Initialize Supabase client with hardcoded credentials
@@ -941,25 +954,13 @@
                 document.getElementById('heading_font').value = 'Montserrat';
                 document.getElementById('body_font').value = 'Open Sans';
                 
-                // Update preview
-                document.querySelector('.primary-color').style.backgroundColor = '#28a745';
-                document.querySelector('.secondary-color').style.backgroundColor = '#20c997';
-                document.querySelector('.accent-color').style.backgroundColor = '#17a2b8';
-                document.querySelector('.text-color').style.backgroundColor = '#212529';
-                document.querySelector('.background-color').style.backgroundColor = '#f8f9fa';
+                // Update font selectors
+                document.getElementById('heading_font_select').value = 'Montserrat';
+                document.getElementById('body_font_select').value = 'Open Sans';
                 
-                // Set text color based on background brightness
-                document.querySelector('.primary-color').style.color = '#fff';
-                document.querySelector('.secondary-color').style.color = '#fff';
-                document.querySelector('.accent-color').style.color = '#fff';
-                document.querySelector('.text-color').style.color = '#fff';
-                document.querySelector('.background-color').style.color = '#000';
-                
-                // Load and apply fonts
+                // Load fonts
                 loadFont('Montserrat');
                 loadFont('Open Sans');
-                document.querySelector('.preview-heading').style.fontFamily = 'Montserrat';
-                document.querySelector('.preview-body').style.fontFamily = 'Open Sans';
                 
                 return; // Skip database lookup
             } 
@@ -973,25 +974,13 @@
                 document.getElementById('heading_font').value = 'Raleway';
                 document.getElementById('body_font').value = 'Roboto';
                 
-                // Update preview
-                document.querySelector('.primary-color').style.backgroundColor = '#dc3545';
-                document.querySelector('.secondary-color').style.backgroundColor = '#fd7e14';
-                document.querySelector('.accent-color').style.backgroundColor = '#6f42c1';
-                document.querySelector('.text-color').style.backgroundColor = '#212529';
-                document.querySelector('.background-color').style.backgroundColor = '#fff5f5';
+                // Update font selectors
+                document.getElementById('heading_font_select').value = 'Raleway';
+                document.getElementById('body_font_select').value = 'Roboto';
                 
-                // Set text color based on background brightness
-                document.querySelector('.primary-color').style.color = '#fff';
-                document.querySelector('.secondary-color').style.color = '#fff';
-                document.querySelector('.accent-color').style.color = '#fff';
-                document.querySelector('.text-color').style.color = '#fff';
-                document.querySelector('.background-color').style.color = '#000';
-                
-                // Load and apply fonts
+                // Load fonts
                 loadFont('Raleway');
                 loadFont('Roboto');
-                document.querySelector('.preview-heading').style.fontFamily = 'Raleway';
-                document.querySelector('.preview-body').style.fontFamily = 'Roboto';
                 
                 return; // Skip database lookup
             }
@@ -1019,28 +1008,17 @@
                             return;
                         }
                         
-                        // Update hidden inputs and preview
+                        // Update hidden inputs and font selectors
                         data.forEach(({ key, value }) => {
                             const element = document.getElementById(key);
                             if (element) {
                                 element.value = value;
                             }
 
-                            // Update preview
-                            if (key.endsWith('_color')) {
-                                const previewElement = document.querySelector('.' + key.replace('_', '-'));
-                                if (previewElement) {
-                                    previewElement.style.backgroundColor = value;
-                                    // Set text color based on background brightness
-                                    const brightness = getBrightness(value);
-                                    previewElement.style.color = brightness > 128 ? '#000' : '#fff';
-                                }
-                            } else if (key === 'heading_font') {
-                                loadFont(value);
-                                document.querySelector('.preview-heading').style.fontFamily = value;
+                            if (key === 'heading_font') {
+                                document.getElementById('heading_font_select').value = value;
                             } else if (key === 'body_font') {
-                                loadFont(value);
-                                document.querySelector('.preview-body').style.fontFamily = value;
+                                document.getElementById('body_font_select').value = value;
                             }
                         });
                     });
@@ -1051,6 +1029,14 @@
             }
         }
         
+        // Update font
+        function updateFont(type) {
+            const fontSelect = type === 'heading' ? document.getElementById('heading_font_select') : document.getElementById('body_font_select');
+            const fontInput = type === 'heading' ? document.getElementById('heading_font') : document.getElementById('body_font');
+            fontInput.value = fontSelect.value;
+            loadFont(fontSelect.value);
+        }
+
         // Helper function to calculate color brightness
         function getBrightness(color) {
             const hex = color.replace('#', '');
@@ -1186,7 +1172,9 @@
 
                 if (insertError) throw insertError;
 
-                const option = new Option(newProjectId, newProjectId);
+                const option = document.createElement('option');
+                option.value = newProjectId;
+                option.textContent = newProjectId;
                 projectSelect.add(option);
                 projectSelect.value = newProjectId;
 
