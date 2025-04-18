@@ -912,10 +912,10 @@
             try {
                 // Map old preset names to new ones if needed (for backward compatibility)
                 let lookupPreset = preset;
-                if (preset === 'standard-professional') lookupPreset = 'professional-his-preset';
-                else if (preset === 'dark-professional') lookupPreset = 'professional-her-preset';
+                if (preset === 'standard-professional') lookupPreset = 'his-preset';
+                else if (preset === 'dark-professional') lookupPreset = 'her-preset';
                 else if (preset === 'light-professional') lookupPreset = 'standard-preset';
-                else lookupPreset = preset + '-preset';
+                else lookupPreset = preset;
                 
                 // Fetch preset data from Supabase
                 supabase
