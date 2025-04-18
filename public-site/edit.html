@@ -215,6 +215,123 @@
         .form-actions button:hover {
             background-color: #0069d9;
         }
+        .help-text {
+            font-size: 0.75rem;
+            color: #666;
+            margin-top: 0.25rem;
+        }
+        .style-package-selector {
+            display: flex;
+            gap: 1rem;
+        }
+        .style-button {
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+            border: 2px solid transparent;
+        }
+        .style-button.active {
+            border: 2px solid #333;
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+        }
+        .standard-style {
+            background: #3498db;
+            color: white;
+        }
+        .standard-style:hover {
+            background: #2980b9;
+        }
+        .dark-style {
+            background: #2c3e50;
+            color: white;
+        }
+        .dark-style:hover {
+            background: #1a252f;
+        }
+        .light-style {
+            background: #f1c40f;
+            color: #333;
+        }
+        .light-style:hover {
+            background: #e0b604;
+        }
+        /* View Site Button */
+        .view-site-button {
+            background: linear-gradient(135deg, #4a90e2, #5637d7);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(86, 55, 215, 0.3);
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .view-site-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(86, 55, 215, 0.4);
+            background: linear-gradient(135deg, #5a9ff2, #6647e7);
+        }
+
+        .view-site-button:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 8px rgba(86, 55, 215, 0.4);
+        }
+
+        .view-site-button::after {
+            content: "→";
+            margin-left: 8px;
+            font-size: 18px;
+            transition: transform 0.2s ease;
+        }
+
+        .view-site-button:hover::after {
+            transform: translateX(4px);
+        }
+        
+        /* Success Message Styles */
+        .success-message {
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        .checkmark {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: inline-block;
+            stroke-width: 2;
+            stroke-linecap: round;
+            margin: 0 auto;
+        }
+        .checkmark-circle {
+            stroke-dasharray: 166;
+            stroke-dashoffset: 166;
+            stroke-width: 2;
+            stroke-miterlimit: 10;
+            stroke: #155724;
+            fill: none;
+            animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+        }
+        .checkmark-check {
+            transform-origin: 50% 50%;
+            stroke-dasharray: 48;
+            stroke-dashoffset: 48;
+            animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards;
+            stroke: #155724;
+            fill: none;
+        }
+        @keyframes stroke {
+            100% {
+                stroke-dashoffset: 0;
+            }
+        }
     </style>
 </head>
 <body>
@@ -245,12 +362,12 @@
                     <input type="text" name="client_name" id="client_name" required>
                     
                     <div class="profile-upload">
-                        <label>Profile Image:</label>
+                        <label>Profile Image URL:</label>
                         <div class="image-preview">
                             <img id="profile-preview" src="" alt="" style="display: none;">
                         </div>
                         <div class="form-group" style="margin-top: 0.5rem;">
-                            <label for="profile_image_url">Image URL:</label>
+                            <label for="profile_image_url">Profile Image URL:</label>
                             <input type="url" name="profile_image_url" id="profile_image_url" placeholder="https://example.com/image.jpg">
                             <small>Enter direct image URL or use file upload below</small>
                         </div>
@@ -270,16 +387,66 @@
                 </div>
             </div>
 
+            <!-- Bio Content -->
+            <div class="section">
+                <h2>Bio Content</h2>
+                <div class="form-group">
+                    <label for="rendered_bio_html">Bio:</label>
+                    <textarea name="rendered_bio_html" id="rendered_bio_html" rows="6" placeholder="Enter your bio..."></textarea>
+                </div>
+
+                <!-- Bio Cards -->
+                <div class="form-group">
+                    <label for="rendered_bio_html_card_1">Bio Card 1 (Mind):</label>
+                    <textarea name="rendered_bio_html_card_1" id="rendered_bio_html_card_1" rows="4" placeholder="Enter content for Mind card..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="rendered_bio_html_card_2">Bio Card 2 (Body):</label>
+                    <textarea name="rendered_bio_html_card_2" id="rendered_bio_html_card_2" rows="4" placeholder="Enter content for Body card..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="rendered_bio_html_card_3">Bio Card 3 (Soul):</label>
+                    <textarea name="rendered_bio_html_card_3" id="rendered_bio_html_card_3" rows="4" placeholder="Enter content for Soul card..."></textarea>
+                </div>
+            </div>
+
+            <!-- Quote Cards -->
+            <div class="section">
+                <h2>Inspirational Quotes</h2>
+                <div class="form-group">
+                    <label for="quote_1">Quote 1 (After Bio):</label>
+                    <textarea name="quote_1" id="quote_1" placeholder="Enter an inspirational quote..." maxlength="200"></textarea>
+                    <p class="help-text">This quote will appear between the Bio and Blog sections.</p>
+                </div>
+                <div class="form-group">
+                    <label for="quote_2">Quote 2 (After Blog):</label>
+                    <textarea name="quote_2" id="quote_2" placeholder="Enter an inspirational quote..." maxlength="200"></textarea>
+                    <p class="help-text">This quote will appear between the Blog and Social Media sections.</p>
+                </div>
+                <div class="form-group">
+                    <label for="quote_3">Quote 3 (After Social Media):</label>
+                    <textarea name="quote_3" id="quote_3" placeholder="Enter an inspirational quote..." maxlength="200"></textarea>
+                    <p class="help-text">This quote will appear between the Social Media and Connect sections.</p>
+                </div>
+            </div>
+
             <!-- Brand & Style -->
             <div class="section">
                 <h2>Brand & Style</h2>
                 <div class="form-group">
-                    <label for="style_package">Style Package:</label>
-                    <select name="style_package" id="style_package" onchange="applyStylePreset()">
-                        <option value="standard">Standard Professional</option>
-                        <option value="professional-her">Professional Her</option>
-                        <option value="professional-his">Professional His</option>
-                    </select>
+                    <label>Style Package:</label>
+                    <div class="style-package-selector">
+                        <button type="button" class="style-button standard-style active" data-style="standard-professional" onclick="applyStylePreset('standard-professional')">
+                            <span>Professional</span>
+                        </button>
+                        <button type="button" class="style-button dark-style" data-style="dark-professional" onclick="applyStylePreset('dark-professional')">
+                            <span>Dark</span>
+                        </button>
+                        <button type="button" class="style-button light-style" data-style="light-professional" onclick="applyStylePreset('light-professional')">
+                            <span>Light</span>
+                        </button>
+                    </div>
+                    <input type="hidden" name="style_package" id="style_package" value="standard-professional">
                 </div>
 
                 <!-- Style Preview -->
@@ -308,16 +475,6 @@
                 <input type="hidden" name="body_font" id="body_font">
             </div>
 
-            <!-- Bio Content -->
-            <div class="section">
-                <h2>Bio Content</h2>
-                <div class="form-group">
-                    <label for="rendered_bio_html">Bio:</label>
-                    <textarea name="rendered_bio_html" id="rendered_bio_html" 
-                              placeholder="Enter your bio with HTML formatting"></textarea>
-                </div>
-            </div>
-
             <!-- Blog Posts -->
             <div class="section">
                 <h2>Blog Posts</h2>
@@ -326,20 +483,16 @@
                 <div class="blog-section">
                     <h3>Blog Post 1</h3>
                     <div class="form-group">
-                        <label for="blog_1_title">Title:</label>
-                        <input type="text" name="blog_1_title" id="blog_1_title" 
-                               placeholder="Enter blog post 1 title">
+                        <label for="blog_post_1_title">Title:</label>
+                        <input type="text" name="blog_post_1_title" id="blog_post_1_title" placeholder="Blog Post Title">
                     </div>
                     <div class="form-group">
-                        <label for="blog_1_short">Short Description:</label>
-                        <textarea name="blog_1_short" id="blog_1_short" 
-                                  placeholder="Enter a brief description or excerpt (max 150 characters)" maxlength="150"></textarea>
-                        <div class="character-count">0 characters</div>
+                        <label for="blog_post_1_description">Description (will be shown as preview):</label>
+                        <textarea name="blog_post_1_description" id="blog_post_1_description" placeholder="A brief description of your blog post (150-200 characters recommended)" maxlength="300"></textarea>
                     </div>
                     <div class="form-group">
-                        <label for="blog_1_post">Full Content:</label>
-                        <textarea name="blog_1_post" id="blog_1_post" 
-                                  placeholder="Enter full blog post 1 content with HTML formatting"></textarea>
+                        <label for="blog_post_1">Full Content:</label>
+                        <textarea name="blog_post_1" id="blog_post_1" placeholder="Your full blog post content here..."></textarea>
                     </div>
                 </div>
                 
@@ -347,83 +500,61 @@
                 <div class="blog-section">
                     <h3>Blog Post 2</h3>
                     <div class="form-group">
-                        <label for="blog_2_title">Title:</label>
-                        <input type="text" name="blog_2_title" id="blog_2_title" 
-                               placeholder="Enter blog post 2 title">
+                        <label for="blog_post_2_title">Title:</label>
+                        <input type="text" name="blog_post_2_title" id="blog_post_2_title" placeholder="Blog Post Title">
                     </div>
                     <div class="form-group">
-                        <label for="blog_2_short">Short Description:</label>
-                        <textarea name="blog_2_short" id="blog_2_short" 
-                                  placeholder="Enter a brief description or excerpt (max 150 characters)" maxlength="150"></textarea>
-                        <div class="character-count">0 characters</div>
+                        <label for="blog_post_2_description">Description (will be shown as preview):</label>
+                        <textarea name="blog_post_2_description" id="blog_post_2_description" placeholder="A brief description of your blog post (150-200 characters recommended)" maxlength="300"></textarea>
                     </div>
                     <div class="form-group">
-                        <label for="blog_2_post">Full Content:</label>
-                        <textarea name="blog_2_post" id="blog_2_post" 
-                                  placeholder="Enter full blog post 2 content with HTML formatting"></textarea>
+                        <label for="blog_post_2">Full Content:</label>
+                        <textarea name="blog_post_2" id="blog_post_2" placeholder="Your full blog post content here..."></textarea>
                     </div>
                 </div>
-                
+
                 <!-- Blog Post 3 -->
                 <div class="blog-section">
                     <h3>Blog Post 3</h3>
                     <div class="form-group">
-                        <label for="blog_3_title">Title:</label>
-                        <input type="text" name="blog_3_title" id="blog_3_title" 
-                               placeholder="Enter blog post 3 title">
+                        <label for="blog_post_3_title">Title:</label>
+                        <input type="text" name="blog_post_3_title" id="blog_post_3_title" placeholder="Blog Post Title">
                     </div>
                     <div class="form-group">
-                        <label for="blog_3_short">Short Description:</label>
-                        <textarea name="blog_3_short" id="blog_3_short" 
-                                  placeholder="Enter a brief description or excerpt (max 150 characters)" maxlength="150"></textarea>
-                        <div class="character-count">0 characters</div>
+                        <label for="blog_post_3_description">Description (will be shown as preview):</label>
+                        <textarea name="blog_post_3_description" id="blog_post_3_description" placeholder="A brief description of your blog post (150-200 characters recommended)" maxlength="300"></textarea>
                     </div>
                     <div class="form-group">
-                        <label for="blog_3_post">Full Content:</label>
-                        <textarea name="blog_3_post" id="blog_3_post" 
-                                  placeholder="Enter full blog post 3 content with HTML formatting"></textarea>
+                        <label for="blog_post_3">Full Content:</label>
+                        <textarea name="blog_post_3" id="blog_post_3" placeholder="Your full blog post content here..."></textarea>
                     </div>
                 </div>
-                
+
                 <!-- Blog Post 4 -->
                 <div class="blog-section">
                     <h3>Blog Post 4</h3>
                     <div class="form-group">
-                        <label for="blog_4_title">Title:</label>
-                        <input type="text" name="blog_4_title" id="blog_4_title" 
-                               placeholder="Enter blog post 4 title">
+                        <label for="blog_post_4_title">Title:</label>
+                        <input type="text" name="blog_post_4_title" id="blog_post_4_title" placeholder="Blog Post Title">
                     </div>
                     <div class="form-group">
-                        <label for="blog_4_short">Short Description:</label>
-                        <textarea name="blog_4_short" id="blog_4_short" 
-                                  placeholder="Enter a brief description or excerpt (max 150 characters)" maxlength="150"></textarea>
-                        <div class="character-count">0 characters</div>
+                        <label for="blog_post_4_description">Description (will be shown as preview):</label>
+                        <textarea name="blog_post_4_description" id="blog_post_4_description" placeholder="A brief description of your blog post (150-200 characters recommended)" maxlength="300"></textarea>
                     </div>
                     <div class="form-group">
-                        <label for="blog_4_post">Full Content:</label>
-                        <textarea name="blog_4_post" id="blog_4_post" 
-                                  placeholder="Enter full blog post 4 content with HTML formatting"></textarea>
+                        <label for="blog_post_4">Full Content:</label>
+                        <textarea name="blog_post_4" id="blog_post_4" placeholder="Your full blog post content here..."></textarea>
                     </div>
                 </div>
             </div>
 
-            <!-- Quote Cards -->
+            <!-- Contact Information -->
             <div class="section">
-                <h2>Inspirational Quotes</h2>
+                <h2>Contact Information</h2>
                 <div class="form-group">
-                    <label for="quote_1">Quote 1 (After Bio):</label>
-                    <textarea name="quote_1" id="quote_1" 
-                              placeholder="Enter an inspirational quote to display after the bio section">"Softness is not a weakness. It's what happens when you've survived — and still choose to stay open."</textarea>
-                </div>
-                <div class="form-group">
-                    <label for="quote_2">Quote 2 (After Blog):</label>
-                    <textarea name="quote_2" id="quote_2" 
-                              placeholder="Enter an inspirational quote to display after the blog section">"Your truth doesn't have to be loud to be real. The quiet parts of you deserve to be heard, too."</textarea>
-                </div>
-                <div class="form-group">
-                    <label for="quote_3">Quote 3 (After Social):</label>
-                    <textarea name="quote_3" id="quote_3" 
-                              placeholder="Enter an inspirational quote to display after the social media section">"The moment I stopped performing strength and started trusting my sensitivity… everything began to shift."</textarea>
+                    <label for="email_address">Email Address:</label>
+                    <input type="email" name="email_address" id="email_address" placeholder="example@email.com">
+                    <p class="help-text">This email will be used for the contact button in the Connect section.</p>
                 </div>
             </div>
 
@@ -440,20 +571,13 @@
                     </div>
                     <div class="form-group">
                         <label for="facebook_title">Title:</label>
-                        <input type="text" name="facebook_title" id="facebook_title" 
-                               placeholder="Enter a title for this Facebook post">
+                        <input type="text" name="facebook_title" id="facebook_title" placeholder="Facebook" value="Facebook">
+                        <p class="help-text">This will appear as the title of your Facebook card and post.</p>
                     </div>
                     <div class="form-group">
-                        <label for="facebook_short">Short Description:</label>
-                        <textarea name="facebook_short" id="facebook_short" 
-                                placeholder="Enter a brief description or excerpt (max 150 characters)" maxlength="150"></textarea>
-                        <div class="character-count">0 characters</div>
-                    </div>
-                    <div class="form-group">
-                        <label for="facebook_post">Full Content:</label>
-                        <textarea name="facebook_post" id="facebook_post" 
-                                placeholder="Enter your full Facebook post text (emojis allowed)"></textarea>
-                        <div class="character-count">0 characters</div>
+                        <label for="facebook_post">Facebook Post: <span class="character-count">0/500 characters</span></label>
+                        <textarea name="facebook_post" id="facebook_post" placeholder="Your Facebook post content here..." maxlength="500"></textarea>
+                        <p class="help-text">This content will be displayed in your social media feed section. The first 150 characters will be shown as a preview.</p>
                     </div>
                 </div>
 
@@ -466,20 +590,13 @@
                     </div>
                     <div class="form-group">
                         <label for="twitter_title">Title:</label>
-                        <input type="text" name="twitter_title" id="twitter_title" 
-                               placeholder="Enter a title for this Twitter post">
+                        <input type="text" name="twitter_title" id="twitter_title" placeholder="Twitter" value="Twitter">
+                        <p class="help-text">This will appear as the title of your Twitter card and post.</p>
                     </div>
                     <div class="form-group">
-                        <label for="twitter_short">Short Description:</label>
-                        <textarea name="twitter_short" id="twitter_short" 
-                                placeholder="Enter a brief description or excerpt (max 150 characters)" maxlength="150"></textarea>
-                        <div class="character-count">0 characters</div>
-                    </div>
-                    <div class="form-group">
-                        <label for="twitter_post">Full Content:</label>
-                        <textarea name="twitter_post" id="twitter_post" 
-                                placeholder="Enter your full tweet text (emojis allowed)"></textarea>
-                        <div class="character-count">0 characters</div>
+                        <label for="twitter_post">Twitter Post: <span class="character-count">0/500 characters</span></label>
+                        <textarea name="twitter_post" id="twitter_post" placeholder="Your Twitter post content here..." maxlength="500"></textarea>
+                        <p class="help-text">This content will be displayed in your social media feed section. The first 150 characters will be shown as a preview.</p>
                     </div>
                 </div>
 
@@ -492,20 +609,13 @@
                     </div>
                     <div class="form-group">
                         <label for="instagram_title">Title:</label>
-                        <input type="text" name="instagram_title" id="instagram_title" 
-                               placeholder="Enter a title for this Instagram post">
+                        <input type="text" name="instagram_title" id="instagram_title" placeholder="Instagram" value="Instagram">
+                        <p class="help-text">This will appear as the title of your Instagram card and post.</p>
                     </div>
                     <div class="form-group">
-                        <label for="instagram_short">Short Description:</label>
-                        <textarea name="instagram_short" id="instagram_short" 
-                                placeholder="Enter a brief description or excerpt (max 150 characters)" maxlength="150"></textarea>
-                        <div class="character-count">0 characters</div>
-                    </div>
-                    <div class="form-group">
-                        <label for="instagram_post">Full Content:</label>
-                        <textarea name="instagram_post" id="instagram_post" 
-                                placeholder="Enter your full Instagram post text (emojis allowed)"></textarea>
-                        <div class="character-count">0 characters</div>
+                        <label for="instagram_post">Instagram Post: <span class="character-count">0/500 characters</span></label>
+                        <textarea name="instagram_post" id="instagram_post" placeholder="Your Instagram post content here..." maxlength="500"></textarea>
+                        <p class="help-text">This content will be displayed in your social media feed section. The first 150 characters will be shown as a preview.</p>
                     </div>
                 </div>
 
@@ -518,20 +628,13 @@
                     </div>
                     <div class="form-group">
                         <label for="linkedin_title">Title:</label>
-                        <input type="text" name="linkedin_title" id="linkedin_title" 
-                               placeholder="Enter a title for this LinkedIn post">
+                        <input type="text" name="linkedin_title" id="linkedin_title" placeholder="LinkedIn" value="LinkedIn">
+                        <p class="help-text">This will appear as the title of your LinkedIn card and post.</p>
                     </div>
                     <div class="form-group">
-                        <label for="linkedin_short">Short Description:</label>
-                        <textarea name="linkedin_short" id="linkedin_short" 
-                                placeholder="Enter a brief description or excerpt (max 150 characters)" maxlength="150"></textarea>
-                        <div class="character-count">0 characters</div>
-                    </div>
-                    <div class="form-group">
-                        <label for="linkedin_post">Full Content:</label>
-                        <textarea name="linkedin_post" id="linkedin_post" 
-                                placeholder="Enter your full LinkedIn post text (emojis allowed)"></textarea>
-                        <div class="character-count">0 characters</div>
+                        <label for="linkedin_post">LinkedIn Post: <span class="character-count">0/500 characters</span></label>
+                        <textarea name="linkedin_post" id="linkedin_post" placeholder="Your LinkedIn post content here..." maxlength="500"></textarea>
+                        <p class="help-text">This content will be displayed in your social media feed section. The first 150 characters will be shown as a preview.</p>
                     </div>
                 </div>
             </div>
@@ -568,14 +671,27 @@
         </form>
 
         <div id="status" class="status"></div>
+        
+        <!-- View Site Button (hidden by default) -->
+        <div id="view-site-container" style="display: none; margin-top: 20px; text-align: center;">
+            <div class="success-message">
+                <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+                    <circle class="checkmark-circle" cx="26" cy="26" r="25" fill="none"/>
+                    <path class="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+                </svg>
+                <p>Your site has been successfully updated!</p>
+            </div>
+            <button id="view-site-button" class="view-site-button">View Your Site</button>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
     <script>
-        // Initialize Supabase client with direct config
+        // Initialize Supabase client with centralized config
         const supabase = window.supabase.createClient(
-            'https://aqicztygjpmunfljjuto.supabase.co',
-            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxaWN6dHlnanBtdW5mbGpqdXRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3MDU1ODIsImV4cCI6MjA1OTI4MTU4Mn0.5e2hvTckSSbTFLBjQiccrvjoBd6QQDX0X4tccFOc1rs'
+            SUPABASE_CONFIG.url,
+            SUPABASE_CONFIG.key
         );
 
         // Add connection check
@@ -778,7 +894,7 @@
                         {
                             project_id: newProjectId,
                             key: 'style_package',
-                            value: 'standard'
+                            value: 'standard-professional'
                         }
                     ]);
 
@@ -847,11 +963,30 @@
         async function applyStylePreset(presetName) {
             const preset = presetName || document.getElementById('style_package').value;
             
+            // Update the hidden input with the selected style
+            document.getElementById('style_package').value = preset;
+            
+            // Add active class to the selected button
+            document.querySelectorAll('.style-button').forEach(button => {
+                if (button.getAttribute('data-style') === preset) {
+                    button.classList.add('active');
+                } else {
+                    button.classList.remove('active');
+                }
+            });
+            
             try {
+                // Map old preset names to new ones if needed (for backward compatibility)
+                let lookupPreset = preset;
+                if (preset === 'standard-professional') lookupPreset = 'professional-his-preset';
+                else if (preset === 'dark-professional') lookupPreset = 'professional-her-preset';
+                else if (preset === 'light-professional') lookupPreset = 'standard-preset';
+                else lookupPreset = preset + '-preset';
+                
                 const { data, error } = await supabase
                     .from('dynamic_content')
                     .select('key, value')
-                    .eq('project_id', preset + '-preset');
+                    .eq('project_id', lookupPreset);
 
                 if (error) throw error;
 
@@ -903,13 +1038,82 @@
             document.head.appendChild(link);
         }
 
+        // Initialize the style buttons with the correct fonts
+        function initializeStyleButtons() {
+            // Set the fonts for the style buttons
+            const standardButton = document.querySelector('.standard-style');
+            const darkButton = document.querySelector('.dark-style');
+            const lightButton = document.querySelector('.light-style');
+            
+            // Load the fonts
+            loadFont('Montserrat');  // Standard Professional
+            loadFont('Raleway');     // Dark Professional
+            loadFont('Roboto');      // Light Professional
+            
+            // Apply the fonts to the buttons
+            if (standardButton) standardButton.style.fontFamily = "'Montserrat', sans-serif";
+            if (darkButton) darkButton.style.fontFamily = "'Raleway', sans-serif";
+            if (lightButton) lightButton.style.fontFamily = "'Roboto', sans-serif";
+            
+            // Mark the default style as active
+            const defaultStyle = document.querySelector('.style-button[data-style="standard-professional"]');
+            if (defaultStyle) defaultStyle.classList.add('active');
+        }
+
         // Event Listeners
-        projectSelect.addEventListener('change', () => {
-            if (projectSelect.value === 'new') {
+        projectSelect.addEventListener('change', async function() {
+            const selectedProject = this.value;
+            
+            // Hide view site button initially
+            document.getElementById('view-site-container').style.display = 'none';
+            
+            // Reset form if "Select Project" is chosen
+            if (selectedProject === '') {
+                form.reset();
+                return;
+            }
+            
+            // Handle "Create New Project" option
+            if (selectedProject === 'new') {
                 document.getElementById('new-project-form').style.display = 'block';
-            } else {
-                document.getElementById('new-project-form').style.display = 'none';
-                loadContent();
+                return;
+            }
+            
+            try {
+                status.textContent = 'Loading project content...';
+                status.className = 'status info';
+                
+                // Fetch content for the selected project
+                const { data, error } = await supabase
+                    .from('dynamic_content')
+                    .select('*')
+                    .eq('project_id', selectedProject);
+                
+                if (error) throw error;
+                
+                // Reset form first
+                form.reset();
+                
+                // Populate form with project data
+                populateForm(data);
+                
+                status.textContent = `Loaded project: ${selectedProject}`;
+                status.className = 'status success';
+                
+                // Show the view site button for existing projects
+                document.getElementById('view-site-container').style.display = 'block';
+                
+                // Set up the view site button with the current project ID
+                const viewSiteButton = document.getElementById('view-site-button');
+                viewSiteButton.onclick = function() {
+                    const siteUrl = window.location.origin + '/index.html?project_id=' + selectedProject;
+                    window.open(siteUrl, '_blank');
+                };
+                
+            } catch (error) {
+                console.error('Error loading project:', error);
+                status.textContent = 'Error loading project: ' + error.message;
+                status.className = 'status error';
             }
         });
 
@@ -953,26 +1157,26 @@
 
                 // Process blog posts
                 for (let i = 1; i <= 4; i++) {
-                    const title = document.getElementById(`blog_${i}_title`).value;
-                    const short = document.getElementById(`blog_${i}_short`).value;
-                    const post = document.getElementById(`blog_${i}_post`).value;
+                    const title = document.getElementById(`blog_post_${i}_title`).value;
+                    const description = document.getElementById(`blog_post_${i}_description`).value;
+                    const post = document.getElementById(`blog_post_${i}`).value;
                     
                     // Only save if any content is provided
-                    if (title || short || post) {
+                    if (title || description || post) {
                         updates.push(
                             {
                                 project_id: projectId,
-                                key: `blog_${i}_title`,
+                                key: `blog_post_${i}_title`,
                                 value: title
                             },
                             {
                                 project_id: projectId,
-                                key: `blog_${i}_short`,
-                                value: short
+                                key: `blog_post_${i}_description`,
+                                value: description
                             },
                             {
                                 project_id: projectId,
-                                key: `blog_${i}_post`,
+                                key: `blog_post_${i}`,
                                 value: post
                             }
                         );
@@ -997,29 +1201,48 @@
                                 project_id: projectId,
                                 key: `${platform}_post`,
                                 value: post
-                            },
-                            {
-                                project_id: projectId,
-                                key: `${platform}_title`,
-                                value: document.getElementById(`${platform}_title`).value
-                            },
-                            {
-                                project_id: projectId,
-                                key: `${platform}_short`,
-                                value: document.getElementById(`${platform}_short`).value
                             }
                         );
                     }
                 }
 
-                // Add all other form fields
+                // Process basic information fields
+                const basicFields = [
+                    'rendered_title',
+                    'rendered_subtitle',
+                    'rendered_bio_html',
+                    'rendered_footer_slogan',
+                    'profile_image_url',
+                    'quote_1',
+                    'quote_2',
+                    'quote_3',
+                    'rendered_bio_html_card_1',
+                    'rendered_bio_html_card_2',
+                    'rendered_bio_html_card_3',
+                    'email_address'
+                ];
+                
+                for (const field of basicFields) {
+                    const element = document.getElementById(field);
+                    if (element && element.value) {
+                        updates.push({
+                            project_id: projectId,
+                            key: field,
+                            value: element.value
+                        });
+                    }
+                }
+
+                // Add remaining form fields
                 for (const [key, value] of formData.entries()) {
                     // Skip fields we've already processed
                     if (key === 'project_id' || 
                         key.endsWith('_url') || 
                         key.endsWith('_post') || 
                         key.endsWith('_title') || 
-                        key.endsWith('_short')) continue;
+                        key.endsWith('_description') ||
+                        key.endsWith('_short') ||
+                        basicFields.includes(key)) continue;
                     
                     updates.push({
                         project_id: projectId,
@@ -1049,6 +1272,22 @@
                         countDisplay.textContent = count + ' characters';
                     }
                 });
+
+                // Show view site button
+                document.getElementById('view-site-container').style.display = 'block';
+                
+                // Update the view site button with the correct project ID
+                const viewSiteButton = document.getElementById('view-site-button');
+                const currentProjectId = document.getElementById('project_id').value;
+                
+                // Set up the click handler for the view site button
+                viewSiteButton.onclick = function() {
+                    // Construct the URL for viewing the site
+                    const siteUrl = window.location.origin + '/index.html?project_id=' + currentProjectId;
+                    
+                    // Open the site in a new tab/window
+                    window.open(siteUrl, '_blank');
+                };
 
             } catch (error) {
                 status.textContent = 'Error saving content: ' + error.message;
@@ -1095,6 +1334,8 @@
                 }
             </style>
         `);
+
+        initializeStyleButtons();
 
         // CSV Import/Export functionality
         const csvUpload = document.getElementById('csv-upload');
@@ -1274,47 +1515,40 @@ example-project,profile_image_url,https://example.com/image.jpg
 example-project,rendered_title,Site Title
 example-project,rendered_subtitle,Site Subtitle
 example-project,rendered_bio_html,Bio content
-example-project,style_package,professional-his
+example-project,style_package,standard-professional
 example-project,primary_color,#4a6fa5
 example-project,secondary_color,#6c8eb4
 example-project,accent_color,#f9a03f
 example-project,text_color,#333333
-example-project,background_color,#f5f5f5
+example-project,background_color,#f9f9f9
 example-project,heading_font,Montserrat
 example-project,body_font,Open Sans
 example-project,quote_1,Quote 1 content
 example-project,quote_2,Quote 2 content
 example-project,quote_3,Quote 3 content
-example-project,blog_1_title,First Blog Post Title
-example-project,blog_1_short,Short description of first blog post
-example-project,blog_1_post,Full content of first blog post
-example-project,blog_2_title,Second Blog Post Title
-example-project,blog_2_short,Short description of second blog post
-example-project,blog_2_post,Full content of second blog post
-example-project,blog_3_title,Third Blog Post Title
-example-project,blog_3_short,Short description of third blog post
-example-project,blog_3_post,Full content of third blog post
-example-project,blog_4_title,Fourth Blog Post Title
-example-project,blog_4_short,Short description of fourth blog post
-example-project,blog_4_post,Full content of fourth blog post
+example-project,blog_post_1_title,First Blog Post Title
+example-project,blog_post_1_description,Short description of first blog post
+example-project,blog_post_1,Full content of first blog post
+example-project,blog_post_2_title,Second Blog Post Title
+example-project,blog_post_2_description,Short description of second blog post
+example-project,blog_post_2,Full content of second blog post
+example-project,blog_post_3_title,Third Blog Post Title
+example-project,blog_post_3_description,Short description of third blog post
+example-project,blog_post_3,Full content of third blog post
+example-project,blog_post_4_title,Fourth Blog Post Title
+example-project,blog_post_4_description,Short description of fourth blog post
+example-project,blog_post_4,Full content of fourth blog post
 example-project,facebook_url,https://facebook.com/username
-example-project,facebook_title,Latest Facebook Update
-example-project,facebook_short,Brief excerpt of the Facebook post
-example-project,facebook_post,Full Facebook post content
+example-project,facebook_post,Facebook post content
 example-project,twitter_url,https://twitter.com/username
-example-project,twitter_title,Latest Tweet
-example-project,twitter_short,Brief excerpt of the tweet
-example-project,twitter_post,Full tweet content
+example-project,twitter_post,Twitter post content
 example-project,instagram_url,https://instagram.com/username
-example-project,instagram_title,Latest Instagram Post
-example-project,instagram_short,Brief excerpt of the Instagram post
-example-project,instagram_post,Full Instagram post content
+example-project,instagram_post,Instagram post content
 example-project,linkedin_url,https://linkedin.com/in/username
-example-project,linkedin_title,Latest LinkedIn Article
-example-project,linkedin_short,Brief excerpt of the LinkedIn post
-example-project,linkedin_post,Full LinkedIn post content
+example-project,linkedin_post,LinkedIn post content
 example-project,rendered_footer_slogan,Footer slogan content
-example-project,current_year,2025`;
+example-project,current_year,2025
+example-project,email_address,example@email.com`;
             
             // Create a download link
             const element = document.createElement('a');
