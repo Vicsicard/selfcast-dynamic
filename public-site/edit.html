@@ -257,6 +257,20 @@
         .light-style:hover {
             background: #e0b604;
         }
+        .green-style {
+            background-color: #28a745;
+            color: white;
+        }
+        .green-style:hover {
+            background-color: #218838;
+        }
+        .red-style {
+            background-color: #dc3545;
+            color: white;
+        }
+        .red-style:hover {
+            background-color: #c82333;
+        }
         /* View Site Button */
         .view-site-button {
             background: linear-gradient(135deg, #4a90e2, #5637d7);
@@ -481,6 +495,12 @@
                         </button>
                         <button type="button" class="style-button light-style" data-style="light-professional" onclick="applyStylePreset('light-professional')">
                             <span>Light</span>
+                        </button>
+                        <button type="button" class="style-button green-style" data-style="green-professional" onclick="applyStylePreset('green-professional')">
+                            <span>Green</span>
+                        </button>
+                        <button type="button" class="style-button red-style" data-style="red-professional" onclick="applyStylePreset('red-professional')">
+                            <span>Red</span>
                         </button>
                     </div>
                     <input type="hidden" name="style_package" id="style_package" value="standard-professional">
@@ -915,6 +935,8 @@
                 if (preset === 'standard-professional') lookupPreset = 'his-preset';
                 else if (preset === 'dark-professional') lookupPreset = 'her-preset';
                 else if (preset === 'light-professional') lookupPreset = 'standard-preset';
+                else if (preset === 'green-professional') lookupPreset = 'green-preset';
+                else if (preset === 'red-professional') lookupPreset = 'red-preset';
                 else lookupPreset = preset;
                 
                 // Fetch preset data from Supabase
