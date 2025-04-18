@@ -3,18 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title data-key="rendered_title">Dynamic Site</title>
+    <title data-key="rendered_title"></title>
     <link rel="stylesheet" href="style.css">
     <style id="dynamic-theme"></style>
     <!-- Supabase Client Library -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- Site Configuration -->
-    <script src="../config.js"></script>
     <!-- Initialize Supabase Client -->
     <script>
-      window.supabase = window.supabase || supabase.createClient(
-        window.SUPABASE_CONFIG.url,
-        window.SUPABASE_CONFIG.key
+      // Supabase Configuration (hardcoded to ensure consistency)
+      const SUPABASE_URL = 'https://aqicztygjpmunfljjuto.supabase.co';
+      const SUPABASE_PROJECT_ID = 'aqicztygjpmunfljjuto';
+      const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxaWN6dHlnanBtdW5mbGpqdXRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3MDU1ODIsImV4cCI6MjA1OTI4MTU4Mn0.5e2hvTckSSbTFLBjQiccrvjoBd6QQDX0X4tccFOc1rs';
+      
+      // Initialize Supabase client with hardcoded credentials
+      window.supabase = window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_ANON_KEY
       );
     </script>
     <!-- Site Scripts -->
@@ -37,12 +41,12 @@
             </div>
             <div class="hero-content">
                 <div class="hero-text">
-                    <h1 data-key="rendered_title">Welcome</h1>
-                    <p data-key="rendered_subtitle">Your dynamic content here</p>
+                    <h1 data-key="rendered_title"></h1>
+                    <p data-key="rendered_subtitle"></p>
                 </div>
                 <div class="hero-image">
                     <div class="profile-image-container">
-                        <img data-key="profile_image_url" src="https://imagestopost.carrd.co/assets/images/image07.jpg?v=98a7173f" alt="Profile" class="profile-image">
+                        <img data-key="profile_image_url" src="" alt="Profile" class="profile-image">
                     </div>
                 </div>
             </div>
@@ -57,12 +61,25 @@
         <section class="bio">
             <h2>About</h2>
             <div data-key="rendered_bio_html"></div>
+            
+            <!-- Bio Cards -->
+            <div class="bio-cards">
+                <div class="bio-card">
+                    <div data-key="rendered_bio_html_card_1"></div>
+                </div>
+                <div class="bio-card">
+                    <div data-key="rendered_bio_html_card_2"></div>
+                </div>
+                <div class="bio-card">
+                    <div data-key="rendered_bio_html_card_3"></div>
+                </div>
+            </div>
         </section>
 
         <!-- Quote Card 1 -->
         <div class="quote-card">
             <div class="quote-content">
-                <p class="quote-text" data-key="quote_1">"Softness is not a weakness. It's what happens when you've survived — and still choose to stay open."</p>
+                <p class="quote-text" data-key="quote_1"></p>
             </div>
         </div>
 
@@ -78,32 +95,65 @@
             <h2>Blog Posts</h2>
             <div class="grid-2x2">
                 <div class="grid-item blog-card">
-                    <h3 class="blog-title">Blog Post 1</h3>
-                    <p class="excerpt blog-excerpt" data-key="rendered_blog_post_1">Latest update...</p>
+                    <h3 class="blog-title" data-key="blog_post_1_title"></h3>
+                    <p class="excerpt blog-excerpt" data-key="blog_post_1_description"></p>
                     <button class="action-button" onclick="openModal('blog-1')">Read More</button>
                 </div>
                 <div class="grid-item blog-card">
-                    <h3 class="blog-title">Blog Post 2</h3>
-                    <p class="excerpt blog-excerpt" data-key="rendered_blog_post_2">Latest update...</p>
+                    <h3 class="blog-title" data-key="blog_post_2_title"></h3>
+                    <p class="excerpt blog-excerpt" data-key="blog_post_2_description"></p>
                     <button class="action-button" onclick="openModal('blog-2')">Read More</button>
                 </div>
                 <div class="grid-item blog-card">
-                    <h3 class="blog-title">Blog Post 3</h3>
-                    <p class="excerpt blog-excerpt" data-key="rendered_blog_post_3">Latest update...</p>
+                    <h3 class="blog-title" data-key="blog_post_3_title"></h3>
+                    <p class="excerpt blog-excerpt" data-key="blog_post_3_description"></p>
                     <button class="action-button" onclick="openModal('blog-3')">Read More</button>
                 </div>
                 <div class="grid-item blog-card">
-                    <h3 class="blog-title">Blog Post 4</h3>
-                    <p class="excerpt blog-excerpt" data-key="rendered_blog_post_4">Latest update...</p>
+                    <h3 class="blog-title" data-key="blog_post_4_title"></h3>
+                    <p class="excerpt blog-excerpt" data-key="blog_post_4_description"></p>
                     <button class="action-button" onclick="openModal('blog-4')">Read More</button>
                 </div>
             </div>
         </section>
 
+        <!-- Blog Post Modals -->
+        <div id="blog-1" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal('blog-1')">&times;</span>
+                <h2 data-key="blog_post_1_title"></h2>
+                <div class="blog-content" data-key="blog_post_1"></div>
+            </div>
+        </div>
+
+        <div id="blog-2" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal('blog-2')">&times;</span>
+                <h2 data-key="blog_post_2_title"></h2>
+                <div class="blog-content" data-key="blog_post_2"></div>
+            </div>
+        </div>
+
+        <div id="blog-3" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal('blog-3')">&times;</span>
+                <h2 data-key="blog_post_3_title"></h2>
+                <div class="blog-content" data-key="blog_post_3"></div>
+            </div>
+        </div>
+
+        <div id="blog-4" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal('blog-4')">&times;</span>
+                <h2 data-key="blog_post_4_title"></h2>
+                <div class="blog-content" data-key="blog_post_4"></div>
+            </div>
+        </div>
+
         <!-- Quote Card 2 -->
         <div class="quote-card">
             <div class="quote-content">
-                <p class="quote-text" data-key="quote_2">"Your truth doesn't have to be loud to be real. The quiet parts of you deserve to be heard, too."</p>
+                <p class="quote-text" data-key="quote_2"></p>
             </div>
         </div>
 
@@ -119,23 +169,23 @@
             <h2>Latest Updates</h2>
             <div class="grid-2x2">
                 <div class="grid-item social-card facebook">
-                    <h3 class="social-title">Facebook</h3>
-                    <p class="excerpt social-excerpt" data-key="facebook_post">Latest update...</p>
+                    <h3 class="social-title" data-key="facebook_title"></h3>
+                    <p class="excerpt social-excerpt" data-key="facebook_excerpt"></p>
                     <button class="action-button" onclick="openModal('facebook')">Read More</button>
                 </div>
                 <div class="grid-item social-card twitter">
-                    <h3 class="social-title">Twitter</h3>
-                    <p class="excerpt social-excerpt" data-key="twitter_post">Latest update...</p>
+                    <h3 class="social-title" data-key="twitter_title"></h3>
+                    <p class="excerpt social-excerpt" data-key="twitter_excerpt"></p>
                     <button class="action-button" onclick="openModal('twitter')">Read More</button>
                 </div>
                 <div class="grid-item social-card instagram">
-                    <h3 class="social-title">Instagram</h3>
-                    <p class="excerpt social-excerpt" data-key="instagram_post">Latest update...</p>
+                    <h3 class="social-title" data-key="instagram_title"></h3>
+                    <p class="excerpt social-excerpt" data-key="instagram_excerpt"></p>
                     <button class="action-button" onclick="openModal('instagram')">Read More</button>
                 </div>
                 <div class="grid-item social-card linkedin">
-                    <h3 class="social-title">LinkedIn</h3>
-                    <p class="excerpt social-excerpt" data-key="linkedin_post">Latest update...</p>
+                    <h3 class="social-title" data-key="linkedin_title"></h3>
+                    <p class="excerpt social-excerpt" data-key="linkedin_excerpt"></p>
                     <button class="action-button" onclick="openModal('linkedin')">Read More</button>
                 </div>
             </div>
@@ -144,7 +194,40 @@
         <!-- Quote Card 3 -->
         <div class="quote-card">
             <div class="quote-content">
-                <p class="quote-text" data-key="quote_3">"The moment I stopped performing strength and started trusting my sensitivity… everything began to shift."</p>
+                <p class="quote-text" data-key="quote_3"></p>
+            </div>
+        </div>
+
+        <!-- Social Media Modals -->
+        <div id="facebook" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal('facebook')">&times;</span>
+                <h2 data-key="facebook_title"></h2>
+                <div class="social-content" data-key="facebook_post"></div>
+            </div>
+        </div>
+
+        <div id="twitter" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal('twitter')">&times;</span>
+                <h2 data-key="twitter_title"></h2>
+                <div class="social-content" data-key="twitter_post"></div>
+            </div>
+        </div>
+
+        <div id="instagram" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal('instagram')">&times;</span>
+                <h2 data-key="instagram_title"></h2>
+                <div class="social-content" data-key="instagram_post"></div>
+            </div>
+        </div>
+
+        <div id="linkedin" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal('linkedin')">&times;</span>
+                <h2 data-key="linkedin_title"></h2>
+                <div class="social-content" data-key="linkedin_post"></div>
             </div>
         </div>
 
@@ -179,6 +262,9 @@
                     <a data-key="linkedin_url" href="#" class="social-button linkedin" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
                         <span class="social-icon">in</span>
                     </a>
+                    <a data-key="email_address" href="#" class="social-button email" aria-label="Email">
+                        <span class="social-icon">@</span>
+                    </a>
                 </div>
             </div>
         </section>
@@ -198,7 +284,7 @@
         <!-- Footer -->
         <footer>
             <p data-key="rendered_footer_slogan"></p>
-            <p class="copyright">&copy; 2025 All rights reserved anniesicard.com - Built by <a href="https://www.selfcaststudios.com/" target="_blank" rel="noopener noreferrer">Self Cast Studio</a></p>
+            <p class="copyright">&copy; 2025 All rights reserved <span data-key="email_domain"></span> - Built by <a href="https://www.selfcaststudios.com/" target="_blank" rel="noopener noreferrer">Self Cast Studio</a></p>
         </footer>
     </div>
 </body>

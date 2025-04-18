@@ -1,5 +1,5 @@
 // Initialize Supabase client
-const supabase = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.key);
+const supabase = window.supabase;
 
 // Initialize site content storage
 window.siteContent = {};
@@ -36,8 +36,8 @@ function injectStyles(styles) {
 function getProjectId() {
     const urlParams = new URLSearchParams(window.location.search);
     const projectId = urlParams.get('project_id');
-    console.log('Using default project ID: annie-sicard-123');
-    return projectId || 'annie-sicard-123';
+    console.log(`Project ID from URL: ${projectId || 'none'}`);
+    return projectId || 'adam-hyp-1';
 }
 
 // Load and inject content
@@ -112,6 +112,31 @@ async function loadContent() {
                 }
             }
             
+            // Special handling for email address
+            if (item.key === 'email_address') {
+                const emailLink = document.querySelector('a[data-key="email_address"]');
+                if (emailLink && item.value) {
+                    emailLink.href = `mailto:${item.value}`;
+                }
+            }
+            
+            // Special handling for social media URLs
+            if (item.key.endsWith('_url') && ['facebook_url', 'twitter_url', 'instagram_url', 'linkedin_url'].includes(item.key)) {
+                const socialLink = document.querySelector(`a[data-key="${item.key}"]`);
+                if (socialLink && item.value) {
+                    socialLink.href = item.value;
+                    // Ensure the social icon is displayed properly
+                    const socialIcon = socialLink.querySelector('.social-icon');
+                    if (socialIcon) {
+                        // Set appropriate icon character
+                        if (item.key === 'facebook_url') socialIcon.textContent = 'f';
+                        if (item.key === 'twitter_url') socialIcon.textContent = 't';
+                        if (item.key === 'instagram_url') socialIcon.textContent = 'i';
+                        if (item.key === 'linkedin_url') socialIcon.textContent = 'in';
+                    }
+                }
+            }
+            
             // Find elements with matching data-key
             const elements = document.querySelectorAll(`[data-key="${item.key}"]`);
             console.log(`Found ${elements.length} elements with data-key="${item.key}"`);
@@ -123,6 +148,10 @@ async function loadContent() {
                     
                     // Create fun fact cards from bio content
                     createBioCards(item.value, element);
+                } else if (item.key === 'email_address') {
+                    // Handle email links specially
+                    const mailtoLink = `mailto:${item.value}`;
+                    element.href = mailtoLink;
                 } else if (item.key.includes('_url')) {
                     // Handle URLs differently based on element type
                     if (element.tagName === 'IMG') {
@@ -133,24 +162,33 @@ async function loadContent() {
                         // For link elements, set the href attribute
                         element.href = item.value;
                     }
-                } else if (item.key.startsWith('rendered_blog_post_') || item.key.includes('_post')) {
-                    // Create excerpt for blog and social posts
-                    console.log('Creating excerpt for:', item.key);
-                    console.log('Full content:', item.value);
+                } else if (item.key.endsWith('_post')) {
+                    // For social media posts, create excerpt
+                    console.log('Creating excerpt for social post:', item.key);
                     
-                    // Try to find first paragraph or description
-                    let excerpt;
-                    if (item.value.includes('Description:')) {
-                        // For blog posts that have a description section
-                        const description = item.value.split('Description:')[1].split('\n\n')[0].trim();
-                        excerpt = description.length > 300 ? description.substring(0, 300) + '...' : description;
+                    // Check if this is a social media post
+                    const platform = item.key.replace('_post', '');
+                    const excerptKey = `${platform}_excerpt`;
+                    
+                    // Find excerpt elements for this platform
+                    const excerptElements = document.querySelectorAll(`[data-key="${excerptKey}"]`);
+                    
+                    if (excerptElements.length > 0) {
+                        // Create excerpt by truncating to 150 characters
+                        const excerpt = item.value.length > 150 ? item.value.substring(0, 150) + '...' : item.value;
+                        
+                        // Apply excerpt to all matching elements
+                        excerptElements.forEach(excerptElement => {
+                            excerptElement.textContent = excerpt;
+                        });
                     } else {
-                        // For social posts or other content
-                        const text = item.value.split('\n')[0];
-                        excerpt = text.length > 300 ? text.substring(0, 300) + '...' : text;
+                        // If no specific excerpt element, use the post element for the excerpt
+                        element.textContent = item.value.length > 150 ? item.value.substring(0, 150) + '...' : item.value;
                     }
-                    console.log('Created excerpt:', excerpt);
-                    element.textContent = excerpt;
+                } else if (item.key.includes('_description')) {
+                    // For blog post descriptions, use as excerpt
+                    console.log('Using description as excerpt for:', item.key);
+                    element.textContent = item.value;
                 } else {
                     // For other content (titles, text, etc.)
                     element.textContent = item.value;
@@ -190,78 +228,83 @@ function createBioCards(bioContent, element) {
     element.parentNode.insertBefore(cardsContainer, element.nextSibling);
 }
 
-// Modal functions
-function openModal(type) {
-    const modal = document.getElementById('modal');
-    const modalTitle = document.getElementById('modal-title');
-    const modalContent = document.getElementById('modal-content');
+// Modal Functions
+function openModal(modalId) {
+    console.log('Opening modal:', modalId);
     
-    // Get content based on type
-    let title, content;
-    if (type.startsWith('blog-')) {
-        // For blog posts
-        const blogNum = type.replace('blog-', '');
-        const blogKey = `rendered_blog_post_${blogNum}`;
-        content = window.siteContent[blogKey];
+    // Handle blog posts
+    if (modalId.startsWith('blog-')) {
+        const blogNumber = modalId.split('-')[1];
+        const titleKey = `blog_post_${blogNumber}_title`;
+        const contentKey = `blog_post_${blogNumber}`;
         
-        // Split content into sections
-        const sections = content.split('\n\n');
-        title = sections[0].replace(/["]/g, ''); // First line is the title
+        const modal = document.getElementById(modalId);
+        if (!modal) {
+            console.error('Modal not found:', modalId);
+            return;
+        }
         
-        // Format content with proper spacing
-        const formattedContent = sections.slice(1).map(section => {
-            if (section.startsWith('Description:')) {
-                return `<p class="description">${section.replace('Description:', '<strong>Description:</strong>')}</p>`;
-            }
-            return `<p>${section}</p>`;
-        }).join('');
+        // Set modal content from stored data
+        const titleElement = modal.querySelector(`[data-key="${titleKey}"]`);
+        const contentElement = modal.querySelector(`[data-key="${contentKey}"]`);
         
-        modalContent.innerHTML = formattedContent;
-    } else {
-        // For social media posts
-        const postKey = `${type}_post`;
-        content = window.siteContent[postKey];
-        title = type.charAt(0).toUpperCase() + type.slice(1) + ' Update';
+        if (titleElement && window.siteContent[titleKey]) {
+            titleElement.textContent = window.siteContent[titleKey];
+        }
         
-        // Format social media content with line breaks
-        modalContent.innerHTML = content.split('\n').map(line => 
-            line.trim() ? `<p>${line}</p>` : ''
-        ).join('');
+        if (contentElement && window.siteContent[contentKey]) {
+            contentElement.innerHTML = window.siteContent[contentKey];
+        }
+        
+        modal.style.display = 'block';
     }
-
-    // Set modal title
-    modalTitle.innerHTML = `<h2>${title}</h2>`;
-    
-    // Show modal
-    modal.style.display = 'flex';
-    document.body.style.overflow = 'hidden';
+    // Handle social media posts
+    else if (['facebook', 'twitter', 'instagram', 'linkedin'].includes(modalId)) {
+        const titleKey = `${modalId}_title`;
+        const contentKey = `${modalId}_post`;
+        
+        const modal = document.getElementById('modal');
+        if (!modal) {
+            console.error('Modal not found');
+            return;
+        }
+        
+        const modalTitle = document.getElementById('modal-title');
+        const modalContent = document.getElementById('modal-content');
+        
+        if (modalTitle) {
+            modalTitle.textContent = window.siteContent[titleKey] || `${modalId.charAt(0).toUpperCase() + modalId.slice(1)} Update`;
+        }
+        
+        if (modalContent) {
+            modalContent.innerHTML = window.siteContent[contentKey] || '';
+        }
+        
+        modal.style.display = 'block';
+    }
 }
 
-function closeModal() {
-    const modal = document.getElementById('modal');
-    modal.style.display = 'none';
-    document.body.style.overflow = 'auto';
+function closeModal(modalId) {
+    if (modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.style.display = 'none';
+        }
+    } else {
+        // Close the generic modal
+        const modal = document.getElementById('modal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
+    }
 }
 
 // Close modal when clicking outside
 window.onclick = function(event) {
-    const modal = document.getElementById('modal');
-    if (event.target == modal) {
-        closeModal();
+    if (event.target.classList.contains('modal')) {
+        event.target.style.display = 'none';
     }
-}
-
-// Close modal on escape key
-document.addEventListener('keydown', function(event) {
-    if (event.key === 'Escape') {
-        closeModal();
-    }
-});
-
-// Initialize content on page load
-document.addEventListener('DOMContentLoaded', function() {
-    loadContent();
-});
+};
 
 // Parallax effect for hero section
 function initParallax() {
@@ -282,6 +325,11 @@ function initParallax() {
         }
     });
 }
+
+// Initialize content on page load
+document.addEventListener('DOMContentLoaded', function() {
+    loadContent();
+});
 
 // Initialize parallax effect
 document.addEventListener('DOMContentLoaded', function() {
