@@ -1034,6 +1034,12 @@ footer a:hover {
     height: 24px;
 }
 
+.button-text {
+    font-size: 28px;
+    font-weight: bold;
+    color: white;
+}
+
 .social-button .social-card-icon {
     margin-right: 0;
     width: auto;
