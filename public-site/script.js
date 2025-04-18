@@ -353,15 +353,42 @@ function closeModal(modalId) {
             // Restore body scrolling
             document.body.style.overflow = '';
         }
+    } else {
+        // Close the generic modal
+        const modal = document.getElementById('modal');
+        if (modal) {
+            modal.classList.remove('active');
+            
+            // Restore body scrolling
+            document.body.style.overflow = '';
+        }
     }
 }
 
 // Close modal when clicking outside
-window.onclick = function(event) {
+document.addEventListener('click', function(event) {
     if (event.target.classList.contains('modal')) {
-        event.target.style.display = 'none';
+        const modalId = event.target.id;
+        closeModal(modalId);
+        
+        // Ensure body scrolling is restored
+        document.body.style.overflow = '';
     }
-};
+});
+
+// Close modal with Escape key
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        // Find any open modal
+        const openModals = document.querySelectorAll('.modal.active');
+        openModals.forEach(modal => {
+            closeModal(modal.id);
+        });
+        
+        // Ensure body scrolling is restored
+        document.body.style.overflow = '';
+    }
+});
 
 // Parallax effect for hero section
 function initParallax() {
