@@ -1068,7 +1068,7 @@ footer a:hover {
     align-items: center;
     justify-content: center;
     color: white;
-    font-size: 0;
+    text-decoration: none;
     transition: all 0.3s ease;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
     position: relative;
@@ -1097,14 +1097,9 @@ footer a:hover {
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
 }
 
-.social-button .social-icon {
+.social-button i {
     font-size: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 100%;
-    z-index: 2;
+    color: white;
 }
 
 .social-button.facebook {
