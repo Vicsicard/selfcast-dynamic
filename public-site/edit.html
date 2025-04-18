@@ -1194,7 +1194,10 @@
             try {
                 // Gather all form data
                 const formData = new FormData(form);
-                const updates = [];
+                let updates = [];
+                
+                // Use a Set to track keys we've already added to prevent duplicates
+                const processedKeys = new Set();
 
                 // Process blog posts
                 for (let i = 1; i <= 4; i++) {
@@ -1204,23 +1207,36 @@
                     
                     // Only save if any content is provided
                     if (title || description || post) {
-                        updates.push(
-                            {
+                        const titleKey = `blog_post_${i}_title`;
+                        const descKey = `blog_post_${i}_description`;
+                        const postKey = `blog_post_${i}`;
+                        
+                        if (!processedKeys.has(titleKey)) {
+                            updates.push({
                                 project_id: projectId,
-                                key: `blog_post_${i}_title`,
+                                key: titleKey,
                                 value: title
-                            },
-                            {
+                            });
+                            processedKeys.add(titleKey);
+                        }
+                        
+                        if (!processedKeys.has(descKey)) {
+                            updates.push({
                                 project_id: projectId,
-                                key: `blog_post_${i}_description`,
+                                key: descKey,
                                 value: description
-                            },
-                            {
+                            });
+                            processedKeys.add(descKey);
+                        }
+                        
+                        if (!processedKeys.has(postKey)) {
+                            updates.push({
                                 project_id: projectId,
-                                key: `blog_post_${i}`,
+                                key: postKey,
                                 value: post
-                            }
-                        );
+                            });
+                            processedKeys.add(postKey);
+                        }
                     }
                 }
 
@@ -1232,18 +1248,26 @@
                     
                     // Only save if either URL or post is provided
                     if (url || post) {
-                        updates.push(
-                            {
+                        const urlKey = `${platform}_url`;
+                        const postKey = `${platform}_post`;
+                        
+                        if (!processedKeys.has(urlKey)) {
+                            updates.push({
                                 project_id: projectId,
-                                key: `${platform}_url`,
+                                key: urlKey,
                                 value: url
-                            },
-                            {
+                            });
+                            processedKeys.add(urlKey);
+                        }
+                        
+                        if (!processedKeys.has(postKey)) {
+                            updates.push({
                                 project_id: projectId,
-                                key: `${platform}_post`,
+                                key: postKey,
                                 value: post
-                            }
-                        );
+                            });
+                            processedKeys.add(postKey);
+                        }
                     }
                 }
 
@@ -1260,17 +1284,19 @@
                     'rendered_bio_html_card_1',
                     'rendered_bio_html_card_2',
                     'rendered_bio_html_card_3',
-                    'email_address'
+                    'email_address',
+                    'style_package'
                 ];
                 
                 for (const field of basicFields) {
                     const element = document.getElementById(field);
-                    if (element && element.value) {
+                    if (element && element.value && !processedKeys.has(field)) {
                         updates.push({
                             project_id: projectId,
                             key: field,
                             value: element.value
                         });
+                        processedKeys.add(field);
                     }
                 }
 
@@ -1278,6 +1304,7 @@
                 for (const [key, value] of formData.entries()) {
                     // Skip fields we've already processed
                     if (key === 'project_id' || 
+                        processedKeys.has(key) ||
                         key.endsWith('_url') || 
                         key.endsWith('_post') || 
                         key.endsWith('_title') || 
@@ -1290,6 +1317,7 @@
                         key: key,
                         value: value
                     });
+                    processedKeys.add(key);
                 }
 
                 // Insert or update all values
