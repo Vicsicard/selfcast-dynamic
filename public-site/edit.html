@@ -380,7 +380,6 @@
                 <select name="project_id" id="project_id" required>
                     <option value="">Select Project</option>
                     <option value="new">+ Create New Project</option>
-                    <option value="default-project">Default Project</option>
                 </select>
                 <div id="new-project-form" style="display: none; margin-top: 1rem;">
                     <input type="text" id="new-project-id" placeholder="Enter new project ID (e.g., client-name)" 
@@ -804,10 +803,6 @@
                 
                 if (!data || data.length === 0) {
                     console.log('No projects found in database');
-                    const option = document.createElement('option');
-                    option.value = 'adam-hyp-1';
-                    option.textContent = 'adam-hyp-1 (Default)';
-                    existingGroup.appendChild(option);
                     return;
                 }
 
@@ -830,15 +825,6 @@
                     console.log('Added project to dropdown:', projectId);
                 });
 
-                // Ensure adam-hyp-1 is always available
-                if (!projectIds.includes('adam-hyp-1')) {
-                    const option = document.createElement('option');
-                    option.value = 'adam-hyp-1';
-                    option.textContent = 'adam-hyp-1 (Default)';
-                    existingGroup.appendChild(option);
-                    console.log('Added default adam-hyp-1 project');
-                }
-
                 console.log(`Loaded ${projectIds.length} projects`);
                 
                 // Log the final state of the dropdown
@@ -848,21 +834,6 @@
                 console.error('Error loading projects:', error);
                 status.textContent = 'Error loading projects: ' + error.message;
                 status.className = 'status error';
-                
-                // Add adam-hyp-1 as a fallback
-                const existingGroup = projectSelect.querySelector('optgroup') || 
-                    (() => {
-                        const group = document.createElement('optgroup');
-                        group.label = 'Existing Projects';
-                        projectSelect.appendChild(group);
-                        return group;
-                    })();
-                
-                const option = document.createElement('option');
-                option.value = 'adam-hyp-1';
-                option.textContent = 'adam-hyp-1 (Fallback)';
-                existingGroup.appendChild(option);
-                console.log('Added fallback adam-hyp-1 project due to error');
             }
         }
 
