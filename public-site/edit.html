@@ -739,18 +739,40 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
     <script>
-        // Supabase Configuration (hardcoded to ensure consistency)
-        const SUPABASE_URL = 'https://aqicztygjpmunfljjjuto.supabase.co';
-        const SUPABASE_PROJECT_ID = 'aqicztygjpmunfljjjuto';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxaWN6dHlnanBtdW5mbGpqdXRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3MDU1ODIsImV4cCI6MjA1OTI4MTU4Mn0.5e2hvTckSSbTFLBjQiccrvjoBd6QQDX0X4tccFOc1rs';
+        // Supabase Configuration with fallbacks
+        let SUPABASE_URL, SUPABASE_ANON_KEY, supabase;
         
-        // Initialize Supabase client with hardcoded credentials
-        const supabase = window.supabase.createClient(
-            SUPABASE_URL,
-            SUPABASE_ANON_KEY
-        );
-
+        // Try to use the configuration from config.js
+        if (window.SUPABASE_CONFIG) {
+            console.log('Using Supabase config from config.js');
+            SUPABASE_URL = window.SUPABASE_CONFIG.url;
+            SUPABASE_ANON_KEY = window.SUPABASE_CONFIG.key;
+        } else {
+            // Fallback to hardcoded values
+            console.log('Using hardcoded Supabase config');
+            SUPABASE_URL = 'https://aqicztygjpmunfljjjuto.supabase.co';
+            SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxaWN6dHlnanBtdW5mbGpqdXRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3MDU1ODIsImV4cCI6MjA1OTI4MTU4Mn0.5e2hvTckSSbTFLBjQiccrvjoBd6QQDX0X4tccFOc1rs';
+        }
+        
+        // Clean up URL if needed (remove markdown formatting if present)
+        if (SUPABASE_URL.includes('](')) {
+            SUPABASE_URL = SUPABASE_URL.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '$2');
+        }
+        
+        console.log('Connecting to Supabase URL:', SUPABASE_URL);
+        
+        // Initialize Supabase client
+        try {
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            console.log('Supabase client initialized');
+        } catch (error) {
+            console.error('Error initializing Supabase client:', error);
+            document.getElementById('status').textContent = 'Error initializing database connection: ' + error.message;
+            document.getElementById('status').className = 'status error';
+        }
+        
         // Add connection check
         async function checkConnection() {
             try {
