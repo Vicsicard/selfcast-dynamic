@@ -992,23 +992,67 @@ footer a:hover {
 }
 
 .social-button {
-    display: inline-block;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
     text-decoration: none;
     transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
     position: relative;
+    overflow: hidden;
+}
+
+.social-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.1);
+    transform: scale(0);
+    transition: transform 0.3s ease;
+    border-radius: 50%;
+}
+
+.social-button:hover::before {
+    transform: scale(1);
 }
 
 .social-button:hover {
     transform: translateY(-5px);
-}
-
-.social-button:hover .social-card-icon {
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
 }
 
-/* Specific styles for social-card-icon in the Connect section */
 .social-button .social-card-icon {
     margin-right: 0;
+    width: auto;
+    height: auto;
+    box-shadow: none;
+}
+
+.social-button.facebook {
+    background-color: #3b5998;
+}
+
+.social-button.twitter {
+    background-color: #1da1f2;
+}
+
+.social-button.instagram {
+    background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+}
+
+.social-button.linkedin {
+    background-color: #0077b5;
+}
+
+.social-button.email {
+    background-color: #ea4335;
 }
 
 /* Floating social icons */
