@@ -125,6 +125,7 @@ async function loadContent() {
                 const socialLink = document.querySelector(`a[data-key="${item.key}"]`);
                 if (socialLink && item.value) {
                     socialLink.href = item.value;
+                    
                     // Ensure the social icon is displayed properly
                     const socialIcon = socialLink.querySelector('.social-icon');
                     if (socialIcon) {
@@ -134,19 +135,13 @@ async function loadContent() {
                         if (item.key === 'instagram_url') socialIcon.textContent = 'i';
                         if (item.key === 'linkedin_url') socialIcon.textContent = 'in';
                     }
-                    // Don't display the URL text on the button
-                    if (socialLink.classList.contains('social-button')) {
-                        // Keep only the icon visible
-                        const iconElement = socialLink.querySelector('.social-icon');
-                        if (iconElement) {
-                            // Make sure we don't show the URL text
-                            Array.from(socialLink.childNodes).forEach(node => {
-                                if (node.nodeType === Node.TEXT_NODE) {
-                                    socialLink.removeChild(node);
-                                }
-                            });
+                    
+                    // Clear any text nodes to prevent URL from showing
+                    Array.from(socialLink.childNodes).forEach(node => {
+                        if (node.nodeType === Node.TEXT_NODE) {
+                            socialLink.removeChild(node);
                         }
-                    }
+                    });
                 }
             }
             
