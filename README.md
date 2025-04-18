@@ -22,6 +22,14 @@ A multi-client website platform for personal branding and content management.
   - Reduced excessive padding for a tighter, more cohesive layout
 - **Footer:**
   - Updated to match header gradient and includes copyright with link to Self Cast Studio
+- **Style Package Renaming & Visual Selection:**
+  - Renamed style packages: "professional-his" → "Standard Professional", "professional-her" → "Dark Professional", "standard" → "Light Professional"
+  - Style selection now uses visually styled buttons with previews of each theme (color and font), replacing the dropdown menu.
+- **Dynamic Content Cleanup:**
+  - Removed all hardcoded content from dynamic fields in `index.html`.
+  - All elements with `data-key` attributes are blank by default and receive content dynamically from Supabase.
+- **Dynamic Email Button:**
+  - The email button in the Connect section now links dynamically to the email address stored in the database.
 
 ## April 17, 2025 – Major Content and Logic Update
 
