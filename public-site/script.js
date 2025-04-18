@@ -64,6 +64,15 @@ async function loadContent() {
         // For every element with a data-key, set its content to the project value or blank if missing
         document.querySelectorAll('[data-key]').forEach(element => {
             const key = element.getAttribute('data-key');
+            
+            // Skip social buttons - we don't want to clear their content
+            if (element.classList.contains('social-button')) {
+                if (themeData[key] !== undefined && themeData[key] !== null && themeData[key] !== '') {
+                    element.href = themeData[key];
+                }
+                return; // Skip the rest of the processing for social buttons
+            }
+            
             if (themeData[key] !== undefined && themeData[key] !== null && themeData[key] !== '') {
                 // If the key exists for this project, set the value
                 if (element.tagName === 'IMG') {
@@ -328,12 +337,26 @@ function initParallax() {
     });
 }
 
+// Function to ensure social media icons are displayed
+function fixSocialIcons() {
+    document.querySelectorAll('.button-text').forEach(element => {
+        const icon = element.getAttribute('data-icon');
+        if (icon && element.textContent === '') {
+            element.textContent = icon;
+        }
+    });
+}
+
 // Initialize content on page load
 document.addEventListener('DOMContentLoaded', function() {
     loadContent();
+    fixSocialIcons();
 });
 
 // Initialize parallax effect
 document.addEventListener('DOMContentLoaded', function() {
     initParallax();
 });
+
+// Also run it after a short delay to catch any dynamic changes
+setTimeout(fixSocialIcons, 1000);
