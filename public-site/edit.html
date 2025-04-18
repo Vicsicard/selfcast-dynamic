@@ -332,6 +332,43 @@
                 stroke-dashoffset: 0;
             }
         }
+        
+        /* Style Button Styles */
+        .style-package-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .style-button {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            background: #fff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+            text-align: center;
+        }
+        .style-button:hover {
+            border-color: #aaa;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .style-button.active {
+            border-color: #007bff;
+            box-shadow: 0 2px 8px rgba(0,123,255,0.3);
+        }
+        .standard-style {
+            background-color: #f8f9fa;
+        }
+        .dark-style {
+            background-color: #343a40;
+            color: white;
+        }
+        .light-style {
+            background-color: #ffffff;
+            border-color: #e9ecef;
+        }
     </style>
 </head>
 <body>
@@ -812,6 +849,128 @@
             }
         }
 
+        // Populate form with project data
+        function populateForm(data) {
+            // Reset form
+            form.reset();
+            
+            // Set the project ID
+            projectSelect.value = data[0]?.project_id || '';
+            
+            // Hide profile preview initially
+            profilePreview.style.display = 'none';
+            
+            // Process each data item
+            data.forEach(item => {
+                const element = document.getElementById(item.key);
+                if (element) {
+                    // Handle profile image specially
+                    if (item.key === 'profile_image_url' && item.value) {
+                        profilePreview.src = item.value;
+                        profilePreview.style.display = 'block';
+                        profileImageUrl.value = item.value;
+                    } else {
+                        element.value = item.value;
+                    }
+                }
+            });
+            
+            // If style_package is set, apply the preset
+            const stylePackage = data.find(item => item.key === 'style_package');
+            if (stylePackage) {
+                document.getElementById('style_package').value = stylePackage.value;
+                applyStylePreset(stylePackage.value);
+            }
+        }
+        
+        // Load Google Fonts
+        function loadFont(fontName) {
+            if (!fontName) return;
+            
+            const link = document.createElement('link');
+            link.href = `https://fonts.googleapis.com/css2?family=${fontName.replace(/\s+/g, '+')}:wght@400;700&display=swap`;
+            link.rel = 'stylesheet';
+            document.head.appendChild(link);
+        }
+        
+        // Apply style preset
+        function applyStylePreset(presetName) {
+            const preset = presetName || document.getElementById('style_package').value;
+            
+            // Update the hidden input with the selected style
+            document.getElementById('style_package').value = preset;
+            
+            // Add active class to the selected button
+            document.querySelectorAll('.style-button').forEach(button => {
+                if (button.getAttribute('data-style') === preset) {
+                    button.classList.add('active');
+                } else {
+                    button.classList.remove('active');
+                }
+            });
+            
+            try {
+                // Map old preset names to new ones if needed (for backward compatibility)
+                let lookupPreset = preset;
+                if (preset === 'standard-professional') lookupPreset = 'professional-his-preset';
+                else if (preset === 'dark-professional') lookupPreset = 'professional-her-preset';
+                else if (preset === 'light-professional') lookupPreset = 'standard-preset';
+                else lookupPreset = preset + '-preset';
+                
+                // Fetch preset data from Supabase
+                supabase
+                    .from('dynamic_content')
+                    .select('key, value')
+                    .eq('project_id', lookupPreset)
+                    .then(({ data, error }) => {
+                        if (error) {
+                            console.error('Error applying style preset:', error);
+                            status.textContent = 'Error applying style preset: ' + error.message;
+                            status.className = 'status error';
+                            return;
+                        }
+                        
+                        // Update hidden inputs and preview
+                        data.forEach(({ key, value }) => {
+                            const element = document.getElementById(key);
+                            if (element) {
+                                element.value = value;
+                            }
+
+                            // Update preview
+                            if (key.endsWith('_color')) {
+                                const previewElement = document.querySelector('.' + key.replace('_', '-'));
+                                if (previewElement) {
+                                    previewElement.style.backgroundColor = value;
+                                    // Set text color based on background brightness
+                                    const brightness = getBrightness(value);
+                                    previewElement.style.color = brightness > 128 ? '#000' : '#fff';
+                                }
+                            } else if (key === 'heading_font') {
+                                loadFont(value);
+                                document.querySelector('.preview-heading').style.fontFamily = value;
+                            } else if (key === 'body_font') {
+                                loadFont(value);
+                                document.querySelector('.preview-body').style.fontFamily = value;
+                            }
+                        });
+                    });
+            } catch (error) {
+                console.error('Error applying style preset:', error);
+                status.textContent = 'Error applying style preset: ' + error.message;
+                status.className = 'status error';
+            }
+        }
+        
+        // Helper function to calculate color brightness
+        function getBrightness(color) {
+            const hex = color.replace('#', '');
+            const r = parseInt(hex.substr(0, 2), 16);
+            const g = parseInt(hex.substr(2, 2), 16);
+            const b = parseInt(hex.substr(4, 2), 16);
+            return (r * 299 + g * 587 + b * 114) / 1000;
+        }
+
         // DOM Elements
         const form = document.getElementById('contentForm');
         const status = document.getElementById('status');
@@ -1239,6 +1398,8 @@
             if (defaultStyle) defaultStyle.classList.add('active');
         }
 
+        initializeStyleButtons();
+
         // Event Listeners
         projectSelect.addEventListener('change', async function() {
             const selectedProject = this.value;
@@ -1297,8 +1458,6 @@
                 status.className = 'status error';
             }
         });
-
-        initializeStyleButtons();
 
         // CSV Import/Export functionality
         const csvUpload = document.getElementById('csv-upload');
