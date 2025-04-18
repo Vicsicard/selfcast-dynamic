@@ -385,6 +385,37 @@ SelfCast Dynamic is a multi-client website platform that allows you to:
 
 ---
 
+## Deploying the Content Editor
+
+To create a permanent, accessible content editor for managing all your SelfCast Dynamic sites:
+
+### Vercel Deployment (Recommended)
+
+1. **Connect Repository to Vercel**:
+   - Go to [Vercel Dashboard](https://vercel.com/dashboard)
+   - Click "Add New..." → "Project"
+   - Import the GitHub repository (selfcast-dynamic)
+
+2. **Configure Deployment Settings**:
+   - Framework Preset: Other
+   - Root Directory: ./
+   - Build Command: (leave empty)
+   - Output Directory: public-site
+
+3. **Access Your Content Editor**:
+   - Once deployed, your content editor will be available at:
+     - Main URL: `https://your-project-name.vercel.app/`
+     - Admin URL: `https://your-project-name.vercel.app/admin`
+     - Editor URL: `https://your-project-name.vercel.app/editor`
+
+4. **Viewing Specific Projects**:
+   - To view a specific project site, use:
+     `https://your-project-name.vercel.app/index.html?project_id=your-project-id`
+
+The deployment is configured to prioritize the content editor as the main interface, making it easy to manage all your SelfCast Dynamic sites from a single, accessible location.
+
+---
+
 ## Features
 - **Content isolation**: Each client site is isolated by `project_id`
 - **Static generation**: All content is embedded, no Supabase dependency after deployment

@@ -1,7 +1,7 @@
 {
   "version": 2,
   "buildCommand": null,
-  "outputDirectory": "static-sites/annie-sicard-123",
+  "outputDirectory": "public-site",
   "public": true,
   "cleanUrls": true,
   "trailingSlash": false,
@@ -10,8 +10,30 @@
   },
   "redirects": [
     {
+      "source": "/",
+      "destination": "/edit.html",
+      "permanent": true
+    },
+    {
       "source": "/admin",
-      "destination": "/edit.html"
+      "destination": "/edit.html",
+      "permanent": true
+    },
+    {
+      "source": "/editor",
+      "destination": "/edit.html",
+      "permanent": true
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "s-maxage=1, stale-while-revalidate"
+        }
+      ]
     }
   ]
 }
