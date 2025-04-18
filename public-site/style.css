@@ -937,24 +937,26 @@ footer a:hover {
 .social-card-header {
     display: flex;
     align-items: center;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
 }
 
 .social-card-icon {
-    font-size: 18px;
-    margin-right: 10px;
-    width: 30px;
-    height: 30px;
+    font-size: 20px;
+    margin-right: 15px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     color: white;
     flex-shrink: 0;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
 }
 
 .social-card-header h3 {
     margin: 0;
+    font-size: 1.3rem;
 }
 
 .facebook .social-card-icon {
@@ -976,10 +978,37 @@ footer a:hover {
 /* Fix for social buttons */
 .social-button {
     font-size: 0; /* Ensure no text is displayed */
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+}
+
+.social-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
 }
 
 .social-button .social-icon {
-    font-size: 20px; /* Reset font size for the icon */
+    font-size: 22px; /* Larger icon size */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+}
+
+/* Social links container */
+.social-links {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+    flex-wrap: wrap;
 }
 
 /* Media queries for responsiveness */
