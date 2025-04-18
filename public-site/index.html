@@ -23,6 +23,7 @@
     </script>
     <!-- Site Scripts -->
     <script src="script.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
 </head>
 <body>
     <!-- Site Wrapper -->
@@ -169,22 +170,34 @@
             <h2>Latest Updates</h2>
             <div class="grid-2x2">
                 <div class="grid-item social-card facebook">
-                    <h3 class="social-title" data-key="facebook_title"></h3>
+                    <div class="social-card-header">
+                        <i class="fab fa-facebook-f social-card-icon"></i>
+                        <h3 class="social-title" data-key="facebook_title"></h3>
+                    </div>
                     <p class="excerpt social-excerpt" data-key="facebook_excerpt"></p>
                     <button class="action-button" onclick="openModal('facebook')">Read More</button>
                 </div>
                 <div class="grid-item social-card twitter">
-                    <h3 class="social-title" data-key="twitter_title"></h3>
+                    <div class="social-card-header">
+                        <i class="fab fa-twitter social-card-icon"></i>
+                        <h3 class="social-title" data-key="twitter_title"></h3>
+                    </div>
                     <p class="excerpt social-excerpt" data-key="twitter_excerpt"></p>
                     <button class="action-button" onclick="openModal('twitter')">Read More</button>
                 </div>
                 <div class="grid-item social-card instagram">
-                    <h3 class="social-title" data-key="instagram_title"></h3>
+                    <div class="social-card-header">
+                        <i class="fab fa-instagram social-card-icon"></i>
+                        <h3 class="social-title" data-key="instagram_title"></h3>
+                    </div>
                     <p class="excerpt social-excerpt" data-key="instagram_excerpt"></p>
                     <button class="action-button" onclick="openModal('instagram')">Read More</button>
                 </div>
                 <div class="grid-item social-card linkedin">
-                    <h3 class="social-title" data-key="linkedin_title"></h3>
+                    <div class="social-card-header">
+                        <i class="fab fa-linkedin-in social-card-icon"></i>
+                        <h3 class="social-title" data-key="linkedin_title"></h3>
+                    </div>
                     <p class="excerpt social-excerpt" data-key="linkedin_excerpt"></p>
                     <button class="action-button" onclick="openModal('linkedin')">Read More</button>
                 </div>
@@ -251,23 +264,23 @@
                 <p class="connect-subtitle">I would love to connect with you on social media!</p>
                 <div class="social-links">
                     <a data-key="facebook_url" href="#" class="social-button facebook" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
-                        <span class="social-icon">f</span>
+                        <i class="social-icon fab fa-facebook-f"></i>
                         <span class="sr-only">Facebook</span>
                     </a>
                     <a data-key="twitter_url" href="#" class="social-button twitter" target="_blank" rel="noopener noreferrer" aria-label="Twitter">
-                        <span class="social-icon">t</span>
+                        <i class="social-icon fab fa-twitter"></i>
                         <span class="sr-only">Twitter</span>
                     </a>
                     <a data-key="instagram_url" href="#" class="social-button instagram" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
-                        <span class="social-icon">i</span>
+                        <i class="social-icon fab fa-instagram"></i>
                         <span class="sr-only">Instagram</span>
                     </a>
                     <a data-key="linkedin_url" href="#" class="social-button linkedin" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
-                        <span class="social-icon">in</span>
+                        <i class="social-icon fab fa-linkedin-in"></i>
                         <span class="sr-only">LinkedIn</span>
                     </a>
                     <a data-key="email_address" href="#" class="social-button email" aria-label="Email">
-                        <span class="social-icon">@</span>
+                        <i class="social-icon fas fa-envelope"></i>
                         <span class="sr-only">Email</span>
                     </a>
                 </div>

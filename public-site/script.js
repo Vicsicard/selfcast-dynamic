@@ -117,6 +117,13 @@ async function loadContent() {
                 const emailLink = document.querySelector('a[data-key="email_address"]');
                 if (emailLink && item.value) {
                     emailLink.href = `mailto:${item.value}`;
+                    
+                    // Clear any text nodes to prevent email from showing
+                    Array.from(emailLink.childNodes).forEach(node => {
+                        if (node.nodeType === Node.TEXT_NODE) {
+                            emailLink.removeChild(node);
+                        }
+                    });
                 }
             }
             
