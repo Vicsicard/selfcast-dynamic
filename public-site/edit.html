@@ -929,6 +929,73 @@
                 }
             });
             
+            // Apply default values based on preset selection
+            // This ensures themes work even if database presets don't exist yet
+            if (preset === 'green-professional') {
+                // Apply green theme defaults directly
+                document.getElementById('primary_color').value = '#28a745';
+                document.getElementById('secondary_color').value = '#20c997';
+                document.getElementById('accent_color').value = '#17a2b8';
+                document.getElementById('text_color').value = '#212529';
+                document.getElementById('background_color').value = '#f8f9fa';
+                document.getElementById('heading_font').value = 'Montserrat';
+                document.getElementById('body_font').value = 'Open Sans';
+                
+                // Update preview
+                document.querySelector('.primary-color').style.backgroundColor = '#28a745';
+                document.querySelector('.secondary-color').style.backgroundColor = '#20c997';
+                document.querySelector('.accent-color').style.backgroundColor = '#17a2b8';
+                document.querySelector('.text-color').style.backgroundColor = '#212529';
+                document.querySelector('.background-color').style.backgroundColor = '#f8f9fa';
+                
+                // Set text color based on background brightness
+                document.querySelector('.primary-color').style.color = '#fff';
+                document.querySelector('.secondary-color').style.color = '#fff';
+                document.querySelector('.accent-color').style.color = '#fff';
+                document.querySelector('.text-color').style.color = '#fff';
+                document.querySelector('.background-color').style.color = '#000';
+                
+                // Load and apply fonts
+                loadFont('Montserrat');
+                loadFont('Open Sans');
+                document.querySelector('.preview-heading').style.fontFamily = 'Montserrat';
+                document.querySelector('.preview-body').style.fontFamily = 'Open Sans';
+                
+                return; // Skip database lookup
+            } 
+            else if (preset === 'red-professional') {
+                // Apply red theme defaults directly
+                document.getElementById('primary_color').value = '#dc3545';
+                document.getElementById('secondary_color').value = '#fd7e14';
+                document.getElementById('accent_color').value = '#6f42c1';
+                document.getElementById('text_color').value = '#212529';
+                document.getElementById('background_color').value = '#fff5f5';
+                document.getElementById('heading_font').value = 'Raleway';
+                document.getElementById('body_font').value = 'Roboto';
+                
+                // Update preview
+                document.querySelector('.primary-color').style.backgroundColor = '#dc3545';
+                document.querySelector('.secondary-color').style.backgroundColor = '#fd7e14';
+                document.querySelector('.accent-color').style.backgroundColor = '#6f42c1';
+                document.querySelector('.text-color').style.backgroundColor = '#212529';
+                document.querySelector('.background-color').style.backgroundColor = '#fff5f5';
+                
+                // Set text color based on background brightness
+                document.querySelector('.primary-color').style.color = '#fff';
+                document.querySelector('.secondary-color').style.color = '#fff';
+                document.querySelector('.accent-color').style.color = '#fff';
+                document.querySelector('.text-color').style.color = '#fff';
+                document.querySelector('.background-color').style.color = '#000';
+                
+                // Load and apply fonts
+                loadFont('Raleway');
+                loadFont('Roboto');
+                document.querySelector('.preview-heading').style.fontFamily = 'Raleway';
+                document.querySelector('.preview-body').style.fontFamily = 'Roboto';
+                
+                return; // Skip database lookup
+            }
+            
             try {
                 // Map old preset names to new ones if needed (for backward compatibility)
                 let lookupPreset = preset;
