@@ -803,6 +803,15 @@
                 
                 if (!data || data.length === 0) {
                     console.log('No projects found in database');
+                    const option = document.createElement('option');
+                    option.value = 'adam-hyp-1';
+                    option.textContent = 'adam-hyp-1 (Default)';
+                    existingGroup.appendChild(option);
+                    
+                    const option2 = document.createElement('option');
+                    option2.value = 'annie-sicard-123';
+                    option2.textContent = 'annie-sicard-123';
+                    existingGroup.appendChild(option2);
                     return;
                 }
 
@@ -830,10 +839,45 @@
                 // Log the final state of the dropdown
                 console.log('Final dropdown options:', Array.from(projectSelect.options).map(opt => opt.value));
                 
+                // Ensure important projects are always available
+                const importantProjects = ['adam-hyp-1', 'annie-sicard-123'];
+                importantProjects.forEach(projectId => {
+                    if (!projectIds.includes(projectId)) {
+                        const option = document.createElement('option');
+                        option.value = projectId;
+                        option.textContent = projectId === 'adam-hyp-1' ? 'adam-hyp-1 (Default)' : projectId;
+                        existingGroup.appendChild(option);
+                        console.log(`Added important project: ${projectId}`);
+                    }
+                });
+                
             } catch (error) {
                 console.error('Error loading projects:', error);
                 status.textContent = 'Error loading projects: ' + error.message;
                 status.className = 'status error';
+                
+                // Add fallback projects in case of error
+                const existingGroup = projectSelect.querySelector('optgroup') || 
+                    (() => {
+                        const group = document.createElement('optgroup');
+                        group.label = 'Existing Projects';
+                        projectSelect.appendChild(group);
+                        return group;
+                    })();
+                
+                const fallbackProjects = [
+                    { value: 'adam-hyp-1', text: 'adam-hyp-1 (Fallback)' },
+                    { value: 'annie-sicard-123', text: 'annie-sicard-123 (Fallback)' }
+                ];
+                
+                fallbackProjects.forEach(project => {
+                    const option = document.createElement('option');
+                    option.value = project.value;
+                    option.textContent = project.text;
+                    existingGroup.appendChild(option);
+                });
+                
+                console.log('Added fallback projects due to error');
             }
         }
 
