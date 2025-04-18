@@ -568,7 +568,7 @@ section {
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 
 .blog-card .action-button:hover {
@@ -1411,7 +1411,7 @@ footer a:hover {
     position: relative;
     width: 90%;
     max-width: 800px;
-    max-height: 85vh;
+    max-height: 90vh; /* Increased from 85vh to 90vh */
     overflow-y: auto;
     transform: translateY(0);
     transition: transform 0.3s ease;
@@ -1476,6 +1476,41 @@ footer a:hover {
     margin: 2rem 0 1rem 0;
     font-size: 1.5rem;
     font-weight: 600;
+}
+
+.modal-content .social-content,
+.social-content {
+    line-height: 1.7;
+    font-size: 1.1rem;
+    color: var(--text-color);
+    text-align: left;
+    max-height: none; /* Remove any height constraints */
+    overflow: visible; /* Ensure content is not cut off */
+}
+
+.modal-content .social-content p,
+.social-content p {
+    margin-bottom: 1.5rem;
+    line-height: 1.7;
+}
+
+.modal-content .social-content p:last-child,
+.social-content p:last-child {
+    margin-bottom: 0;
+}
+
+/* Style for quotes within social content */
+.modal-content .social-content p:has(q),
+.modal-content .social-content p:has(blockquote),
+.social-content p:has(q),
+.social-content p:has(blockquote) {
+    font-style: italic;
+    font-size: 1.2rem;
+    line-height: 1.8;
+    color: var(--accent-color);
+    padding-left: 1.5rem;
+    border-left: 3px solid var(--primary-color);
+    margin: 2rem 0;
 }
 
 .close-button {
