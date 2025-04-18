@@ -59,19 +59,39 @@
 
         <!-- Bio Section -->
         <section class="bio">
-            <h2>About</h2>
-            <div data-key="rendered_bio_html"></div>
-            
-            <!-- Bio Cards -->
-            <div class="bio-cards">
-                <div class="bio-card">
-                    <div data-key="rendered_bio_html_card_1"></div>
+            <div class="bio-background">
+                <div class="bio-shape shape1"></div>
+                <div class="bio-shape shape2"></div>
+                <div class="bio-shape shape3"></div>
+            </div>
+            <div class="bio-container">
+                <h2 class="section-title">About</h2>
+                <div class="bio-main-content">
+                    <div data-key="rendered_bio_html" class="bio-text"></div>
                 </div>
-                <div class="bio-card">
-                    <div data-key="rendered_bio_html_card_2"></div>
-                </div>
-                <div class="bio-card">
-                    <div data-key="rendered_bio_html_card_3"></div>
+                
+                <!-- Bio Cards - Restructured for better alignment -->
+                <div class="bio-cards-container">
+                    <div class="bio-cards-row">
+                        <div class="bio-card">
+                            <div class="bio-card-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="none" d="M0 0h24v24H0z"/><path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm0-2a8 8 0 1 0 0-16 8 8 0 0 0 0 16zm-.997-4L6.76 11.757l1.414-1.414 2.829 2.829 5.656-5.657 1.415 1.414L11.003 16z"/></svg>
+                            </div>
+                            <div data-key="rendered_bio_html_card_1" class="bio-card-content"></div>
+                        </div>
+                        <div class="bio-card">
+                            <div class="bio-card-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="none" d="M0 0h24v24H0z"/><path d="M19.606 6.995c-.076-.298-.292-.523-.539-.592C18.63 6.28 16.5 6 12 6s-6.628.28-7.069.403c-.244.068-.46.293-.537.592C4.285 7.419 4 9.196 4 12s.285 4.58.394 5.006c.076.297.292.522.538.59C5.372 17.72 7.5 18 12 18s6.629-.28 7.069-.403c.244-.068.46-.293.537-.592C19.715 16.581 20 14.8 20 12s-.285-4.58-.394-5.005zm1.937-.497C22 8.28 22 12 22 12s0 3.72-.457 5.502c-.254.985-.997 1.76-1.938 2.022C17.896 20 12 20 12 20s-5.893 0-7.605-.476c-.945-.266-1.687-1.04-1.938-2.022C2 15.72 2 12 2 12s0-3.72.457-5.502c.254-.985.997-1.76 1.938-2.022C6.107 4 12 4 12 4s5.896 0 7.605.476c.945.266 1.687 1.04 1.938 2.022zM10 15.5v-7l6 3.5-6 3.5z"/></svg>
+                            </div>
+                            <div data-key="rendered_bio_html_card_2" class="bio-card-content"></div>
+                        </div>
+                        <div class="bio-card">
+                            <div class="bio-card-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="none" d="M0 0h24v24H0z"/><path d="M20 22H4a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1zm-1-2V4H5v16h14zM8 7h8v2H8V7zm0 4h8v2H8v-2zm0 4h8v2H8v-2z"/></svg>
+                            </div>
+                            <div data-key="rendered_bio_html_card_3" class="bio-card-content"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
