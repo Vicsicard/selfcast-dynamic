@@ -3,7 +3,7 @@
   "buildCommand": null,
   "outputDirectory": "public-site",
   "public": true,
-  "cleanUrls": true,
+  "cleanUrls": false,
   "trailingSlash": false,
   "github": {
     "silent": true
@@ -23,12 +23,6 @@
       "source": "/editor",
       "destination": "/edit.html",
       "permanent": true
-    }
-  ],
-  "rewrites": [
-    {
-      "source": "/index.html",
-      "destination": "/index.html"
     }
   ],
   "headers": [
