@@ -254,7 +254,7 @@
         </div>
         
         <div id="blog-form" class="blog-form">
-            <h2>Edit Blog Post <span id="blog-number"></span></h2>
+            <h2 id="blog-form-title">Edit Blog Post <span id="blog-number"></span></h2>
             
             <div class="form-group">
                 <label for="blog_title">Title:</label>
@@ -410,6 +410,22 @@
                 if (projectId && projectIds.includes(projectId)) {
                     projectSelect.value = projectId;
                     loadBlogPosts(projectId);
+                    
+                    // Update URL to include project_id if it's not already there
+                    if (!window.location.search.includes('project_id=')) {
+                        const newUrl = new URL(window.location.href);
+                        newUrl.searchParams.set('project_id', projectId);
+                        window.history.replaceState({}, '', newUrl);
+                    }
+                } else if (projectIds.length > 0) {
+                    // If no project_id in URL but we have projects, select the first one
+                    projectSelect.value = projectIds[0];
+                    loadBlogPosts(projectIds[0]);
+                    
+                    // Update URL to include project_id
+                    const newUrl = new URL(window.location.href);
+                    newUrl.searchParams.set('project_id', projectIds[0]);
+                    window.history.replaceState({}, '', newUrl);
                 }
             } catch (error) {
                 console.error('Error loading projects:', error);
@@ -561,73 +577,70 @@
         }
         
         // Edit a blog post
-        async function editBlogPost(number) {
-            try {
-                currentBlogNumber = number;
-                
-                // Get project ID
-                const projectId = projectSelect.value;
-                
-                // Fetch blog post data
-                const { data, error } = await supabase
-                    .from('dynamic_content')
-                    .select('*')
-                    .eq('project_id', projectId)
-                    .or(`key.eq.blog_${number}_title,key.eq.blog_${number},key.eq.blog_${number}_excerpt,key.eq.blog_${number}_featured`);
-                
-                if (error) throw error;
-                
-                // Extract blog post data
-                const title = data.find(item => item.key === `blog_${number}_title`)?.value || '';
-                const content = data.find(item => item.key === `blog_${number}`)?.value || '';
-                const excerpt = data.find(item => item.key === `blog_${number}_excerpt`)?.value || '';
-                const featured = data.find(item => item.key === `blog_${number}_featured`)?.value === 'true';
-                
-                // Populate form
-                blogNumber.textContent = number;
-                blogTitle.value = title;
-                blogContent.value = content;
-                blogExcerpt.value = excerpt;
-                blogFeatured.checked = featured;
-                
-                // Show form
-                blogForm.classList.add('active');
-                blogList.style.display = 'none';
-                document.querySelector('.pagination').style.display = 'none';
-                
-                // Scroll to form
-                blogForm.scrollIntoView({ behavior: 'smooth' });
-                
-            } catch (error) {
-                console.error('Error editing blog post:', error);
-                status.textContent = 'Error editing blog post: ' + error.message;
+        function editBlogPost(number) {
+            // Get project ID
+            const projectId = projectSelect.value;
+            
+            if (!projectId) {
+                status.textContent = 'Please select a project first';
                 status.className = 'status error';
+                return;
             }
+            
+            // Find the blog post
+            const blogPost = allBlogPosts.find(post => post.number === number);
+            
+            if (!blogPost) {
+                status.textContent = `Blog post #${number} not found`;
+                status.className = 'status error';
+                return;
+            }
+            
+            // Set current blog number
+            currentBlogNumber = number;
+            
+            // Populate form
+            document.getElementById('blog-form-title').textContent = `Edit Blog Post #${number}`;
+            blogTitle.value = blogPost.title;
+            blogExcerpt.value = blogPost.excerpt;
+            blogContent.value = blogPost.content;
+            blogFeatured.checked = blogPost.featured;
+            
+            // Show form
+            blogForm.classList.add('active');
+            blogForm.scrollIntoView({ behavior: 'smooth' });
         }
         
         // Create a new blog post
         function createNewBlogPost() {
+            // Get project ID
+            const projectId = projectSelect.value;
+            
+            if (!projectId) {
+                status.textContent = 'Please select a project first';
+                status.className = 'status error';
+                return;
+            }
+            
             // Find the highest blog number
             const highestNumber = allBlogPosts.length > 0 
                 ? Math.max(...allBlogPosts.map(post => post.number)) 
                 : 0;
             
-            // Set new blog number
+            // Set the new blog number
             currentBlogNumber = highestNumber + 1;
             
-            // Clear form
-            blogNumber.textContent = currentBlogNumber;
+            // Clear form fields
             blogTitle.value = '';
-            blogContent.value = '';
             blogExcerpt.value = '';
+            blogContent.value = '';
             blogFeatured.checked = false;
+            
+            // Update form title
+            document.getElementById('blog-form-title').textContent = `Create Blog Post #${currentBlogNumber}`;
             
             // Show form
             blogForm.classList.add('active');
-            blogList.style.display = 'none';
-            document.querySelector('.pagination').style.display = 'none';
-            
-            // Scroll to form
             blogForm.scrollIntoView({ behavior: 'smooth' });
         }
         
@@ -719,9 +732,14 @@
         
         // Cancel editing a blog post
         function cancelEditBlogPost() {
+            // Hide form
             blogForm.classList.remove('active');
-            blogList.style.display = 'block';
-            document.querySelector('.pagination').style.display = 'flex';
+            
+            // Clear status
+            status.textContent = '';
+            status.className = 'status';
+            
+            // Reset current blog number
             currentBlogNumber = null;
         }
         
