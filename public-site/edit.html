@@ -1297,35 +1297,10 @@
                 
                 // Set up the click handler for the view site button
                 viewSiteButton.onclick = function() {
-                    // First run the static build script to generate or update the static site
-                    const statusElement = document.getElementById('status');
-                    statusElement.textContent = 'Building static site...';
-                    statusElement.className = 'status info';
-                    
-                    // Create a form to submit to the build endpoint
-                    const form = document.createElement('form');
-                    form.method = 'POST';
-                    form.action = '/build-static-site';
-                    form.target = '_blank';
-                    
-                    // Add the project ID as a hidden input
-                    const input = document.createElement('input');
-                    input.type = 'hidden';
-                    input.name = 'project_id';
-                    input.value = projectId;
-                    form.appendChild(input);
-                    
-                    // Add the form to the document and submit it
-                    document.body.appendChild(form);
-                    
-                    // Open the static site in a new tab
-                    const siteUrl = window.location.origin + '/static-sites/' + projectId + '/index.html';
+                    // Use the view-site.html page to handle the redirect
+                    const siteUrl = window.location.origin + '/view-site.html?project_id=' + projectId;
                     console.log('Opening site URL:', siteUrl);
                     window.open(siteUrl, '_blank');
-                    
-                    // Show success message
-                    statusElement.textContent = 'Static site opened in new tab';
-                    statusElement.className = 'status success';
                 };
                 
             } catch (error) {
@@ -1528,35 +1503,10 @@
                 
                 // Set up the click handler for the view site button
                 viewSiteButton.onclick = function() {
-                    // First run the static build script to generate or update the static site
-                    const statusElement = document.getElementById('status');
-                    statusElement.textContent = 'Building static site...';
-                    statusElement.className = 'status info';
-                    
-                    // Create a form to submit to the build endpoint
-                    const form = document.createElement('form');
-                    form.method = 'POST';
-                    form.action = '/build-static-site';
-                    form.target = '_blank';
-                    
-                    // Add the project ID as a hidden input
-                    const input = document.createElement('input');
-                    input.type = 'hidden';
-                    input.name = 'project_id';
-                    input.value = projectId;
-                    form.appendChild(input);
-                    
-                    // Add the form to the document and submit it
-                    document.body.appendChild(form);
-                    
-                    // Open the static site in a new tab
-                    const siteUrl = window.location.origin + '/static-sites/' + projectId + '/index.html';
+                    // Use the view-site.html page to handle the redirect
+                    const siteUrl = window.location.origin + '/view-site.html?project_id=' + projectId;
                     console.log('Opening site URL:', siteUrl);
                     window.open(siteUrl, '_blank');
-                    
-                    // Show success message
-                    statusElement.textContent = 'Static site opened in new tab';
-                    statusElement.className = 'status success';
                 };
                 
             } catch (error) {
@@ -1677,35 +1627,10 @@
                 // Set up the view site button with the current project ID
                 const viewSiteButton = document.getElementById('view-site-button');
                 viewSiteButton.onclick = function() {
-                    // First run the static build script to generate or update the static site
-                    const statusElement = document.getElementById('status');
-                    statusElement.textContent = 'Building static site...';
-                    statusElement.className = 'status info';
-                    
-                    // Create a form to submit to the build endpoint
-                    const form = document.createElement('form');
-                    form.method = 'POST';
-                    form.action = '/build-static-site';
-                    form.target = '_blank';
-                    
-                    // Add the project ID as a hidden input
-                    const input = document.createElement('input');
-                    input.type = 'hidden';
-                    input.name = 'project_id';
-                    input.value = selectedProject;
-                    form.appendChild(input);
-                    
-                    // Add the form to the document and submit it
-                    document.body.appendChild(form);
-                    
-                    // Open the static site in a new tab
-                    const siteUrl = window.location.origin + '/static-sites/' + selectedProject + '/index.html';
+                    // Use the view-site.html page to handle the redirect
+                    const siteUrl = window.location.origin + '/view-site.html?project_id=' + selectedProject;
                     console.log('Opening site URL:', siteUrl);
                     window.open(siteUrl, '_blank');
-                    
-                    // Show success message
-                    statusElement.textContent = 'Static site opened in new tab';
-                    statusElement.className = 'status success';
                 };
                 
             } catch (error) {

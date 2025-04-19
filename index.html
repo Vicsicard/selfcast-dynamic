@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SelfCast Dynamic</title>
+    <script src="public-site/config.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f5f5f5;
+            color: #333;
+        }
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 2rem;
+            text-align: center;
+        }
+        .spinner {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(0,0,0,0.1);
+            border-radius: 50%;
+            border-top-color: #3399FF;
+            animation: spin 1s ease-in-out infinite;
+            margin-bottom: 2rem;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .status {
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1rem 0;
+            max-width: 600px;
+        }
+        .info {
+            background: #e3f2fd;
+            color: #0d47a1;
+        }
+        .error {
+            background: #ffebee;
+            color: #c62828;
+        }
+        h1 {
+            margin-bottom: 1rem;
+        }
+        #content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-container">
+        <div class="spinner"></div>
+        <h1>Loading SelfCast Dynamic</h1>
+        <div id="status" class="status info">Initializing...</div>
+    </div>
+    
+    <div id="content"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async function() {
+            const statusElement = document.getElementById('status');
+            const contentElement = document.getElementById('content');
+            
+            try {
+                // Get the project_id from the URL
+                const urlParams = new URLSearchParams(window.location.search);
+                const projectId = urlParams.get('project_id');
+                
+                if (!projectId) {
+                    throw new Error('No project ID specified. Please provide a project_id parameter.');
+                }
+                
+                statusElement.textContent = `Loading project: ${projectId}...`;
+                
+                // Initialize Supabase client
+                const supabaseUrl = SUPABASE_URL;
+                const supabaseKey = SUPABASE_KEY;
+                const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+                
+                // Fetch all content for this project
+                const { data, error } = await supabase
+                    .from('dynamic_content')
+                    .select('*')
+                    .eq('project_id', projectId);
+                
+                if (error) {
+                    throw new Error('Error fetching project content: ' + error.message);
+                }
+                
+                if (!data || data.length === 0) {
+                    throw new Error(`Project "${projectId}" not found or has no content.`);
+                }
+                
+                statusElement.textContent = `Rendering project: ${projectId}...`;
+                
+                // Create a content object from the data
+                const content = {};
+                data.forEach(item => {
+                    content[item.content_key] = item.content_value;
+                });
+                
+                // Fetch the template HTML
+                const response = await fetch('public-site/template.html');
+                if (!response.ok) {
+                    throw new Error('Failed to load template: ' + response.statusText);
+                }
+                
+                let html = await response.text();
+                
+                // Replace content placeholders
+                for (const [key, value] of Object.entries(content)) {
+                    const placeholder = new RegExp(`\\{\\{\\s*${key}\\s*\\}\\}`, 'g');
+                    html = html.replace(placeholder, value || '');
+                }
+                
+                // Set the content
+                document.documentElement.innerHTML = html;
+                
+                // Initialize any scripts that might be needed
+                const scripts = document.querySelectorAll('script');
+                scripts.forEach(script => {
+                    if (script.src) {
+                        const newScript = document.createElement('script');
+                        newScript.src = script.src;
+                        document.body.appendChild(newScript);
+                    } else if (script.textContent) {
+                        eval(script.textContent);
+                    }
+                });
+                
+            } catch (error) {
+                console.error('Error:', error);
+                statusElement.className = 'status error';
+                statusElement.textContent = error.message;
+                
+                // Add a link to go back to the editor
+                const backLink = document.createElement('p');
+                backLink.innerHTML = '<a href="public-site/edit.html" style="color: #3399FF; text-decoration: underline;">Return to Content Editor</a>';
+                document.querySelector('.loading-container').appendChild(backLink);
+            }
+        });
+    </script>
+</body>
+</html>

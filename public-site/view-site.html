@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Redirecting to Site</title>
+    <title>Redirecting to Your Site</title>
+    <script src="config.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body {
             font-family: system-ui, -apple-system, sans-serif;
@@ -12,128 +14,138 @@
             padding: 0 1rem;
             background: #f5f5f5;
         }
-        .error {
-            background: #f8d7da;
-            color: #721c24;
+        .card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 1.5rem;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        .status {
             padding: 1rem;
             border-radius: 4px;
-            margin-bottom: 1rem;
+            margin: 1rem 0;
         }
         .info {
-            background: #d1ecf1;
-            color: #0c5460;
-            padding: 1rem;
-            border-radius: 4px;
-            margin-bottom: 1rem;
+            background: #e3f2fd;
+            color: #0d47a1;
+        }
+        .error {
+            background: #ffebee;
+            color: #c62828;
+        }
+        .success {
+            background: #e8f5e9;
+            color: #2e7d32;
         }
         pre {
-            background: #f8f9fa;
+            background: #f5f5f5;
             padding: 1rem;
             border-radius: 4px;
             overflow-x: auto;
         }
-        button {
-            background: #007bff;
-            color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-top: 1rem;
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(0,0,0,0.1);
+            border-radius: 50%;
+            border-top-color: #3399FF;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
         }
-        button:hover {
-            background: #0069d9;
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
     </style>
-    <script>
-        // Wait for DOM to be fully loaded
-        document.addEventListener('DOMContentLoaded', function() {
-            // Get elements
-            const statusDiv = document.getElementById('status');
-            const detailsDiv = document.getElementById('details');
-            const tryAgainBtn = document.getElementById('try-again');
-            const directLinkBtn = document.getElementById('direct-link');
-            
-            // Get project ID from URL parameter
-            const urlParams = new URLSearchParams(window.location.search);
-            const projectId = urlParams.get('project_id');
-            
-            console.log('Project ID from URL:', projectId);
-            
-            if (!projectId) {
-                console.error('No project ID specified in URL parameters');
-                statusDiv.innerHTML = '<div class="error">Error: No project ID specified</div>';
-                return;
-            }
-            
-            // Construct the target URL
-            const targetUrl = 'http://127.0.0.1:8100/' + projectId + '/index.html';
-            console.log('Target URL:', targetUrl);
-            
-            // Update the direct link button
-            directLinkBtn.href = targetUrl;
-            directLinkBtn.textContent = 'Open ' + targetUrl;
-            
-            // Check if the file exists (using fetch)
-            fetch(targetUrl)
-                .then(response => {
-                    console.log('Fetch response:', response);
-                    if (response.ok) {
-                        console.log('File exists, redirecting...');
-                        statusDiv.innerHTML = '<div class="info">Redirecting to ' + targetUrl + '...</div>';
-                        // Redirect to the static site
-                        window.location.href = targetUrl;
-                    } else {
-                        console.error('File not found:', response.status, response.statusText);
-                        statusDiv.innerHTML = '<div class="error">Error: Static site not found for project "' + projectId + '"</div>';
-                        detailsDiv.innerHTML = `
-                            <p>The static site for this project may not exist yet or might be in a different location.</p>
-                            <p>Details:</p>
-                            <pre>
-Status: ${response.status} ${response.statusText}
-URL: ${targetUrl}
-Project ID: ${projectId}
-Current location: ${window.location.href}
-                            </pre>
-                            <p>Possible solutions:</p>
-                            <ol>
-                                <li>Make sure you've run the static-build.js script for this project: <code>node static-build.js ${projectId}</code></li>
-                                <li>Check if the static site directory exists: <code>static-sites/${projectId}/</code></li>
-                                <li>Try viewing the dynamic site instead: <a href="index.html?project_id=${projectId}">index.html?project_id=${projectId}</a></li>
-                            </ol>
-                        `;
-                    }
-                })
-                .catch(error => {
-                    console.error('Fetch error:', error);
-                    statusDiv.innerHTML = '<div class="error">Error: Failed to check if static site exists</div>';
-                    detailsDiv.innerHTML = `
-                        <p>An error occurred while trying to access the static site:</p>
-                        <pre>${error.toString()}</pre>
-                        <p>This might be due to CORS restrictions or network issues.</p>
-                    `;
-                });
-            
-            // Try again button
-            tryAgainBtn.addEventListener('click', function() {
-                window.location.reload();
-            });
-        });
-    </script>
 </head>
 <body>
-    <h1>Site Viewer</h1>
-    <div id="status">
-        <div class="info">Checking if static site exists...</div>
+    <div class="card">
+        <h1>Redirecting to Your Site</h1>
+        <div id="status" class="status info">
+            <div class="loading"></div>
+            <span>Checking project information...</span>
+        </div>
+        <div id="details"></div>
     </div>
-    <div id="details"></div>
-    <div>
-        <button id="try-again">Try Again</button>
-        <a id="direct-link" href="#" target="_blank">Direct Link</a>
-    </div>
-    <div style="margin-top: 2rem;">
-        <h2>Console Output</h2>
-        <p>Check your browser's developer console (F12) for more detailed error information.</p>
-    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async function() {
+            const statusElement = document.getElementById('status');
+            const detailsElement = document.getElementById('details');
+            
+            try {
+                // Get the project_id from the URL
+                const urlParams = new URLSearchParams(window.location.search);
+                const projectId = urlParams.get('project_id');
+                
+                if (!projectId) {
+                    throw new Error('No project ID specified. Please provide a project_id parameter.');
+                }
+                
+                // Log the project ID for debugging
+                console.log('Project ID:', projectId);
+                statusElement.innerHTML = `<div class="loading"></div><span>Loading project: ${projectId}...</span>`;
+                
+                // Initialize Supabase client
+                const supabaseUrl = SUPABASE_URL;
+                const supabaseKey = SUPABASE_KEY;
+                const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+                
+                // Check if the project exists in Supabase
+                const { data, error } = await supabase
+                    .from('dynamic_content')
+                    .select('project_id')
+                    .eq('project_id', projectId)
+                    .limit(1);
+                
+                if (error) {
+                    throw new Error('Error checking project: ' + error.message);
+                }
+                
+                if (!data || data.length === 0) {
+                    throw new Error(`Project "${projectId}" not found. Please check the project ID and try again.`);
+                }
+                
+                // Determine the appropriate URL based on the environment
+                let siteUrl;
+                
+                // Check if we're on Vercel
+                if (window.location.hostname.includes('vercel.app')) {
+                    // On Vercel, we'll use the index.html in the public directory
+                    siteUrl = `${window.location.origin}/index.html?project_id=${projectId}`;
+                } else {
+                    // Locally, we'll use the static site
+                    siteUrl = `${window.location.origin}/static-sites/${projectId}/index.html`;
+                }
+                
+                console.log('Redirecting to:', siteUrl);
+                statusElement.innerHTML = `<div class="loading"></div><span>Redirecting to site...</span>`;
+                
+                // Redirect to the site
+                window.location.href = siteUrl;
+                
+            } catch (error) {
+                console.error('Error:', error);
+                statusElement.className = 'status error';
+                statusElement.textContent = error.message;
+                
+                // Add more details for debugging
+                detailsElement.innerHTML = `
+                    <h2>Debug Information</h2>
+                    <p>If you're seeing this error, please check the following:</p>
+                    <ul>
+                        <li>Make sure the project ID is correct</li>
+                        <li>Verify that the project exists in the Supabase database</li>
+                        <li>Check the browser console for more detailed error messages</li>
+                    </ul>
+                    <pre>Error: ${error.stack || error.message}</pre>
+                `;
+            }
+        });
+    </script>
 </body>
 </html>
