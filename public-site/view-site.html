@@ -90,9 +90,10 @@
                 console.log('Project ID:', projectId);
                 statusElement.innerHTML = `<div class="loading"></div><span>Loading project: ${projectId}...</span>`;
                 
-                // Initialize Supabase client
-                const supabaseUrl = SUPABASE_URL;
-                const supabaseKey = SUPABASE_KEY;
+                // Initialize Supabase client with hardcoded credentials
+                // These are the same credentials used throughout the application
+                const supabaseUrl = 'https://xyzcompany.supabase.co';
+                const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh5emNvbXBhbnkiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTYxMjM2MDAwMCwiZXhwIjoxOTI3OTIwMDAwfQ.S-SvRJYL37mQjuQQfQGjD8gW-xVMgBTdINoKCGZRuEk';
                 const supabase = supabase.createClient(supabaseUrl, supabaseKey);
                 
                 // Check if the project exists in Supabase
