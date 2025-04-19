@@ -1,0 +1,594 @@
+<!DOCTYPE html><html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-key="rendered_title">Adam Hyp</title>
+    <style>
+        :root {
+            --primary-color: #3399FF;
+            --secondary-color: #66CCFF;
+            --accent-color: #FF6B6B;
+            --text-color: #333333;
+            --background-color: #F5F5F5;
+            --heading-font: 'Montserrat', sans-serif;
+            --body-font: 'Open Sans', sans-serif;
+        }
+        
+        body {
+            font-family: var(--body-font);
+            color: var(--text-color);
+            background-color: var(--background-color);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        header {
+            background-color: #fff;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 20px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-family: var(--heading-font);
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        
+        nav li {
+            margin-left: 30px;
+        }
+        
+        nav a {
+            color: var(--text-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        
+        nav a:hover {
+            color: var(--primary-color);
+        }
+        
+        .hero {
+            padding: 100px 0;
+            background-color: var(--primary-color);
+            color: white;
+            text-align: center;
+        }
+        
+        .hero h1 {
+            font-family: var(--heading-font);
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+        
+        .hero p {
+            font-size: 20px;
+            max-width: 600px;
+            margin: 0 auto 30px;
+        }
+        
+        .btn {
+            display: inline-block;
+            background-color: white;
+            color: var(--primary-color);
+            padding: 12px 30px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        
+        section {
+            padding: 80px 0;
+        }
+        
+        h2 {
+            font-family: var(--heading-font);
+            font-size: 36px;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+        
+        .bio {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            padding: 40px;
+            margin-bottom: 40px;
+        }
+        
+        .bio-content {
+            display: flex;
+            align-items: center;
+            gap: 40px;
+        }
+        
+        .bio-image {
+            flex: 0 0 300px;
+        }
+        
+        .bio-image img {
+            width: 100%;
+            border-radius: 10px;
+        }
+        
+        .bio-text {
+            flex: 1;
+        }
+        
+        .quote {
+            font-style: italic;
+            font-size: 24px;
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto 40px;
+            color: var(--primary-color);
+        }
+        
+        .blog-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .blog-card {
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: transform 0.3s;
+        }
+        
+        .blog-card:hover {
+            transform: translateY(-10px);
+        }
+        
+        .blog-image {
+            height: 200px;
+            background-color: #eee;
+            background-size: cover;
+            background-position: center;
+        }
+        
+        .blog-content {
+            padding: 20px;
+        }
+        
+        .blog-title {
+            font-family: var(--heading-font);
+            font-size: 20px;
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+        
+        .blog-excerpt {
+            color: #666;
+            margin-bottom: 20px;
+        }
+        
+        .blog-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .view-all-blogs {
+            text-align: center;
+            margin: 40px 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            border-radius: 10px;
+        }
+        
+        .view-all-blogs a {
+            display: inline-block;
+            background-color: #3399FF;
+            color: white;
+            padding: 15px 40px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 18px;
+        }
+        
+        .view-all-blogs a:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        
+        .social-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 30px;
+        }
+        
+        .social-card {
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        
+        .social-header {
+            padding: 15px 20px;
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .social-icon {
+            font-size: 24px;
+        }
+        
+        .social-platform {
+            font-weight: 600;
+        }
+        
+        .social-content {
+            padding: 20px;
+        }
+        
+        .social-link {
+            display: block;
+            margin-top: 15px;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .contact {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .contact-btn {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 600;
+            margin-top: 20px;
+            transition: all 0.3s;
+        }
+        
+        .contact-btn:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        
+        footer {
+            background-color: #333;
+            color: white;
+            padding: 40px 0;
+            text-align: center;
+        }
+        
+        .footer-content {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .footer-links {
+            margin: 20px 0;
+        }
+        
+        .footer-links a {
+            color: white;
+            margin: 0 10px;
+            text-decoration: none;
+        }
+        
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+        
+        .copyright {
+            font-size: 14px;
+            color: #aaa;
+        }
+        
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            nav ul {
+                margin-top: 20px;
+            }
+            
+            nav li {
+                margin: 0 10px;
+            }
+            
+            .hero h1 {
+                font-size: 36px;
+            }
+            
+            .hero p {
+                font-size: 18px;
+            }
+            
+            .bio-content {
+                flex-direction: column;
+            }
+            
+            .bio-image {
+                flex: 0 0 100%;
+                margin-bottom: 20px;
+            }
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&amp;family=Open+Sans:wght@400;600&amp;display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+<!-- Static build generated for test123 on 2025-04-19T16:45:23.845Z --></head>
+<body>
+    <header>
+        <div class="container header-content">
+            <a href="Adam Hyp" class="logo" data-key="rendered_title">SelfCast Dynamic</a>
+            <nav>
+                <ul>
+                    <li><a href="#bio">About</a></li>
+                    <li><a href="#blog">Blog</a></li>
+                    <li><a href="#social">Connect</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    
+    <section class="hero">
+        <div class="container">
+            <h1 data-key="rendered_title">Adam Hyp</h1>
+            <p data-key="rendered_subtitle">Turning connection into momentum — one conversation at a time.</p>
+            <a href="#contact" class="btn">Get in Touch</a>
+        </div>
+    </section>
+    
+    <section id="bio">
+        <div class="container">
+            <h2>About Me</h2>
+            <div class="bio">
+                <div class="bio-content">
+                    <div class="bio-image">
+                        <img src="placeholder.jpg" alt="Profile" data-key="profile_image">
+                    </div>
+                    <div class="bio-text" data-key="rendered_bio_html">Adam-style</div>
+                </div>
+            </div>
+            <div class="quote" data-key="quote_1">"Softness is not a weakness. It's what happens when you've survived — and still choose to stay open."</div>
+        </div>
+    </section>
+    
+    <section id="blog">
+        <div class="container">
+            <h2>Latest Blog Posts</h2>
+            <div class="blog-grid">
+                <!-- Blog Post 1 -->
+                <div class="blog-card">
+                    <div class="blog-image" style="background-image: url('blog-placeholder.jpg');"></div>
+                    <div class="blog-content">
+                        <h3 class="blog-title" data-key="blog_1_title">Adam-style</h3>
+                        <p class="blog-excerpt" data-key="blog_1_description">A brief description of the blog post goes here...</p>
+                        <a href="#" class="blog-link">Read More</a>
+                    </div>
+                </div>
+                
+                <!-- Blog Post 2 -->
+                <div class="blog-card">
+                    <div class="blog-image" style="background-image: url('blog-placeholder.jpg');"></div>
+                    <div class="blog-content">
+                        <h3 class="blog-title" data-key="blog_2_title">Adam-style</h3>
+                        <p class="blog-excerpt" data-key="blog_2_description">A brief description of the blog post goes here...</p>
+                        <a href="#" class="blog-link">Read More</a>
+                    </div>
+                </div>
+                
+                <!-- Blog Post 3 -->
+                <div class="blog-card">
+                    <div class="blog-image" style="background-image: url('blog-placeholder.jpg');"></div>
+                    <div class="blog-content">
+                        <h3 class="blog-title" data-key="blog_3_title">Adam-style</h3>
+                        <p class="blog-excerpt" data-key="blog_3_description">A brief description of the blog post goes here...</p>
+                        <a href="#" class="blog-link">Read More</a>
+                    </div>
+                </div>
+                
+                <!-- Blog Post 4 -->
+                <div class="blog-card">
+                    <div class="blog-image" style="background-image: url('blog-placeholder.jpg');"></div>
+                    <div class="blog-content">
+                        <h3 class="blog-title" data-key="blog_4_title">Adam-style</h3>
+                        <p class="blog-excerpt" data-key="blog_4_description">A brief description of the blog post goes here...</p>
+                        <a href="#" class="blog-link">Read More</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section id="social">
+        <div class="container">
+            <h2>Connect With Me</h2>
+            <div class="social-grid">
+                <!-- Facebook -->
+                <div class="social-card">
+                    <div class="social-header">
+                        <span class="social-icon"><i class="fab fa-facebook-f"></i></span>
+                        <span class="social-platform">Facebook</span>
+                    </div>
+                    <div class="social-content">
+                        <p data-key="facebook_description">Follow me on Facebook for daily updates and behind-the-scenes content.</p>
+                        <a href="https://www.facebook.com" class="social-link" data-key="facebook_url">Visit Facebook Page</a>
+                    </div>
+                </div>
+                
+                <!-- Twitter -->
+                <div class="social-card">
+                    <div class="social-header">
+                        <span class="social-icon"><i class="fab fa-twitter"></i></span>
+                        <span class="social-platform">Twitter</span>
+                    </div>
+                    <div class="social-content">
+                        <p data-key="twitter_description">Join the conversation on Twitter for quick thoughts and industry news.</p>
+                        <a href="https://www.twitter.com" class="social-link" data-key="twitter_url">Visit Twitter Profile</a>
+                    </div>
+                </div>
+                
+                <!-- Instagram -->
+                <div class="social-card">
+                    <div class="social-header">
+                        <span class="social-icon"><i class="fab fa-instagram"></i></span>
+                        <span class="social-platform">Instagram</span>
+                    </div>
+                    <div class="social-content">
+                        <p data-key="instagram_description">Check out my Instagram for visual stories and inspiration.</p>
+                        <a href="#" class="social-link" data-key="instagram_url">Visit Instagram Profile</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section id="contact">
+        <div class="container">
+            <h2>Get in Touch</h2>
+            <div class="contact">
+                <p data-key="contact_description">Have a question or want to work together? Feel free to reach out!</p>
+                <a href="vicsicard@gmail.com" class="contact-btn" data-key="email_address">Contact Me</a>
+            </div>
+        </div>
+    </section>
+    
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-links">
+                    <a href="#bio">About</a>
+                    <a href="#blog">Blog</a>
+                    <a href="#social">Connect</a>
+                    <a href="#contact">Contact</a>
+                </div>
+                <p class="copyright" data-key="footer_copyright"> 2025 SelfCast Dynamic. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <script>
+        // Get the current project ID from the URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const projectId = urlParams.get('project_id');
+        
+        // Update the "View All Blog Posts" link with the current project ID
+        if (projectId) {
+            const viewAllBlogsLink = document.getElementById('view-all-blogs-link');
+            if (viewAllBlogsLink) {
+                viewAllBlogsLink.href = viewAllBlogsLink.href.replace('PROJECT_ID', projectId);
+            }
+        }
+        
+        // Initialize parallax effect
+        function initParallax() {
+            const parallaxElements = document.querySelectorAll('.parallax');
+            
+            window.addEventListener('scroll', function() {
+                for (let i = 0; i < parallaxElements.length; i++) {
+                    const position = window.pageYOffset * parallaxElements[i].dataset.speed;
+                    parallaxElements[i].style.transform = 'translateY(' + position + 'px)';
+                }
+            });
+        }
+        
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            initParallax();
+            
+            // Add View All Blog Posts link if it doesn't exist
+            const blogSection = document.getElementById('blog');
+            if (blogSection) {
+                const existingLink = blogSection.querySelector('.view-all-blogs');
+                if (!existingLink) {
+                    console.log('Adding View All Blog Posts link');
+                    const container = blogSection.querySelector('.container');
+                    const blogGrid = blogSection.querySelector('.blog-grid');
+                    
+                    if (container && blogGrid) {
+                        const viewAllDiv = document.createElement('div');
+                        viewAllDiv.className = 'view-all-blogs';
+                        viewAllDiv.style.textAlign = 'center';
+                        viewAllDiv.style.margin = '40px 0';
+                        viewAllDiv.style.padding = '20px';
+                        viewAllDiv.style.backgroundColor = '#f5f5f5';
+                        viewAllDiv.style.borderRadius = '10px';
+                        
+                        const heading = document.createElement('h3');
+                        heading.style.marginBottom = '15px';
+                        heading.textContent = 'Want to see more content?';
+                        
+                        const link = document.createElement('a');
+                        link.href = 'blog.html?project_id=test123';
+                        link.className = 'btn';
+                        link.textContent = 'View All Blog Posts';
+                        link.style.display = 'inline-block';
+                        link.style.backgroundColor = '#3399FF';
+                        link.style.color = 'white';
+                        link.style.padding = '15px 40px';
+                        link.style.borderRadius = '30px';
+                        link.style.textDecoration = 'none';
+                        link.style.fontWeight = '600';
+                        link.style.fontSize = '18px';
+                        
+                        viewAllDiv.appendChild(heading);
+                        viewAllDiv.appendChild(link);
+                        
+                        // Insert after blog grid
+                        blogGrid.after(viewAllDiv);
+                        console.log('View All Blog Posts link added successfully');
+                    }
+                }
+            }
+        });
+    </script>
+
+
+</body></html>
