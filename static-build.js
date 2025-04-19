@@ -186,57 +186,39 @@ async function buildStaticSite(projectId) {
     // Add our content initialization script before the main script
     $('script[src="script.js"]').before(contentScript);
     
-    // Add a "View All Blog Posts" link to the blog section
-    // First, try to find a section with id="blog"
-    let blogSection = $('section#blog');
-    
-    // If not found, try to find a section with h2 containing "Blog"
-    if (!blogSection.length) {
-      $('section').each(function() {
-        const heading = $(this).find('h2').text().toLowerCase();
-        if (heading.includes('blog') || heading.includes('post')) {
-          blogSection = $(this);
-          return false; // break the loop
-        }
-      });
-    }
-    
-    // If we found a blog section, add the link
+    // Ensure the View All Blog Posts link is present
+    const blogSection = $('section#blog');
     if (blogSection.length) {
-      // First try to find the blog grid
-      let insertAfter = blogSection.find('.blog-grid');
+      // Force add the View All Blog Posts link
+      console.log('Adding View All Blog Posts link to static site');
       
-      // If not found, try to find any grid or container of blog posts
-      if (!insertAfter.length) {
-        insertAfter = blogSection.find('.grid, .container, .blog-container, .posts');
-      }
+      // First, remove any existing link to avoid duplicates
+      blogSection.find('.view-all-blogs').remove();
       
-      // If still not found, just append to the section
-      if (!insertAfter.length) {
-        insertAfter = blogSection;
-      }
-      
-      // Create the link HTML with styling
-      const viewAllBlogsHtml = `
-        <div class="view-all-blogs" style="text-align: center; margin-top: 30px;">
-          <a href="blog.html?project_id=${projectId}" 
-             style="display: inline-block; background-color: #3399FF; color: white; padding: 12px 30px; 
-                    border-radius: 30px; text-decoration: none; font-weight: 600;">
-            View All Blog Posts
-          </a>
-        </div>
-      `;
-      
-      // Add the link
-      if (insertAfter === blogSection) {
-        insertAfter.append(viewAllBlogsHtml);
+      // Add the new link after the blog grid
+      const blogGrid = blogSection.find('.blog-grid');
+      if (blogGrid.length) {
+        const viewAllHtml = `
+          <div class="view-all-blogs" style="text-align: center; margin: 40px 0; padding: 20px; background-color: #f5f5f5; border-radius: 10px;">
+            <h3 style="margin-bottom: 15px;">Want to see more content?</h3>
+            <a href="blog.html?project_id=${projectId}" style="display: inline-block; background-color: #3399FF; color: white; padding: 15px 40px; border-radius: 30px; text-decoration: none; font-weight: 600; font-size: 18px;">View All Blog Posts</a>
+          </div>
+        `;
+        blogGrid.after(viewAllHtml);
+        console.log('View All Blog Posts link added successfully');
       } else {
-        insertAfter.after(viewAllBlogsHtml);
+        console.log('Blog grid not found, adding link directly to blog section');
+        blogSection.append(`
+          <div class="container">
+            <div class="view-all-blogs" style="text-align: center; margin: 40px 0; padding: 20px; background-color: #f5f5f5; border-radius: 10px;">
+              <h3 style="margin-bottom: 15px;">Want to see more content?</h3>
+              <a href="blog.html?project_id=${projectId}" style="display: inline-block; background-color: #3399FF; color: white; padding: 15px 40px; border-radius: 30px; text-decoration: none; font-weight: 600; font-size: 18px;">View All Blog Posts</a>
+            </div>
+          </div>
+        `);
       }
-      
-      console.log('Added "View All Blog Posts" link to the static site');
     } else {
-      console.log('Could not find blog section to add "View All Blog Posts" link');
+      console.log('Blog section not found, cannot add View All Blog Posts link');
     }
     
     // Add a comment to indicate this is a static build

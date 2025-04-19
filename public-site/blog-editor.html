@@ -223,10 +223,14 @@
     </style>
 </head>
 <body>
-    <a href="edit.html" class="back-to-editor">← Back to Main Editor</a>
-    
     <div class="section">
-        <h1>Blog Post Management</h1>
+        <div class="header">
+            <h1>Blog Post Management</h1>
+            <div class="actions">
+                <button id="new-blog-button" class="action-button">Create New Blog Post</button>
+                <a id="back-to-editor-button" href="edit.html" class="action-button secondary">Back to Main Editor</a>
+            </div>
+        </div>
         
         <div class="header-actions">
             <div>
@@ -234,7 +238,6 @@
                     <option value="">Select Project</option>
                 </select>
             </div>
-            <button id="new-blog-button">Create New Blog Post</button>
         </div>
         
         <div class="search-box">
@@ -352,6 +355,7 @@
         const confirmationDialog = document.getElementById('confirmation-dialog');
         const cancelDeleteButton = document.getElementById('cancel-delete');
         const confirmDeleteButton = document.getElementById('confirm-delete');
+        const backButton = document.getElementById('back-to-editor-button');
         
         // Pagination settings
         const postsPerPage = 10;
@@ -863,10 +867,21 @@
         confirmDeleteButton.addEventListener('click', deleteBlogPost);
         
         // Initialize
-        checkConnection().then(connected => {
-            if (connected) {
-                loadProjects();
+        document.addEventListener('DOMContentLoaded', function() {
+            // Update the Back to Main Editor button to preserve project context
+            const urlParams = new URLSearchParams(window.location.search);
+            const projectId = urlParams.get('project_id');
+            
+            if (projectId) {
+                backButton.href = `edit.html?project_id=${projectId}`;
             }
+            
+            // Load projects and blog posts
+            checkConnection().then(connected => {
+                if (connected) {
+                    loadProjects();
+                }
+            });
         });
     </script>
 </body>

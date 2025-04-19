@@ -534,7 +534,7 @@
                 
                 <!-- Blog Management Button -->
                 <div style="margin-bottom: 1.5rem; text-align: center;">
-                    <a href="blog-editor.html" class="action-button" style="display: inline-block; background-color: #3399FF; padding: 0.75rem 1.5rem; text-decoration: none; color: white; font-weight: 500;">
+                    <a id="manage-blogs-button" href="blog-editor.html" class="action-button" style="display: inline-block; background-color: #3399FF; padding: 0.75rem 1.5rem; text-decoration: none; color: white; font-weight: 500;">
                         Manage All Blog Posts
                     </a>
                     <p style="margin-top: 0.5rem; font-size: 0.9rem; color: #666;">
@@ -989,7 +989,7 @@
                 document.getElementById('body_font_select').value = 'Open Sans';
                 
                 // Load fonts
-                loadFont('Montserrat');
+                loadFont('Montserrat');  // Standard Professional
                 loadFont('Open Sans');
                 
                 return; // Skip database lookup
@@ -1129,140 +1129,111 @@
         checkConnection();
         
         // Load available projects on initialization
-        loadProjects();
-
-        // Handle profile image URL input
-        profileImageUrl.addEventListener('input', (e) => {
-            const url = e.target.value.trim();
-            if (url) {
-                profilePreview.src = url;
-                profilePreview.style.display = 'block';
-            } else {
-                profilePreview.style.display = 'none';
-            }
-        });
-
-        // Handle profile image upload
-        profileUpload.addEventListener('change', async (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            const projectId = projectSelect.value;
-            if (!projectId) {
-                status.textContent = 'Please select a project first';
-                status.className = 'status error';
-                return;
-            }
-
+        async function loadProjects() {
             try {
-                const timestamp = new Date().getTime();
-                const filePath = `${projectId}/profile-${timestamp}-${file.name}`;
+                console.log('Loading projects...');
+                
+                // Clear existing options except the first two (Select Project and Create New)
+                while (projectSelect.options.length > 2) {
+                    projectSelect.remove(2);
+                }
+                
+                console.log('Cleared existing options, current count:', projectSelect.options.length);
 
-                const { data, error } = await supabase.storage
-                    .from('images')
-                    .upload(filePath, file, {
-                        onUploadProgress: (progress) => {
-                            const percent = (progress.loaded / progress.total) * 100;
-                            progressBar.style.width = percent + '%';
-                        }
-                    });
+                // Add option group for existing projects
+                const existingGroup = document.createElement('optgroup');
+                existingGroup.label = 'Existing Projects';
+                projectSelect.appendChild(existingGroup);
+                
+                console.log('Added option group for existing projects');
 
-                if (error) throw error;
-
-                const { data: { publicUrl } } = supabase.storage
-                    .from('images')
-                    .getPublicUrl(filePath);
-
-                profilePreview.src = publicUrl;
-                profilePreview.style.display = 'block';
-                profileImageUrl.value = publicUrl;
-
-                setTimeout(() => {
-                    progressBar.style.width = '0';
-                }, 1000);
-
-            } catch (error) {
-                status.textContent = `Error uploading profile image: ${error.message}`;
-                status.className = 'status error';
-            }
-        });
-
-        // Create new project
-        window.createNewProject = async function() {
-            const newProjectInput = document.getElementById('new-project-id');
-            const newProjectId = newProjectInput.value.trim();
-            
-            if (!newProjectId) {
-                status.textContent = 'Please enter a project ID';
-                status.className = 'status error';
-                return;
-            }
-
-            if (!/^[a-z0-9-]+$/.test(newProjectId)) {
-                status.textContent = 'Project ID can only contain lowercase letters, numbers, and hyphens';
-                status.className = 'status error';
-                return;
-            }
-
-            try {
+                // Fetch all unique project IDs
                 const { data, error } = await supabase
                     .from('dynamic_content')
                     .select('project_id')
-                    .eq('project_id', newProjectId)
-                    .limit(1);
+                    .order('project_id', { ascending: true });
+                
+                console.log('Supabase query result:', { data, error });
 
                 if (error) throw error;
                 
-                if (data.length > 0) {
-                    status.textContent = 'Project ID already exists';
-                    status.className = 'status error';
+                if (!data || data.length === 0) {
+                    console.log('No projects found in database');
+                    const option = document.createElement('option');
+                    option.value = 'adam-hyp-1';
+                    option.textContent = 'adam-hyp-1 (Default)';
+                    existingGroup.appendChild(option);
+                    
+                    const option2 = document.createElement('option');
+                    option2.value = 'annie-sicard-123';
+                    option2.textContent = 'annie-sicard-123';
+                    existingGroup.appendChild(option2);
                     return;
                 }
 
-                // Initialize the project with basic fields
-                const { error: insertError } = await supabase
-                    .from('dynamic_content')
-                    .insert([
-                        {
-                            project_id: newProjectId,
-                            key: 'client_name',
-                            value: newProjectId.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
-                        },
-                        {
-                            project_id: newProjectId,
-                            key: 'current_year',
-                            value: new Date().getFullYear().toString()
-                        },
-                        {
-                            project_id: newProjectId,
-                            key: 'style_package',
-                            value: 'standard-professional'
-                        }
-                    ]);
-
-                if (insertError) throw insertError;
-
-                const option = document.createElement('option');
-                option.value = newProjectId;
-                option.textContent = newProjectId;
-                projectSelect.add(option);
-                projectSelect.value = newProjectId;
-
-                document.getElementById('new-project-form').style.display = 'none';
+                // Get unique project IDs
+                const projectIds = [...new Set(data.map(item => item.project_id))];
+                console.log('Unique project IDs:', projectIds);
                 
-                status.textContent = 'New project created successfully';
-                status.className = 'status success';
+                // Add each project to the dropdown
+                projectIds.forEach(projectId => {
+                    // Skip empty or special values
+                    if (!projectId || projectId === 'new' || projectId === 'default-project') {
+                        console.log('Skipping special project ID:', projectId);
+                        return;
+                    }
+                    
+                    const option = document.createElement('option');
+                    option.value = projectId;
+                    option.textContent = projectId;
+                    existingGroup.appendChild(option);
+                    console.log('Added project to dropdown:', projectId);
+                });
 
-                loadContent();
+                console.log(`Loaded ${projectIds.length} projects`);
+                
+                // Log the final state of the dropdown
+                console.log('Final dropdown options:', Array.from(projectSelect.options).map(opt => opt.value));
+                
+                // Ensure important projects are always available
+                const importantProjects = ['adam-hyp-1', 'annie-sicard-123'];
+                importantProjects.forEach(projectId => {
+                    if (!projectIds.includes(projectId)) {
+                        const option = document.createElement('option');
+                        option.value = projectId;
+                        option.textContent = projectId === 'adam-hyp-1' ? 'adam-hyp-1 (Default)' : projectId;
+                        existingGroup.appendChild(option);
+                        console.log(`Added important project: ${projectId}`);
+                    }
+                });
+                
+                // Check if there's a project_id in the URL
+                const urlParams = new URLSearchParams(window.location.search);
+                const projectId = urlParams.get('project_id');
+                
+                if (projectId && projectIds.includes(projectId)) {
+                    projectSelect.value = projectId;
+                    loadContent(projectId);
+                    
+                    // Update URL to include project_id if it's not already there
+                    if (!window.location.search.includes('project_id=')) {
+                        const newUrl = new URL(window.location.href);
+                        newUrl.searchParams.set('project_id', projectId);
+                        window.history.replaceState({}, '', newUrl);
+                    }
+                }
+                
+                // Update the blog management button
+                updateBlogManagementButton();
+                
             } catch (error) {
-                status.textContent = 'Error creating project: ' + error.message;
-                status.className = 'status error';
+                console.error('Error loading projects:', error);
+                alert('Error loading projects: ' + error.message);
             }
-        };
+        }
 
         // Load content
-        async function loadContent() {
-            const projectId = projectSelect.value;
+        async function loadContent(projectId) {
             if (!projectId || projectId === 'new') return;
 
             try {
@@ -1293,7 +1264,7 @@
                 
                 // Set up the view site button with the current project ID
                 const viewSiteButton = document.getElementById('view-site-button');
-                const projectId = document.getElementById('project_id').value;
+                const currentProjectId = document.getElementById('project_id').value;
                 
                 // Set up the click handler for the view site button
                 viewSiteButton.onclick = function() {
@@ -1862,6 +1833,24 @@ example-project,email_address,example@email.com`;
             element.click();
             document.body.removeChild(element);
         });
+        
+        // Update the blog management button to include the current project ID
+        function updateBlogManagementButton() {
+            const projectId = document.getElementById('project_id').value;
+            const manageBlogsButton = document.getElementById('manage-blogs-button');
+            
+            if (projectId) {
+                manageBlogsButton.href = `blog-editor.html?project_id=${projectId}`;
+            } else {
+                manageBlogsButton.href = 'blog-editor.html';
+            }
+        }
+        
+        // Add event listener to update the blog management button when project changes
+        document.getElementById('project_id').addEventListener('change', updateBlogManagementButton);
+        
+        // Update the button initially
+        updateBlogManagementButton();
     </script>
 </body>
 </html>
