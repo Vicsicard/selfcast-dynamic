@@ -532,6 +532,16 @@
             <div class="section">
                 <h2>Blog Posts</h2>
                 
+                <!-- Blog Management Button -->
+                <div style="margin-bottom: 1.5rem; text-align: center;">
+                    <a href="blog-editor.html" class="action-button" style="display: inline-block; background-color: #3399FF; padding: 0.75rem 1.5rem; text-decoration: none; color: white; font-weight: 500;">
+                        Manage All Blog Posts
+                    </a>
+                    <p style="margin-top: 0.5rem; font-size: 0.9rem; color: #666;">
+                        Create, edit and manage unlimited blog posts
+                    </p>
+                </div>
+                
                 <!-- Blog Post 1 -->
                 <div class="blog-section">
                     <h3>Blog Post 1</h3>
@@ -816,8 +826,7 @@
                 const { data, error } = await supabase
                     .from('dynamic_content')
                     .select('project_id')
-                    .order('project_id', { ascending: true })
-                    .limit(100);
+                    .order('project_id', { ascending: true });
                 
                 console.log('Supabase query result:', { data, error });
 
@@ -1284,9 +1293,39 @@
                 
                 // Set up the view site button with the current project ID
                 const viewSiteButton = document.getElementById('view-site-button');
+                const projectId = document.getElementById('project_id').value;
+                
+                // Set up the click handler for the view site button
                 viewSiteButton.onclick = function() {
-                    const siteUrl = window.location.origin + '/index.html?project_id=' + projectId;
+                    // First run the static build script to generate or update the static site
+                    const statusElement = document.getElementById('status');
+                    statusElement.textContent = 'Building static site...';
+                    statusElement.className = 'status info';
+                    
+                    // Create a form to submit to the build endpoint
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = '/build-static-site';
+                    form.target = '_blank';
+                    
+                    // Add the project ID as a hidden input
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'project_id';
+                    input.value = projectId;
+                    form.appendChild(input);
+                    
+                    // Add the form to the document and submit it
+                    document.body.appendChild(form);
+                    
+                    // Open the static site in a new tab
+                    const siteUrl = window.location.origin + '/static-sites/' + projectId + '/index.html';
+                    console.log('Opening site URL:', siteUrl);
                     window.open(siteUrl, '_blank');
+                    
+                    // Show success message
+                    statusElement.textContent = 'Static site opened in new tab';
+                    statusElement.className = 'status success';
                 };
                 
             } catch (error) {
@@ -1489,13 +1528,37 @@
                 
                 // Set up the click handler for the view site button
                 viewSiteButton.onclick = function() {
-                    // Construct the URL for viewing the site
-                    const siteUrl = window.location.origin + '/index.html?project_id=' + currentProjectId;
+                    // First run the static build script to generate or update the static site
+                    const statusElement = document.getElementById('status');
+                    statusElement.textContent = 'Building static site...';
+                    statusElement.className = 'status info';
                     
-                    // Open the site in a new tab/window
+                    // Create a form to submit to the build endpoint
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = '/build-static-site';
+                    form.target = '_blank';
+                    
+                    // Add the project ID as a hidden input
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'project_id';
+                    input.value = projectId;
+                    form.appendChild(input);
+                    
+                    // Add the form to the document and submit it
+                    document.body.appendChild(form);
+                    
+                    // Open the static site in a new tab
+                    const siteUrl = window.location.origin + '/static-sites/' + projectId + '/index.html';
+                    console.log('Opening site URL:', siteUrl);
                     window.open(siteUrl, '_blank');
+                    
+                    // Show success message
+                    statusElement.textContent = 'Static site opened in new tab';
+                    statusElement.className = 'status success';
                 };
-
+                
             } catch (error) {
                 status.textContent = 'Error saving content: ' + error.message;
                 status.className = 'status error';
@@ -1614,8 +1677,35 @@
                 // Set up the view site button with the current project ID
                 const viewSiteButton = document.getElementById('view-site-button');
                 viewSiteButton.onclick = function() {
-                    const siteUrl = window.location.origin + '/index.html?project_id=' + selectedProject;
+                    // First run the static build script to generate or update the static site
+                    const statusElement = document.getElementById('status');
+                    statusElement.textContent = 'Building static site...';
+                    statusElement.className = 'status info';
+                    
+                    // Create a form to submit to the build endpoint
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = '/build-static-site';
+                    form.target = '_blank';
+                    
+                    // Add the project ID as a hidden input
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'project_id';
+                    input.value = selectedProject;
+                    form.appendChild(input);
+                    
+                    // Add the form to the document and submit it
+                    document.body.appendChild(form);
+                    
+                    // Open the static site in a new tab
+                    const siteUrl = window.location.origin + '/static-sites/' + selectedProject + '/index.html';
+                    console.log('Opening site URL:', siteUrl);
                     window.open(siteUrl, '_blank');
+                    
+                    // Show success message
+                    statusElement.textContent = 'Static site opened in new tab';
+                    statusElement.className = 'status success';
                 };
                 
             } catch (error) {
