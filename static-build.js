@@ -59,6 +59,28 @@ async function buildStaticSite(projectId) {
       fs.mkdirSync(outputDir, { recursive: true });
     }
     
+    // Copy static assets
+    const staticAssets = [
+      'style.css',
+      'script.js',
+      'config.js',
+      'blog.html',
+      'placeholder.jpg',
+      'blog-placeholder.jpg'
+    ];
+    
+    staticAssets.forEach(asset => {
+      const sourcePath = path.join(__dirname, 'public-site', asset);
+      const destPath = path.join(outputDir, asset);
+      
+      if (fs.existsSync(sourcePath)) {
+        fs.copyFileSync(sourcePath, path.join(outputDir, asset));
+        console.log(`Copied ${asset} to ${destPath}`);
+      } else {
+        console.log(`Warning: ${sourcePath} does not exist, skipping`);
+      }
+    });
+    
     // Fetch content for the project with retry logic
     let data = null;
     let error = null;
