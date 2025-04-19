@@ -806,109 +806,49 @@
         // Load available projects
         async function loadProjects() {
             try {
-                console.log('Loading projects...');
-                
-                // Clear existing options except the first two (Select Project and Create New)
-                while (projectSelect.options.length > 2) {
-                    projectSelect.remove(2);
-                }
-                
-                console.log('Cleared existing options, current count:', projectSelect.options.length);
-
-                // Add option group for existing projects
-                const existingGroup = document.createElement('optgroup');
-                existingGroup.label = 'Existing Projects';
-                projectSelect.appendChild(existingGroup);
-                
-                console.log('Added option group for existing projects');
-
-                // Fetch all unique project IDs
                 const { data, error } = await supabase
                     .from('dynamic_content')
                     .select('project_id')
                     .order('project_id', { ascending: true });
                 
-                console.log('Supabase query result:', { data, error });
-
                 if (error) throw error;
                 
-                if (!data || data.length === 0) {
-                    console.log('No projects found in database');
-                    const option = document.createElement('option');
-                    option.value = 'adam-hyp-1';
-                    option.textContent = 'adam-hyp-1 (Default)';
-                    existingGroup.appendChild(option);
-                    
-                    const option2 = document.createElement('option');
-                    option2.value = 'annie-sicard-123';
-                    option2.textContent = 'annie-sicard-123';
-                    existingGroup.appendChild(option2);
-                    return;
-                }
-
                 // Get unique project IDs
                 const projectIds = [...new Set(data.map(item => item.project_id))];
-                console.log('Unique project IDs:', projectIds);
                 
-                // Add each project to the dropdown
+                // Clear existing options
+                projectSelect.innerHTML = '<option value="">Select Project</option>';
+                
+                // Add options for each project
                 projectIds.forEach(projectId => {
-                    // Skip empty or special values
-                    if (!projectId || projectId === 'new' || projectId === 'default-project') {
-                        console.log('Skipping special project ID:', projectId);
-                        return;
-                    }
-                    
                     const option = document.createElement('option');
                     option.value = projectId;
                     option.textContent = projectId;
-                    existingGroup.appendChild(option);
-                    console.log('Added project to dropdown:', projectId);
+                    projectSelect.appendChild(option);
                 });
-
-                console.log(`Loaded ${projectIds.length} projects`);
                 
-                // Log the final state of the dropdown
-                console.log('Final dropdown options:', Array.from(projectSelect.options).map(opt => opt.value));
+                // Check if there's a project_id in the URL
+                const urlParams = new URLSearchParams(window.location.search);
+                const projectId = urlParams.get('project_id');
                 
-                // Ensure important projects are always available
-                const importantProjects = ['adam-hyp-1', 'annie-sicard-123'];
-                importantProjects.forEach(projectId => {
-                    if (!projectIds.includes(projectId)) {
-                        const option = document.createElement('option');
-                        option.value = projectId;
-                        option.textContent = projectId === 'adam-hyp-1' ? 'adam-hyp-1 (Default)' : projectId;
-                        existingGroup.appendChild(option);
-                        console.log(`Added important project: ${projectId}`);
+                if (projectId && projectIds.includes(projectId)) {
+                    projectSelect.value = projectId;
+                    loadContent(projectId);
+                    
+                    // Update URL to include project_id if it's not already there
+                    if (!window.location.search.includes('project_id=')) {
+                        const newUrl = new URL(window.location.href);
+                        newUrl.searchParams.set('project_id', projectId);
+                        window.history.replaceState({}, '', newUrl);
                     }
-                });
+                }
+                
+                // Update the blog management button
+                updateBlogManagementButton();
                 
             } catch (error) {
                 console.error('Error loading projects:', error);
-                status.textContent = 'Error loading projects: ' + error.message;
-                status.className = 'status error';
-                
-                // Add fallback projects in case of error
-                const existingGroup = projectSelect.querySelector('optgroup') || 
-                    (() => {
-                        const group = document.createElement('optgroup');
-                        group.label = 'Existing Projects';
-                        projectSelect.appendChild(group);
-                        return group;
-                    })();
-                
-                const fallbackProjects = [
-                    { value: 'adam-hyp-1', text: 'adam-hyp-1 (Fallback)' },
-                    { value: 'annie-sicard-123', text: 'annie-sicard-123 (Fallback)' }
-                ];
-                
-                fallbackProjects.forEach(project => {
-                    const option = document.createElement('option');
-                    option.value = project.value;
-                    option.textContent = project.text;
-                    existingGroup.appendChild(option);
-                });
-                
-                console.log('Added fallback projects due to error');
+                alert('Error loading projects: ' + error.message);
             }
         }
 
@@ -1129,109 +1069,8 @@
         checkConnection();
         
         // Load available projects on initialization
-        async function loadProjects() {
-            try {
-                console.log('Loading projects...');
-                
-                // Clear existing options except the first two (Select Project and Create New)
-                while (projectSelect.options.length > 2) {
-                    projectSelect.remove(2);
-                }
-                
-                console.log('Cleared existing options, current count:', projectSelect.options.length);
-
-                // Add option group for existing projects
-                const existingGroup = document.createElement('optgroup');
-                existingGroup.label = 'Existing Projects';
-                projectSelect.appendChild(existingGroup);
-                
-                console.log('Added option group for existing projects');
-
-                // Fetch all unique project IDs
-                const { data, error } = await supabase
-                    .from('dynamic_content')
-                    .select('project_id')
-                    .order('project_id', { ascending: true });
-                
-                console.log('Supabase query result:', { data, error });
-
-                if (error) throw error;
-                
-                if (!data || data.length === 0) {
-                    console.log('No projects found in database');
-                    const option = document.createElement('option');
-                    option.value = 'adam-hyp-1';
-                    option.textContent = 'adam-hyp-1 (Default)';
-                    existingGroup.appendChild(option);
-                    
-                    const option2 = document.createElement('option');
-                    option2.value = 'annie-sicard-123';
-                    option2.textContent = 'annie-sicard-123';
-                    existingGroup.appendChild(option2);
-                    return;
-                }
-
-                // Get unique project IDs
-                const projectIds = [...new Set(data.map(item => item.project_id))];
-                console.log('Unique project IDs:', projectIds);
-                
-                // Add each project to the dropdown
-                projectIds.forEach(projectId => {
-                    // Skip empty or special values
-                    if (!projectId || projectId === 'new' || projectId === 'default-project') {
-                        console.log('Skipping special project ID:', projectId);
-                        return;
-                    }
-                    
-                    const option = document.createElement('option');
-                    option.value = projectId;
-                    option.textContent = projectId;
-                    existingGroup.appendChild(option);
-                    console.log('Added project to dropdown:', projectId);
-                });
-
-                console.log(`Loaded ${projectIds.length} projects`);
-                
-                // Log the final state of the dropdown
-                console.log('Final dropdown options:', Array.from(projectSelect.options).map(opt => opt.value));
-                
-                // Ensure important projects are always available
-                const importantProjects = ['adam-hyp-1', 'annie-sicard-123'];
-                importantProjects.forEach(projectId => {
-                    if (!projectIds.includes(projectId)) {
-                        const option = document.createElement('option');
-                        option.value = projectId;
-                        option.textContent = projectId === 'adam-hyp-1' ? 'adam-hyp-1 (Default)' : projectId;
-                        existingGroup.appendChild(option);
-                        console.log(`Added important project: ${projectId}`);
-                    }
-                });
-                
-                // Check if there's a project_id in the URL
-                const urlParams = new URLSearchParams(window.location.search);
-                const projectId = urlParams.get('project_id');
-                
-                if (projectId && projectIds.includes(projectId)) {
-                    projectSelect.value = projectId;
-                    loadContent(projectId);
-                    
-                    // Update URL to include project_id if it's not already there
-                    if (!window.location.search.includes('project_id=')) {
-                        const newUrl = new URL(window.location.href);
-                        newUrl.searchParams.set('project_id', projectId);
-                        window.history.replaceState({}, '', newUrl);
-                    }
-                }
-                
-                // Update the blog management button
-                updateBlogManagementButton();
-                
-            } catch (error) {
-                console.error('Error loading projects:', error);
-                alert('Error loading projects: ' + error.message);
-            }
-        }
-
+        loadProjects();
+        
         // Load content
         async function loadContent(projectId) {
             if (!projectId || projectId === 'new') return;
