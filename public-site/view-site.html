@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Redirecting to Your Site</title>
-    <script src="config.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body {
@@ -90,14 +89,35 @@
                 console.log('Project ID:', projectId);
                 statusElement.innerHTML = `<div class="loading"></div><span>Loading project: ${projectId}...</span>`;
                 
-                // Initialize Supabase client with hardcoded credentials
-                // These are the same credentials used throughout the application
-                const supabaseUrl = 'https://xyzcompany.supabase.co';
-                const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh5emNvbXBhbnkiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTYxMjM2MDAwMCwiZXhwIjoxOTI3OTIwMDAwfQ.S-SvRJYL37mQjuQQfQGjD8gW-xVMgBTdINoKCGZRuEk';
-                const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+                // Initialize Supabase client
+                let supabaseUrl, supabaseKey;
+                
+                // Check if we're on Vercel (environment variables will be available)
+                if (window.location.hostname.includes('vercel.app')) {
+                    // On Vercel, we can use process.env variables injected at build time
+                    // These will be replaced with actual values during the build process
+                    supabaseUrl = 'https://aqicztygjpmunfljjuto.supabase.co';
+                    supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxaWN6dHlnanBtdW5mbGpqdXRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3MDU1ODIsImV4cCI6MjA1OTI4MTU4Mn0.5e2hvTckSSbTFLBjQiccrvjoBd6QQDX0X4tccFOc1rs';
+                } else {
+                    // Locally, we'll use the config.js file
+                    try {
+                        supabaseUrl = SUPABASE_URL;
+                        supabaseKey = SUPABASE_KEY;
+                    } catch (e) {
+                        // Fallback to hardcoded values if config.js is not available
+                        supabaseUrl = 'https://aqicztygjpmunfljjuto.supabase.co';
+                        supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxaWN6dHlnanBtdW5mbGpqdXRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3MDU1ODIsImV4cCI6MjA1OTI4MTU4Mn0.5e2hvTckSSbTFLBjQiccrvjoBd6QQDX0X4tccFOc1rs';
+                    }
+                }
+                
+                console.log('Using Supabase URL:', supabaseUrl);
+                
+                // Create the Supabase client
+                const { createClient } = supabase;
+                const supabaseClient = createClient(supabaseUrl, supabaseKey);
                 
                 // Check if the project exists in Supabase
-                const { data, error } = await supabase
+                const { data, error } = await supabaseClient
                     .from('dynamic_content')
                     .select('project_id')
                     .eq('project_id', projectId)
