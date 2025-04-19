@@ -49,28 +49,57 @@ const supabaseConfig = {
 };
 const supabase = createClient(supabaseConfig.url, supabaseConfig.key);
 
-async function buildStaticSite() {
+async function buildStaticSite(projectId) {
+  console.log(`Building static site for project: ${projectId}`);
+  
   try {
-    console.log(`Building static site for project: ${projectId}`);
-    
-    // Fetch all content for this project from Supabase
-    const { data: contentData, error } = await supabase
-      .from('dynamic_content')
-      .select('*')
-      .eq('project_id', projectId);
-      
-    if (error) throw error;
-    
-    if (!contentData || contentData.length === 0) {
-      console.error(`No content found for project: ${projectId}`);
-      process.exit(1);
+    // Create output directory if it doesn't exist
+    const outputDir = path.join(__dirname, 'static-sites', projectId);
+    if (!fs.existsSync(outputDir)) {
+      fs.mkdirSync(outputDir, { recursive: true });
     }
     
-    console.log(`Found ${contentData.length} content items`);
+    // Fetch content for the project with retry logic
+    let data = null;
+    let error = null;
+    const maxRetries = 3;
+    
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        console.log(`Fetching content for project ${projectId} (attempt ${attempt}/${maxRetries})...`);
+        const response = await supabase
+          .from('dynamic_content')
+          .select('*')
+          .eq('project_id', projectId);
+        
+        if (response.error) {
+          throw response.error;
+        }
+        
+        data = response.data;
+        console.log(`Successfully fetched ${data.length} content items for project ${projectId}`);
+        break; // Success, exit retry loop
+      } catch (fetchError) {
+        error = fetchError;
+        console.error(`Attempt ${attempt}/${maxRetries} failed:`, fetchError.message);
+        
+        if (attempt < maxRetries) {
+          // Wait before retrying (exponential backoff)
+          const delay = Math.pow(2, attempt) * 1000;
+          console.log(`Retrying in ${delay/1000} seconds...`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+        }
+      }
+    }
+    
+    // If all retries failed, throw the last error
+    if (!data) {
+      throw new Error(`Failed to fetch content after ${maxRetries} attempts: ${error.message}`);
+    }
     
     // Convert array to object for easier access
     const content = {};
-    contentData.forEach(item => {
+    data.forEach(item => {
       content[item.key] = item.value;
     });
     
@@ -115,7 +144,7 @@ async function buildStaticSite() {
     // We need to preserve the window.siteContent object for modals to work
     // Create a static version of the site content
     const contentObject = {};
-    contentData.forEach(item => {
+    data.forEach(item => {
       contentObject[item.key] = item.value;
     });
     
@@ -211,4 +240,4 @@ async function buildStaticSite() {
   }
 }
 
-buildStaticSite();
+buildStaticSite(projectId);
