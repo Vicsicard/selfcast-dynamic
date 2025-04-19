@@ -113,30 +113,23 @@ async function buildStaticSite(projectId) {
     // Load HTML into cheerio for manipulation
     const $ = cheerio.load(html);
     
-    // Replace all data-key elements with their actual content
-    $('[data-key]').each((i, element) => {
-      const key = $(element).attr('data-key');
-      const value = content[key];
-      
-      if (value) {
-        if (element.tagName === 'img') {
-          $(element).attr('src', value);
-        } else if (element.tagName === 'a') {
-          $(element).attr('href', value);
+    // Replace all data-key attributes with actual content
+    $('[data-key]').each(function() {
+      const key = $(this).attr('data-key');
+      if (content[key]) {
+        if ($(this).is('img')) {
+          $(this).attr('src', content[key]);
         } else {
-          $(element).html(value);
+          $(this).html(content[key]);
         }
       }
     });
     
-    // Replace PROJECT_ID in the "View All Blog Posts" link with the actual project ID
-    const viewAllBlogsLink = $('#view-all-blogs-link');
-    if (viewAllBlogsLink.length) {
-      const href = viewAllBlogsLink.attr('href');
-      if (href) {
-        viewAllBlogsLink.attr('href', href.replace('PROJECT_ID', projectId));
-      }
-    }
+    // Replace PROJECT_ID in all links with the actual project ID
+    $('a[href*="PROJECT_ID"]').each(function() {
+      const href = $(this).attr('href');
+      $(this).attr('href', href.replace('PROJECT_ID', projectId));
+    });
     
     // Remove only the Supabase scripts but keep script.js
     $('script[src*="supabase"]').remove();
