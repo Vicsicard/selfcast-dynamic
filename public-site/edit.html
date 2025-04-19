@@ -269,10 +269,10 @@
             color: white;
         }
         .dark-style::before {
-            background: #2c3e50;
+            background: #121212; /* Darker black for better contrast */
         }
         .dark-style span {
-            color: white;
+            color: white; /* Ensuring text is white for visibility */
         }
         .light-style::before {
             background: #f1c40f;
@@ -951,6 +951,19 @@
                 // Load fonts
                 loadFont('Playfair Display');
                 loadFont('Source Sans Pro');
+                
+                // Ensure text visibility in the editor interface when dark theme is applied
+                document.querySelectorAll('.section').forEach(section => {
+                    section.style.color = '#fff';
+                    section.style.background = '#222';
+                });
+                document.querySelectorAll('.section h2').forEach(heading => {
+                    heading.style.color = '#fff';
+                    heading.style.borderBottomColor = '#444';
+                });
+                document.querySelectorAll('label').forEach(label => {
+                    label.style.color = '#fff';
+                });
                 
                 return; // Skip database lookup
             }
