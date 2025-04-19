@@ -44,7 +44,7 @@ function copyDir(src, dest) {
 // Load Supabase configuration
 // Use hardcoded config values since config.js is browser-based
 const supabaseConfig = {
-  url: 'https://aqicztygjpmunfljjuto.supabase.co',
+  url: 'https://aqicztygjpmunfljjjuto.supabase.co',
   key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxaWN6dHlnanBtdW5mbGpqdXRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3MDU1ODIsImV4cCI6MjA1OTI4MTU4Mn0.5e2hvTckSSbTFLBjQiccrvjoBd6QQDX0X4tccFOc1rs'
 };
 const supabase = createClient(supabaseConfig.url, supabaseConfig.key);
@@ -77,8 +77,8 @@ async function buildStaticSite() {
     // Copy all static files from public-site to output directory
     copyDir(path.join(__dirname, 'public-site'), outputDir);
     
-    // Read the index.html file
-    const indexPath = path.join(__dirname, 'public-site', 'index.html');
+    // Read the template.html file
+    const indexPath = path.join(__dirname, 'public-site', 'template.html');
     let html = fs.readFileSync(indexPath, 'utf8');
     
     // Load HTML into cheerio for manipulation
@@ -99,6 +99,15 @@ async function buildStaticSite() {
         }
       }
     });
+    
+    // Replace PROJECT_ID in the "View All Blog Posts" link with the actual project ID
+    const viewAllBlogsLink = $('#view-all-blogs-link');
+    if (viewAllBlogsLink.length) {
+      const href = viewAllBlogsLink.attr('href');
+      if (href) {
+        viewAllBlogsLink.attr('href', href.replace('PROJECT_ID', projectId));
+      }
+    }
     
     // Remove only the Supabase scripts but keep script.js
     $('script[src*="supabase"]').remove();
