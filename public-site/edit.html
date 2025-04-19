@@ -939,7 +939,7 @@
                 document.getElementById('primary_color').value = '#121212'; // Near-black primary
                 document.getElementById('secondary_color').value = '#333333'; // Dark gray secondary
                 document.getElementById('accent_color').value = '#757575'; // Medium gray accent
-                document.getElementById('text_color').value = '#ffffff'; // Pure white text for maximum contrast
+                document.getElementById('text_color').value = '#000000'; // Black text for bio and cards
                 document.getElementById('background_color').value = '#000000'; // Pure black background
                 document.getElementById('heading_font').value = 'Playfair Display'; // Elegant serif font
                 document.getElementById('body_font').value = 'Source Sans Pro'; // Clean sans-serif
@@ -964,6 +964,38 @@
                 document.querySelectorAll('label').forEach(label => {
                     label.style.color = '#fff';
                 });
+                
+                // Apply enhanced shadows and ensure text visibility for bio/about and card sections
+                const customCSS = `
+                    .grid-item {
+                        box-shadow: 0 8px 16px rgba(0,0,0,0.3), 0 3px 8px rgba(0,0,0,0.2) !important;
+                        background: #fff !important;
+                        color: #000 !important;
+                    }
+                    .grid-item:hover {
+                        box-shadow: 0 12px 24px rgba(0,0,0,0.4), 0 6px 12px rgba(0,0,0,0.25) !important;
+                        transform: translateY(-3px) !important;
+                    }
+                    .bio-text, .bio-main-content, .bio-card-content {
+                        color: #000 !important;
+                        background: #fff !important;
+                    }
+                    .quote-content {
+                        box-shadow: 0 12px 32px rgba(0,0,0,0.25) !important;
+                    }
+                    .blog-title, .blog-excerpt, .social-title, .grid-item h3, .grid-item p {
+                        color: #000 !important;
+                    }
+                `;
+                
+                // Create or update the custom style element
+                let styleEl = document.getElementById('dark-theme-custom-styles');
+                if (!styleEl) {
+                    styleEl = document.createElement('style');
+                    styleEl.id = 'dark-theme-custom-styles';
+                    document.head.appendChild(styleEl);
+                }
+                styleEl.textContent = customCSS;
                 
                 return; // Skip database lookup
             }
