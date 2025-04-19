@@ -44,7 +44,7 @@ function copyDir(src, dest) {
 // Load Supabase configuration
 // Use hardcoded config values since config.js is browser-based
 const supabaseConfig = {
-  url: 'https://aqicztygjpmunfljjuto.supabase.co', // Fixing the Supabase URL
+  url: 'https://aqicztygjpmunfljjjuto.supabase.co', 
   key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxaWN6dHlnanBtdW5mbGpqdXRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3MDU1ODIsImV4cCI6MjA1OTI4MTU4Mn0.5e2hvTckSSbTFLBjQiccrvjoBd6QQDX0X4tccFOc1rs'
 };
 const supabase = createClient(supabaseConfig.url, supabaseConfig.key);
@@ -141,6 +141,20 @@ async function buildStaticSite() {
     
     // Add our content initialization script before the main script
     $('script[src="script.js"]').before(contentScript);
+    
+    // Add a "View All Blog Posts" link to the blog section
+    const blogSection = $('section#blog');
+    if (blogSection.length) {
+      // Check if the view-all-blogs div already exists
+      if (blogSection.find('.view-all-blogs').length === 0) {
+        // Add the "View All Blog Posts" link after the blog grid
+        blogSection.find('.blog-grid').after(`
+          <div class="view-all-blogs">
+            <a href="blog.html?project_id=${projectId}" class="view-all-blogs-link">View All Blog Posts</a>
+          </div>
+        `);
+      }
+    }
     
     // Add a comment to indicate this is a static build
     $('head').append(`<!-- Static build generated for ${projectId} on ${new Date().toISOString()} -->`);
