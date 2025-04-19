@@ -96,6 +96,9 @@ async function loadContent() {
         loadFonts(themeData.heading_font || 'Roboto', themeData.body_font || 'Open Sans');
         injectStyles(themeData);
 
+        // Add "View All Blog Posts" link to the blog section
+        addViewAllBlogsLink();
+
         // Process each content item and store for modal use
         contentData.forEach(item => {
             // Store content for modal use
@@ -221,6 +224,45 @@ async function loadContent() {
     }
 }
 
+// Function to add "View All Blog Posts" link to the blog section
+function addViewAllBlogsLink() {
+    const blogGrid = document.querySelector('.blog-grid');
+    if (blogGrid) {
+        // Check if the container already exists to avoid duplicates
+        if (!blogGrid.querySelector('.view-all-blogs-container')) {
+            // Create container
+            const container = document.createElement('div');
+            container.className = 'view-all-blogs-container';
+            
+            // Create link
+            const link = document.createElement('a');
+            link.href = 'blog.html';
+            link.className = 'view-all-blogs-button';
+            
+            // Create span for text (for styling purposes)
+            const span = document.createElement('span');
+            span.textContent = 'View All Blog Posts →';
+            link.appendChild(span);
+            
+            // Add link to container
+            container.appendChild(link);
+            
+            // Add container after the grid-2x2 but before the next section
+            const gridElement = blogGrid.querySelector('.grid-2x2');
+            if (gridElement) {
+                gridElement.after(container);
+            } else {
+                // If grid not found, append to the end of blog-grid
+                blogGrid.appendChild(container);
+            }
+            
+            console.log('Added "View All Blog Posts" link to blog section');
+        }
+    } else {
+        console.log('Blog grid section not found');
+    }
+}
+
 // Create fun fact cards from bio content
 function createBioCards(bioContent, element) {
     // Use static words for the cards
@@ -341,6 +383,200 @@ function openModal(modalId) {
         // Prevent body scrolling when modal is open
         document.body.style.overflow = 'hidden';
     }
+}
+
+// All Blogs Modal Functions
+// Variables for pagination
+let allBlogPosts = [];
+let currentPage = 1;
+let postsPerPage = 6;
+let totalPages = 1;
+
+// Function to open the All Blogs modal
+function openAllBlogsModal() {
+    console.log('Opening All Blogs Modal');
+    
+    // Get all blog posts
+    allBlogPosts = getAllBlogPosts();
+    
+    // Update pagination
+    updatePagination();
+    
+    // Display blog posts for the first page
+    displayAllBlogPosts(1);
+    
+    // Show the modal
+    const modal = document.getElementById('all-blogs-modal');
+    if (modal) {
+        modal.classList.add('active');
+        
+        // Set modal title with site name if available
+        const titleElement = document.getElementById('all-blogs-title');
+        if (titleElement && window.siteContent.rendered_title) {
+            titleElement.textContent = window.siteContent.rendered_title + ' - All Blog Posts';
+        }
+        
+        // Prevent body scrolling when modal is open
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+// Function to get all blog posts from the loaded content
+function getAllBlogPosts() {
+    const blogPosts = [];
+    const blogTitleRegex = /^blog_(\d+)_title$/;
+    
+    // Find all blog posts in the loaded content
+    for (const key in window.siteContent) {
+        const match = key.match(blogTitleRegex);
+        if (match) {
+            const blogNumber = parseInt(match[1]);
+            const contentKey = `blog_${blogNumber}`;
+            
+            // Check if this blog post has content
+            if (window.siteContent[contentKey]) {
+                blogPosts.push({
+                    number: blogNumber,
+                    title: window.siteContent[key] || `Blog Post ${blogNumber}`,
+                    content: window.siteContent[contentKey],
+                    // Check if this blog is featured (shown on homepage)
+                    featured: window.siteContent[`blog_${blogNumber}_featured`] === 'true',
+                    // Check if this blog is active (not deleted)
+                    active: window.siteContent[`blog_${blogNumber}_active`] !== 'false',
+                    // Get date if available
+                    date: window.siteContent[`blog_${blogNumber}_date`] || 'No date'
+                });
+            }
+        }
+    }
+    
+    // Sort by blog number (newest first assuming higher numbers are newer)
+    return blogPosts.sort((a, b) => b.number - a.number);
+}
+
+// Function to display blog posts for the current page
+function displayAllBlogPosts(page) {
+    const container = document.getElementById('all-blogs-container');
+    if (!container) return;
+    
+    // Update current page
+    currentPage = page;
+    
+    // Calculate start and end indices for current page
+    const startIndex = (page - 1) * postsPerPage;
+    const endIndex = Math.min(startIndex + postsPerPage, allBlogPosts.length);
+    
+    // Clear container
+    container.innerHTML = '';
+    
+    // Check if there are any posts
+    if (allBlogPosts.length === 0) {
+        container.innerHTML = `
+            <div class="no-posts">
+                <h3>No Blog Posts Found</h3>
+                <p>There are currently no blog posts available.</p>
+            </div>
+        `;
+        return;
+    }
+    
+    // Add posts for current page
+    for (let i = startIndex; i < endIndex; i++) {
+        const post = allBlogPosts[i];
+        
+        // Create excerpt
+        const excerpt = post.content.length > 150 
+            ? post.content.substring(0, 150) + '...' 
+            : post.content;
+        
+        // Create blog post element
+        const postElement = document.createElement('div');
+        postElement.className = 'grid-item';
+        postElement.innerHTML = `
+            <div class="blog-post-number">Blog ${post.number}</div>
+            <h3 class="blog-title">${post.title}</h3>
+            <p class="blog-excerpt">${excerpt}</p>
+            <button class="read-more" onclick="openBlogPostModal(${post.number})">Read More</button>
+        `;
+        
+        container.appendChild(postElement);
+    }
+    
+    // Update pagination display
+    document.getElementById('current-page').textContent = currentPage;
+    document.getElementById('total-pages').textContent = totalPages;
+    
+    // Update button states
+    document.getElementById('prev-page').disabled = currentPage <= 1;
+    document.getElementById('next-page').disabled = currentPage >= totalPages;
+}
+
+// Function to update pagination
+function updatePagination() {
+    totalPages = Math.ceil(allBlogPosts.length / postsPerPage);
+    
+    document.getElementById('total-pages').textContent = totalPages;
+    document.getElementById('current-page').textContent = currentPage;
+    
+    // Update button states
+    document.getElementById('prev-page').disabled = currentPage <= 1;
+    document.getElementById('next-page').disabled = currentPage >= totalPages;
+}
+
+// Function to change page
+function changePage(direction) {
+    const newPage = currentPage + direction;
+    
+    if (newPage >= 1 && newPage <= totalPages) {
+        currentPage = newPage;
+        displayAllBlogPosts(currentPage);
+    }
+}
+
+// Function to open a specific blog post modal
+function openBlogPostModal(blogNumber) {
+    // Format content with proper paragraph breaks
+    function formatContent(content) {
+        if (!content) return '';
+        
+        // Split content by double line breaks (paragraphs)
+        const paragraphs = content.split(/\n\s*\n/);
+        return paragraphs
+            .map(p => `<p>${p.trim().replace(/\n/g, '<br>')}</p>`)
+            .join('');
+    }
+    
+    // Create or get modal
+    let modal = document.getElementById(`blog-modal-${blogNumber}`);
+    
+    // If modal doesn't exist, create it
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = `blog-modal-${blogNumber}`;
+        modal.className = 'modal';
+        
+        const contentKey = `blog_${blogNumber}`;
+        const titleKey = `blog_${blogNumber}_title`;
+        
+        const title = window.siteContent[titleKey] || `Blog Post ${blogNumber}`;
+        const content = formatContent(window.siteContent[contentKey] || '');
+        
+        modal.innerHTML = `
+            <div class="modal-content">
+                <span class="close-button" onclick="closeModal('blog-modal-${blogNumber}')">&times;</span>
+                <h2>${title}</h2>
+                <div>${content}</div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+    }
+    
+    // Show the modal
+    modal.classList.add('active');
+    
+    // Prevent body scrolling when modal is open
+    document.body.style.overflow = 'hidden';
 }
 
 function closeModal(modalId) {
