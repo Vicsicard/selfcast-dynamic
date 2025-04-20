@@ -6,6 +6,46 @@
     <title>Blog | SelfCast</title>
     <link rel="stylesheet" href="style.css">
     <style id="dynamic-theme"></style>
+    <style id="theme-overrides">
+        /* These styles will ensure text is visible in bio and card sections when dark theme is applied */
+        .grid-item h3, .grid-item p, .blog-title, .blog-excerpt {
+            color: #000000 !important;
+        }
+        
+        .grid-item {
+            background-color: #ffffff !important;
+        }
+        
+        /* Enhanced shadows for better visibility */
+        .grid-item {
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3), 0 3px 8px rgba(0,0,0,0.2) !important;
+        }
+        
+        .grid-item:hover {
+            box-shadow: 0 12px 24px rgba(0,0,0,0.4), 0 6px 12px rgba(0,0,0,0.25) !important;
+            transform: translateY(-5px) !important;
+        }
+        
+        /* Enhanced read more button */
+        .read-more {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+            font-size: 1rem;
+        }
+        
+        .read-more:hover {
+            background-color: var(--accent-color);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+    </style>
     <style>
         /* Blog page specific styles */
         .blog-header {
@@ -106,6 +146,72 @@
             margin: 2rem 0;
         }
         
+        /* Enhanced Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .modal.active {
+            display: flex;
+            opacity: 1;
+        }
+        
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            max-width: 800px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 5px 30px rgba(0,0,0,0.3);
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+        }
+        
+        .modal.active .modal-content {
+            transform: translateY(0);
+        }
+        
+        .close-button {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+            transition: color 0.2s;
+        }
+        
+        .close-button:hover {
+            color: #000;
+        }
+        
+        #modal-title {
+            margin-top: 0;
+            margin-bottom: 1.5rem;
+            color: var(--primary-color);
+            font-family: var(--heading-font, sans-serif);
+            padding-right: 2rem;
+        }
+        
+        #modal-content p {
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+        
         @media (max-width: 768px) {
             .blog-grid {
                 grid-template-columns: 1fr;
@@ -115,6 +221,11 @@
                 flex-direction: column;
                 align-items: flex-start;
                 gap: 1rem;
+            }
+            
+            .modal-content {
+                width: 95%;
+                padding: 1.5rem;
             }
         }
     </style>
@@ -412,8 +523,8 @@
             
             modalContent.innerHTML = formattedContent;
             
-            // Show modal
-            modal.style.display = 'flex';
+            // Show modal with animation
+            modal.classList.add('active');
             
             // Prevent body scrolling
             document.body.style.overflow = 'hidden';
@@ -435,10 +546,23 @@
         
         function closeModal(modalId) {
             const modal = document.getElementById(modalId);
-            modal.style.display = 'none';
+            modal.classList.remove('active');
             
             // Restore body scrolling
             document.body.style.overflow = 'auto';
+            
+            // Remove event listeners
+            modal.removeEventListener('click', function(event) {
+                if (event.target === modal) {
+                    closeModal(modalId);
+                }
+            });
+            
+            document.removeEventListener('keydown', function(event) {
+                if (event.key === 'Escape') {
+                    closeModal(modalId);
+                }
+            });
         }
         
         // Pagination event handlers

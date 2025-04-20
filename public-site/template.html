@@ -585,6 +585,48 @@
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
     <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    
+    <!-- Custom styles for dark theme -->
+    <style id="theme-overrides">
+        /* These styles will ensure text is visible in bio and card sections when dark theme is applied */
+        .bio-text, .bio-content p {
+            color: #000000 !important;
+        }
+        
+        .blog-card h3, .blog-card p, .blog-title, .blog-excerpt {
+            color: #000000 !important;
+        }
+        
+        .social-card h3, .social-card p, .social-platform, .social-content p {
+            color: #000000 !important;
+        }
+        
+        .bio, .blog-card, .social-card {
+            background-color: #ffffff !important;
+        }
+        
+        /* Enhanced "View All Blog Posts" button */
+        .view-all-blogs button {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 18px 50px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 20px;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+        
+        .view-all-blogs button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 25px rgba(0,0,0,0.2);
+            background-color: var(--secondary-color);
+        }
+    </style>
 </head>
 <body>
     <header>

@@ -32,37 +32,15 @@ function injectStyles(styles) {
     // Special handling for dark theme to ensure text visibility in bio and card sections
     if (styles.style_package === 'dark-professional' || 
         (styles.primary_color && styles.primary_color.toLowerCase() === '#121212')) {
-        css += `
-            /* Ensure text visibility in bio section */
-            .bio-text, .bio-content p {
-                color: #000000 !important;
-            }
-            
-            /* Ensure text visibility in blog cards */
-            .blog-card h3, .blog-card p, .blog-title, .blog-excerpt {
-                color: #000000 !important;
-            }
-            
-            /* Ensure text visibility in social cards */
-            .social-card h3, .social-card p, .social-platform, .social-content p {
-                color: #000000 !important;
-            }
-            
-            /* Ensure all cards have white background */
-            .bio, .blog-card, .social-card {
-                background-color: #ffffff !important;
-            }
-            
-            /* Enhance card shadows for better visibility */
-            .blog-card, .social-card, .bio {
-                box-shadow: 0 8px 16px rgba(0,0,0,0.3), 0 3px 8px rgba(0,0,0,0.2) !important;
-            }
-            
-            /* Improve hover effects */
-            .blog-card:hover, .social-card:hover {
-                box-shadow: 0 12px 24px rgba(0,0,0,0.4), 0 6px 12px rgba(0,0,0,0.25) !important;
-            }
-        `;
+        console.log('Applying dark theme overrides for text visibility');
+        
+        // Enable the theme-overrides styles
+        document.getElementById('theme-overrides').disabled = false;
+    } else {
+        // Disable the theme-overrides styles for other themes
+        if (document.getElementById('theme-overrides')) {
+            document.getElementById('theme-overrides').disabled = true;
+        }
     }
 
     style.textContent = css;
@@ -571,70 +549,42 @@ function changePage(direction) {
 
 // Function to open a specific blog post modal
 function openBlogPostModal(blogNumber) {
+    const modalId = 'modal';
+    const modal = document.getElementById(modalId);
+    const modalTitle = document.getElementById('modal-title');
+    const modalContent = document.getElementById('modal-content');
+    
+    // Get blog content
+    const title = window.siteContent[`blog_${blogNumber}_title`] || `Blog Post ${blogNumber}`;
+    const content = window.siteContent[`blog_${blogNumber}`] || 'No content available';
+    
+    // Set modal content
+    modalTitle.textContent = title;
+    
     // Format content with proper paragraph breaks
-    function formatContent(content) {
-        if (!content) return '';
-        
-        // Split content by double line breaks (paragraphs)
-        const paragraphs = content.split(/\n\s*\n/);
-        return paragraphs
-            .map(p => `<p>${p.trim().replace(/\n/g, '<br>')}</p>`)
-            .join('');
-    }
+    const paragraphs = content.split(/\n\s*\n/);
+    const formattedContent = paragraphs
+        .map(p => `<p>${p.trim().replace(/\n/g, '<br>')}</p>`)
+        .join('');
     
-    // Create or get modal
-    let modal = document.getElementById(`blog-modal-${blogNumber}`);
+    modalContent.innerHTML = formattedContent;
     
-    // If modal doesn't exist, create it
-    if (!modal) {
-        modal = document.createElement('div');
-        modal.id = `blog-modal-${blogNumber}`;
-        modal.className = 'modal';
-        
-        const contentKey = `blog_${blogNumber}`;
-        const titleKey = `blog_${blogNumber}_title`;
-        
-        const title = window.siteContent[titleKey] || `Blog Post ${blogNumber}`;
-        const content = formatContent(window.siteContent[contentKey] || '');
-        
-        modal.innerHTML = `
-            <div class="modal-content">
-                <span class="close-button" onclick="closeModal('blog-modal-${blogNumber}')">&times;</span>
-                <h2>${title}</h2>
-                <div>${content}</div>
-            </div>
-        `;
-        
-        document.body.appendChild(modal);
-    }
-    
-    // Show the modal
+    // Show modal
     modal.classList.add('active');
     
-    // Prevent body scrolling when modal is open
+    // Prevent body scrolling
     document.body.style.overflow = 'hidden';
 }
 
 function closeModal(modalId) {
-    if (modalId) {
-        const modal = document.getElementById(modalId);
-        if (modal) {
-            // Remove the active class instead of setting display to none
-            modal.classList.remove('active');
-            
-            // Restore body scrolling
-            document.body.style.overflow = '';
-        }
-    } else {
-        // Close the generic modal
-        const modal = document.getElementById('modal');
-        if (modal) {
-            modal.classList.remove('active');
-            
-            // Restore body scrolling
-            document.body.style.overflow = '';
-        }
-    }
+    if (!modalId) modalId = 'modal';
+    const modal = document.getElementById(modalId);
+    if (!modal) return;
+    
+    modal.classList.remove('active');
+    
+    // Restore body scrolling
+    document.body.style.overflow = 'auto';
 }
 
 // Close modal when clicking outside
@@ -696,11 +646,32 @@ function fixSocialIcons() {
 document.addEventListener('DOMContentLoaded', function() {
     loadContent();
     fixSocialIcons();
-});
-
-// Initialize parallax effect
-document.addEventListener('DOMContentLoaded', function() {
-    initParallax();
+    
+    // Add event listeners for modals
+    document.querySelectorAll('.modal').forEach(modal => {
+        // Close when clicking outside
+        modal.addEventListener('click', function(event) {
+            if (event.target === modal) {
+                closeModal(modal.id);
+            }
+        });
+    });
+    
+    // Close modals with Escape key
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            document.querySelectorAll('.modal').forEach(modal => {
+                if (modal.classList.contains('active')) {
+                    closeModal(modal.id);
+                }
+            });
+        }
+    });
+    
+    // Initialize parallax effect if on main page
+    if (typeof initParallax === 'function') {
+        initParallax();
+    }
 });
 
 // Also run it after a short delay to catch any dynamic changes
