@@ -777,6 +777,9 @@
         try {
             supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
             console.log('Supabase client initialized');
+            
+            // Load projects after Supabase client is initialized
+            loadProjects();
         } catch (error) {
             console.error('Error initializing Supabase client:', error);
             document.getElementById('status').textContent = 'Error initializing database connection: ' + error.message;
@@ -1152,9 +1155,6 @@
 
         // Check connection on load
         checkConnection();
-        
-        // Load available projects on initialization
-        loadProjects();
         
         // Load content
         async function loadContent(projectId) {
