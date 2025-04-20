@@ -217,17 +217,20 @@
             display: inline-block;
             background-color: var(--primary-color);
             color: white;
-            padding: 15px 40px;
-            border-radius: 30px;
+            padding: 18px 50px;
+            border-radius: 50px;
             text-decoration: none;
-            font-weight: 600;
-            font-size: 18px;
+            font-weight: 700;
+            font-size: 20px;
             transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
         }
         
         .view-all-blogs button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            transform: translateY(-5px);
+            box-shadow: 0 15px 25px rgba(0,0,0,0.2);
             background-color: var(--secondary-color);
         }
         
@@ -672,7 +675,7 @@
             
             <!-- View All Blog Posts Link -->
             <div class="view-all-blogs">
-                <h3 style="margin-bottom: 15px;">Want to see more content?</h3>
+                <h3 style="margin-bottom: 20px; font-size: 24px;">Want to see more content?</h3>
                 <button onclick="openAllBlogsModal()" class="btn">View All Blog Posts</button>
             </div>
         </div>
