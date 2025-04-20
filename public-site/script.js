@@ -17,7 +17,7 @@ function injectStyles(styles) {
     const style = document.getElementById('dynamic-theme');
     if (!style) return;
 
-    const css = `
+    let css = `
         :root {
             --primary-color: ${styles.primary_color};
             --secondary-color: ${styles.secondary_color};
@@ -28,6 +28,42 @@ function injectStyles(styles) {
             --body-font: '${styles.body_font}', sans-serif;
         }
     `;
+
+    // Special handling for dark theme to ensure text visibility in bio and card sections
+    if (styles.style_package === 'dark-professional' || 
+        (styles.primary_color && styles.primary_color.toLowerCase() === '#121212')) {
+        css += `
+            /* Ensure text visibility in bio section */
+            .bio-text, .bio-content p {
+                color: #000000 !important;
+            }
+            
+            /* Ensure text visibility in blog cards */
+            .blog-card h3, .blog-card p, .blog-title, .blog-excerpt {
+                color: #000000 !important;
+            }
+            
+            /* Ensure text visibility in social cards */
+            .social-card h3, .social-card p, .social-platform, .social-content p {
+                color: #000000 !important;
+            }
+            
+            /* Ensure all cards have white background */
+            .bio, .blog-card, .social-card {
+                background-color: #ffffff !important;
+            }
+            
+            /* Enhance card shadows for better visibility */
+            .blog-card, .social-card, .bio {
+                box-shadow: 0 8px 16px rgba(0,0,0,0.3), 0 3px 8px rgba(0,0,0,0.2) !important;
+            }
+            
+            /* Improve hover effects */
+            .blog-card:hover, .social-card:hover {
+                box-shadow: 0 12px 24px rgba(0,0,0,0.4), 0 6px 12px rgba(0,0,0,0.25) !important;
+            }
+        `;
+    }
 
     style.textContent = css;
 }
