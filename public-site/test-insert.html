@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Supabase Insert</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        .success {
+            color: green;
+            font-weight: bold;
+        }
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test Supabase Insert</h1>
+    <p>This page will test inserting a record into the dynamic_content table.</p>
+    
+    <button id="testButton">Insert Test Record</button>
+    <button id="listProjectsButton">List All Projects</button>
+    <div id="result"></div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script>
+        // Supabase Configuration with fallbacks
+        let SUPABASE_URL, SUPABASE_ANON_KEY, supabase;
+        
+        // Try to use the configuration from config.js
+        if (window.SUPABASE_CONFIG) {
+            console.log('Using Supabase config from config.js');
+            SUPABASE_URL = window.SUPABASE_CONFIG.url;
+            SUPABASE_ANON_KEY = window.SUPABASE_CONFIG.key;
+        } else {
+            // Fallback to hardcoded values
+            console.log('Using hardcoded Supabase config');
+            SUPABASE_URL = 'https://aqicztygjpmunfljjuto.supabase.co';
+            SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxaWN6dHlnanBtdW5mbGpqdXRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3MDU1ODIsImV4cCI6MjA1OTI4MTU4Mn0.5e2hvTckSSbTFLBjQiccrvjoBd6QQDX0X4tccFOc1rs';
+        }
+        
+        // Clean up URL if needed (remove markdown formatting if present)
+        if (SUPABASE_URL.includes('](')) {
+            SUPABASE_URL = SUPABASE_URL.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '$2');
+        }
+        
+        console.log('Connecting to Supabase URL:', SUPABASE_URL);
+        
+        // Initialize Supabase client
+        try {
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            console.log('Supabase client initialized');
+        } catch (error) {
+            console.error('Error initializing Supabase client:', error);
+            document.getElementById('result').innerHTML = `<p class="error">Error initializing database connection: ${error.message}</p>`;
+        }
+        
+        // Test insert function
+        async function testInsert() {
+            try {
+                const resultDiv = document.getElementById('result');
+                resultDiv.innerHTML = '<p>Testing connection...</p>';
+                
+                // Generate a test project ID
+                const timestamp = new Date().toISOString().replace(/[-:.]/g, '').substring(0, 14);
+                const testProjectId = `html-test-${timestamp}`;
+                
+                // Create test record
+                const testRecord = {
+                    project_id: testProjectId,
+                    key: 'rendered_title',
+                    value: 'HTML Test Project ' + new Date().toISOString()
+                };
+                
+                console.log('Inserting test record:', testRecord);
+                resultDiv.innerHTML += `<p>Inserting record with project_id: ${testProjectId}</p>`;
+                
+                // Insert the record
+                const { data, error } = await supabase
+                    .from('dynamic_content')
+                    .insert(testRecord);
+                
+                if (error) {
+                    console.error('Error inserting record:', error);
+                    resultDiv.innerHTML += `<p class="error">Error: ${error.message}</p>`;
+                    return;
+                }
+                
+                console.log('Record inserted successfully:', data);
+                resultDiv.innerHTML += `<p class="success">Record inserted successfully!</p>`;
+                resultDiv.innerHTML += `<p>Project ID: ${testProjectId}</p>`;
+                resultDiv.innerHTML += `<p>Please check the dynamic_content table to verify the record was inserted.</p>`;
+                
+                // Now try to read the record back
+                const { data: readData, error: readError } = await supabase
+                    .from('dynamic_content')
+                    .select('*')
+                    .eq('project_id', testProjectId);
+                
+                if (readError) {
+                    console.error('Error reading record:', readError);
+                    resultDiv.innerHTML += `<p class="error">Error reading record: ${readError.message}</p>`;
+                    return;
+                }
+                
+                console.log('Read data:', readData);
+                resultDiv.innerHTML += `<p>Read data from database:</p>`;
+                resultDiv.innerHTML += `<pre>${JSON.stringify(readData, null, 2)}</pre>`;
+                
+            } catch (error) {
+                console.error('Test error:', error);
+                document.getElementById('result').innerHTML += `<p class="error">Test error: ${error.message}</p>`;
+            }
+        }
+        
+        // Function to list all projects
+        async function listAllProjects() {
+            try {
+                const resultDiv = document.getElementById('result');
+                resultDiv.innerHTML = '<p>Fetching all projects...</p>';
+                
+                // First, get all unique project IDs
+                const { data: projectData, error: projectError } = await supabase
+                    .from('dynamic_content')
+                    .select('project_id')
+                    .order('project_id');
+                
+                if (projectError) {
+                    console.error('Error fetching projects:', projectError);
+                    resultDiv.innerHTML += `<p class="error">Error fetching projects: ${projectError.message}</p>`;
+                    return;
+                }
+                
+                // Get unique project IDs
+                const uniqueProjects = [...new Set(projectData.map(item => item.project_id))];
+                console.log('Unique projects:', uniqueProjects);
+                
+                resultDiv.innerHTML += `<p>Found ${uniqueProjects.length} unique projects:</p>`;
+                resultDiv.innerHTML += `<pre>${JSON.stringify(uniqueProjects, null, 2)}</pre>`;
+                
+                // Now get details for each project
+                resultDiv.innerHTML += `<h3>Project Details:</h3>`;
+                
+                for (const projectId of uniqueProjects.slice(0, 5)) { // Limit to first 5 for performance
+                    const { data: projectDetails, error: detailsError } = await supabase
+                        .from('dynamic_content')
+                        .select('*')
+                        .eq('project_id', projectId)
+                        .limit(10);
+                    
+                    if (detailsError) {
+                        console.error(`Error fetching details for project ${projectId}:`, detailsError);
+                        resultDiv.innerHTML += `<p class="error">Error fetching details for project ${projectId}: ${detailsError.message}</p>`;
+                        continue;
+                    }
+                    
+                    resultDiv.innerHTML += `<h4>Project: ${projectId}</h4>`;
+                    resultDiv.innerHTML += `<pre>${JSON.stringify(projectDetails, null, 2)}</pre>`;
+                }
+                
+                // Also check the table structure
+                const { data: tableInfo, error: tableError } = await supabase
+                    .rpc('get_table_info', { table_name: 'dynamic_content' })
+                    .select('*');
+                
+                if (!tableError && tableInfo) {
+                    resultDiv.innerHTML += `<h3>Table Information:</h3>`;
+                    resultDiv.innerHTML += `<pre>${JSON.stringify(tableInfo, null, 2)}</pre>`;
+                }
+                
+            } catch (error) {
+                console.error('Error listing projects:', error);
+                document.getElementById('result').innerHTML += `<p class="error">Error listing projects: ${error.message}</p>`;
+            }
+        }
+        
+        // Add event listeners to buttons
+        document.getElementById('testButton').addEventListener('click', testInsert);
+        document.getElementById('listProjectsButton').addEventListener('click', listAllProjects);
+    </script>
+</body>
+</html>

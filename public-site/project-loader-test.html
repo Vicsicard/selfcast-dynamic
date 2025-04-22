@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Loader Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        .success {
+            color: green;
+            font-weight: bold;
+        }
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Project Loader Test</h1>
+    <p>This page will test loading projects using the same code as the content editor.</p>
+    
+    <button id="loadProjectsButton">Load Projects</button>
+    <div id="result"></div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script>
+        // Supabase Configuration with fallbacks
+        let SUPABASE_URL, SUPABASE_ANON_KEY, supabase;
+        
+        // Try to use the configuration from config.js
+        if (window.SUPABASE_CONFIG) {
+            console.log('Using Supabase config from config.js');
+            SUPABASE_URL = window.SUPABASE_CONFIG.url;
+            SUPABASE_ANON_KEY = window.SUPABASE_CONFIG.key;
+        } else {
+            // Fallback to hardcoded values
+            console.log('Using hardcoded Supabase config');
+            SUPABASE_URL = 'https://aqicztygjpmunfljjuto.supabase.co';
+            SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxaWN6dHlnanBtdW5mbGpqdXRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3MDU1ODIsImV4cCI6MjA1OTI4MTU4Mn0.5e2hvTckSSbTFLBjQiccrvjoBd6QQDX0X4tccFOc1rs';
+        }
+        
+        // Initialize Supabase client
+        try {
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            console.log('Supabase client initialized');
+        } catch (error) {
+            console.error('Error initializing Supabase client:', error);
+            document.getElementById('result').innerHTML = `<p class="error">Error initializing database connection: ${error.message}</p>`;
+        }
+        
+        // Function to load projects exactly as the content editor does
+        async function loadProjects() {
+            try {
+                const resultDiv = document.getElementById('result');
+                resultDiv.innerHTML = '<p>Loading projects using content editor method...</p>';
+                
+                // This is the exact query used by the content editor to load projects
+                const { data, error } = await supabase
+                    .from('dynamic_content')
+                    .select('project_id')
+                    .order('project_id');
+                
+                if (error) {
+                    console.error('Error loading projects:', error);
+                    resultDiv.innerHTML += `<p class="error">Error: ${error.message}</p>`;
+                    return;
+                }
+                
+                console.log('Raw project data:', data);
+                
+                // Get unique project IDs (this is how the content editor does it)
+                const projectIds = [...new Set(data.map(item => item.project_id))];
+                console.log('Unique project IDs:', projectIds);
+                
+                resultDiv.innerHTML += `<p class="success">Found ${projectIds.length} unique projects</p>`;
+                resultDiv.innerHTML += `<pre>${JSON.stringify(projectIds, null, 2)}</pre>`;
+                
+                // Now let's also try the alternative method - get all records with key='rendered_title'
+                resultDiv.innerHTML += `<h3>Projects with rendered_title:</h3>`;
+                
+                const { data: titleData, error: titleError } = await supabase
+                    .from('dynamic_content')
+                    .select('*')
+                    .eq('key', 'rendered_title');
+                
+                if (titleError) {
+                    console.error('Error loading titles:', titleError);
+                    resultDiv.innerHTML += `<p class="error">Error loading titles: ${titleError.message}</p>`;
+                } else {
+                    console.log('Title data:', titleData);
+                    resultDiv.innerHTML += `<p>Found ${titleData.length} projects with titles</p>`;
+                    resultDiv.innerHTML += `<pre>${JSON.stringify(titleData, null, 2)}</pre>`;
+                }
+                
+                // Check for our test projects specifically
+                resultDiv.innerHTML += `<h3>Test Projects:</h3>`;
+                
+                const { data: testData, error: testError } = await supabase
+                    .from('dynamic_content')
+                    .select('*')
+                    .like('project_id', '%test%');
+                
+                if (testError) {
+                    console.error('Error loading test projects:', testError);
+                    resultDiv.innerHTML += `<p class="error">Error loading test projects: ${testError.message}</p>`;
+                } else {
+                    console.log('Test project data:', testData);
+                    resultDiv.innerHTML += `<p>Found ${testData.length} test project records</p>`;
+                    resultDiv.innerHTML += `<pre>${JSON.stringify(testData, null, 2)}</pre>`;
+                }
+                
+            } catch (error) {
+                console.error('Error in loadProjects:', error);
+                document.getElementById('result').innerHTML += `<p class="error">Error: ${error.message}</p>`;
+            }
+        }
+        
+        // Add event listener to button
+        document.getElementById('loadProjectsButton').addEventListener('click', loadProjects);
+    </script>
+</body>
+</html>

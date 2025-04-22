@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Check Table Structure</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        .success {
+            color: green;
+            font-weight: bold;
+        }
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Check Table Structure</h1>
+    <p>This page will check the structure of the dynamic_content table.</p>
+    
+    <button id="checkStructureButton">Check Table Structure</button>
+    <button id="sampleDataButton">Get Sample Data</button>
+    <div id="result"></div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script>
+        // Supabase Configuration with fallbacks
+        let SUPABASE_URL, SUPABASE_ANON_KEY, supabase;
+        
+        // Try to use the configuration from config.js
+        if (window.SUPABASE_CONFIG) {
+            console.log('Using Supabase config from config.js');
+            SUPABASE_URL = window.SUPABASE_CONFIG.url;
+            SUPABASE_ANON_KEY = window.SUPABASE_CONFIG.key;
+        } else {
+            // Fallback to hardcoded values
+            console.log('Using hardcoded Supabase config');
+            SUPABASE_URL = 'https://aqicztygjpmunfljjuto.supabase.co';
+            SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxaWN6dHlnanBtdW5mbGpqdXRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3MDU1ODIsImV4cCI6MjA1OTI4MTU4Mn0.5e2hvTckSSbTFLBjQiccrvjoBd6QQDX0X4tccFOc1rs';
+        }
+        
+        // Initialize Supabase client
+        try {
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            console.log('Supabase client initialized');
+        } catch (error) {
+            console.error('Error initializing Supabase client:', error);
+            document.getElementById('result').innerHTML = `<p class="error">Error initializing database connection: ${error.message}</p>`;
+        }
+        
+        // Function to check table structure
+        async function checkTableStructure() {
+            try {
+                const resultDiv = document.getElementById('result');
+                resultDiv.innerHTML = '<p>Checking table structure...</p>';
+                
+                // First, try to get the table info using PostgreSQL's information_schema
+                const { data: tableInfo, error: tableError } = await supabase
+                    .rpc('get_table_info', { table_name: 'dynamic_content' });
+                
+                if (tableError) {
+                    console.error('Error getting table info:', tableError);
+                    resultDiv.innerHTML += `<p class="error">Error getting table info: ${tableError.message}</p>`;
+                    
+                    // Fallback: Get a sample row to infer structure
+                    resultDiv.innerHTML += `<p>Falling back to sample data to infer structure...</p>`;
+                    
+                    const { data: sampleData, error: sampleError } = await supabase
+                        .from('dynamic_content')
+                        .select('*')
+                        .limit(1);
+                    
+                    if (sampleError) {
+                        console.error('Error getting sample data:', sampleError);
+                        resultDiv.innerHTML += `<p class="error">Error getting sample data: ${sampleError.message}</p>`;
+                        return;
+                    }
+                    
+                    if (sampleData && sampleData.length > 0) {
+                        const sampleRow = sampleData[0];
+                        resultDiv.innerHTML += `<p class="success">Inferred structure from sample data:</p>`;
+                        resultDiv.innerHTML += `<pre>${JSON.stringify(sampleRow, null, 2)}</pre>`;
+                        
+                        const columnNames = Object.keys(sampleRow);
+                        resultDiv.innerHTML += `<p>Column names: ${columnNames.join(', ')}</p>`;
+                    } else {
+                        resultDiv.innerHTML += `<p>No sample data found.</p>`;
+                    }
+                } else {
+                    console.log('Table info:', tableInfo);
+                    resultDiv.innerHTML += `<p class="success">Table structure retrieved:</p>`;
+                    resultDiv.innerHTML += `<pre>${JSON.stringify(tableInfo, null, 2)}</pre>`;
+                }
+                
+                // Also try to get the first few records to see the actual data
+                const { data: records, error: recordsError } = await supabase
+                    .from('dynamic_content')
+                    .select('*')
+                    .limit(5);
+                
+                if (recordsError) {
+                    console.error('Error getting records:', recordsError);
+                    resultDiv.innerHTML += `<p class="error">Error getting records: ${recordsError.message}</p>`;
+                } else {
+                    console.log('Sample records:', records);
+                    resultDiv.innerHTML += `<p class="success">Sample records:</p>`;
+                    resultDiv.innerHTML += `<pre>${JSON.stringify(records, null, 2)}</pre>`;
+                }
+                
+            } catch (error) {
+                console.error('Error checking table structure:', error);
+                document.getElementById('result').innerHTML += `<p class="error">Error: ${error.message}</p>`;
+            }
+        }
+        
+        // Function to get sample data with different queries
+        async function getSampleData() {
+            try {
+                const resultDiv = document.getElementById('result');
+                resultDiv.innerHTML = '<p>Getting sample data with different queries...</p>';
+                
+                // Try different queries to see what works
+                const queries = [
+                    {
+                        name: "Basic Select",
+                        query: supabase.from('dynamic_content').select('*').limit(3)
+                    },
+                    {
+                        name: "Select by Project ID",
+                        query: supabase.from('dynamic_content').select('*').eq('project_id', 'test-project-1745281975937').limit(3)
+                    },
+                    {
+                        name: "Select Specific Fields",
+                        query: supabase.from('dynamic_content').select('id, project_id, key, value').limit(3)
+                    },
+                    {
+                        name: "Select with Order",
+                        query: supabase.from('dynamic_content').select('*').order('id', { ascending: false }).limit(3)
+                    }
+                ];
+                
+                for (const q of queries) {
+                    resultDiv.innerHTML += `<h3>${q.name}:</h3>`;
+                    
+                    const { data, error } = await q.query;
+                    
+                    if (error) {
+                        console.error(`Error with ${q.name}:`, error);
+                        resultDiv.innerHTML += `<p class="error">Error: ${error.message}</p>`;
+                    } else {
+                        console.log(`${q.name} results:`, data);
+                        resultDiv.innerHTML += `<p class="success">Results (${data.length} rows):</p>`;
+                        resultDiv.innerHTML += `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                    }
+                }
+                
+                // Also check what tables exist
+                const { data: tables, error: tablesError } = await supabase
+                    .rpc('get_all_tables');
+                
+                if (!tablesError && tables) {
+                    resultDiv.innerHTML += `<h3>All Tables:</h3>`;
+                    resultDiv.innerHTML += `<pre>${JSON.stringify(tables, null, 2)}</pre>`;
+                }
+                
+            } catch (error) {
+                console.error('Error getting sample data:', error);
+                document.getElementById('result').innerHTML += `<p class="error">Error: ${error.message}</p>`;
+            }
+        }
+        
+        // Add event listeners to buttons
+        document.getElementById('checkStructureButton').addEventListener('click', checkTableStructure);
+        document.getElementById('sampleDataButton').addEventListener('click', getSampleData);
+    </script>
+</body>
+</html>
