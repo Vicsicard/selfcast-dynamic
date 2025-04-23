@@ -748,6 +748,7 @@
         </div>
     </div>
 
+    <script src="fallback-data.js"></script>
     <script>
         // Supabase Configuration with fallbacks
         const SUPABASE_URL = 'https://aqicztygjpmunfljjjuto.supabase.co';
@@ -822,64 +823,21 @@
         async function loadProjects() {
             try {
                 console.log('Starting to load projects...');
+                statusElement.textContent = 'Loading projects...';
+                statusElement.className = 'status info';
                 
-                let projectIds = [];
-                let error = null;
+                // Use the API proxy to get projects
+                const response = await fetch('/api/supabase-proxy?action=getProjects');
                 
-                // Immediately use fallback data in production environment
-                if (window.location.hostname.includes('vercel.app')) {
-                    console.log('Running in Vercel environment, using fallback project data directly');
-                    
-                    // Fallback to hardcoded project data
-                    projectIds = [
-                        'Ann sicard2025-04-23T15:36:44.516Z',
-                        'Opie sicard2025-04-23T15:31:47.006Z',
-                        '2025-04-23T15:15:38.214Z',
-                        'test-manual-insert-20250423',
-                        'sicard-vic-20250422-0856',
-                        'sicard-vic-20250422-0948',
-                        'sicard-vic-20250422-1102',
-                        'default-project'
-                    ];
-                    
-                    error = new Error('Skipping Supabase connection in Vercel environment');
-                } else {
-                    // Only try Supabase in non-Vercel environments
-                    try {
-                        // First, try to load from Supabase
-                        console.log('Attempting to load projects from Supabase...');
-                        const { data, error: supabaseError } = await supabase
-                            .from('dynamic_content')
-                            .select('project_id')
-                            .order('project_id', { ascending: true });
-                        
-                        if (supabaseError) {
-                            console.error('Error fetching project IDs from Supabase:', supabaseError);
-                            throw supabaseError;
-                        }
-                        
-                        // Get unique project IDs
-                        projectIds = [...new Set(data.map(item => item.project_id))];
-                        console.log('Successfully loaded projects from Supabase:', projectIds.length);
-                    } catch (supabaseError) {
-                        console.warn('Supabase connection failed, using fallback project data');
-                        error = supabaseError;
-                        
-                        // Fallback to hardcoded project data
-                        projectIds = [
-                            'Ann sicard2025-04-23T15:36:44.516Z',
-                            'Opie sicard2025-04-23T15:31:47.006Z',
-                            '2025-04-23T15:15:38.214Z',
-                            'test-manual-insert-20250423',
-                            'sicard-vic-20250422-0856',
-                            'sicard-vic-20250422-0948',
-                            'sicard-vic-20250422-1102',
-                            'default-project'
-                        ];
-                    }
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(`API error: ${errorData.error || response.statusText}`);
                 }
                 
-                console.log('Project IDs to display:', projectIds.length);
+                const data = await response.json();
+                const projectIds = data.projectIds || [];
+                
+                console.log('Projects loaded via API proxy:', projectIds.length);
                 
                 // Clear existing options
                 const projectSelect = document.getElementById('project_id');
@@ -908,22 +866,17 @@
                 // Update the blog management button
                 updateBlogManagementButton();
                 
-                // Show status message
-                if (error) {
-                    statusElement.textContent = 'Using offline project data (Supabase connection failed)';
-                    statusElement.className = 'status warning';
-                } else {
-                    statusElement.textContent = `Loaded ${projectIds.length} projects from Supabase`;
-                    statusElement.className = 'status success';
-                }
+                // Show success message
+                statusElement.textContent = `Loaded ${projectIds.length} projects`;
+                statusElement.className = 'status success';
                 
             } catch (error) {
-                console.error('Error in loadProjects:', error);
+                console.error('Error loading projects:', error);
                 statusElement.textContent = 'Error loading projects: ' + error.message;
                 statusElement.className = 'status error';
             }
         }
-
+        
         // Load content for a specific project
         async function loadContent(projectId) {
             if (!projectId || projectId === 'new') return;
@@ -932,70 +885,25 @@
                 statusElement.textContent = 'Loading project content...';
                 statusElement.className = 'status info';
                 
-                let contentData = [];
-                let error = null;
+                // Use the API proxy to get content
+                const response = await fetch(`/api/supabase-proxy?action=getContent&projectId=${encodeURIComponent(projectId)}`);
                 
-                // Immediately use fallback data in production environment
-                if (window.location.hostname.includes('vercel.app')) {
-                    console.log('Running in Vercel environment, using fallback content data directly');
-                    error = new Error('Skipping Supabase connection in Vercel environment');
-                    
-                    // Generate some fallback content data based on the project ID
-                    const namePart = projectId.split('T')[0].replace(/-/g, ' ');
-                    
-                    contentData = [
-                        { key: 'rendered_title', value: namePart },
-                        { key: 'full_name', value: namePart },
-                        { key: 'email_address', value: 'example@example.com' },
-                        { key: 'onboarding_phone', value: '555-123-4567' },
-                        { key: 'current_year', value: '2025' },
-                        { key: 'rendered_footer_slogan', value: ` 2025 ${namePart} | All Rights Reserved` }
-                    ];
-                } else {
-                    try {
-                        // First, try to load from Supabase
-                        console.log('Attempting to load content from Supabase for project:', projectId);
-                        const { data, error: supabaseError } = await supabase
-                            .from('dynamic_content')
-                            .select('key, value')
-                            .eq('project_id', projectId);
-                        
-                        if (supabaseError) {
-                            console.error('Error fetching content from Supabase:', supabaseError);
-                            throw supabaseError;
-                        }
-                        
-                        contentData = data;
-                        console.log('Successfully loaded content from Supabase:', contentData.length, 'items');
-                    } catch (supabaseError) {
-                        console.warn('Supabase connection failed, using fallback content data');
-                        error = supabaseError;
-                        
-                        // Generate some fallback content data based on the project ID
-                        const namePart = projectId.split('T')[0].replace(/-/g, ' ');
-                        
-                        contentData = [
-                            { key: 'rendered_title', value: namePart },
-                            { key: 'full_name', value: namePart },
-                            { key: 'email_address', value: 'example@example.com' },
-                            { key: 'onboarding_phone', value: '555-123-4567' },
-                            { key: 'current_year', value: '2025' },
-                            { key: 'rendered_footer_slogan', value: ` 2025 ${namePart} | All Rights Reserved` }
-                        ];
-                    }
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(`API error: ${errorData.error || response.statusText}`);
                 }
+                
+                const data = await response.json();
+                const contentData = data.content || [];
+                
+                console.log('Content loaded via API proxy:', contentData.length, 'items');
                 
                 // Populate form with project data
                 populateForm(contentData);
                 
-                // Show status message
-                if (error) {
-                    statusElement.textContent = 'Using offline content data (Supabase connection failed)';
-                    statusElement.className = 'status warning';
-                } else {
-                    statusElement.textContent = `Loaded project: ${projectId}`;
-                    statusElement.className = 'status success';
-                }
+                // Show success message
+                statusElement.textContent = `Loaded project: ${projectId}`;
+                statusElement.className = 'status success';
                 
                 // Show the view site button for existing projects
                 document.getElementById('view-site-container').style.display = 'block';
@@ -1009,6 +917,63 @@
             } catch (error) {
                 console.error('Error loading project:', error);
                 statusElement.textContent = 'Error loading project: ' + error.message;
+                statusElement.className = 'status error';
+            }
+        }
+        
+        // Save content
+        async function saveContent(event) {
+            event.preventDefault();
+            
+            try {
+                const projectId = document.getElementById('project_id').value;
+                
+                if (!projectId) {
+                    alert('Please select a project or create a new one');
+                    return;
+                }
+                
+                statusElement.textContent = 'Saving content...';
+                statusElement.className = 'status info';
+                
+                // Collect form data
+                const formData = new FormData(form);
+                const content = [];
+                
+                // Process each form field
+                for (const [key, value] of formData.entries()) {
+                    if (key !== 'project_id') {
+                        content.push({ key, value });
+                    }
+                }
+                
+                // Use the API proxy to save content
+                const response = await fetch('/api/supabase-proxy?action=saveContent', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ projectId, content })
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(`API error: ${errorData.error || response.statusText}`);
+                }
+                
+                const data = await response.json();
+                console.log('Content saved via API proxy:', data.results);
+                
+                // Show success message
+                statusElement.textContent = 'Content saved successfully';
+                statusElement.className = 'status success';
+                
+                // Reload projects to ensure the list is up to date
+                loadProjects();
+                
+            } catch (error) {
+                console.error('Error saving content:', error);
+                statusElement.textContent = 'Error saving content: ' + error.message;
                 statusElement.className = 'status error';
             }
         }
@@ -1310,189 +1275,6 @@
         const profilePreview = document.getElementById('profile-preview');
         const profileImageUrl = document.getElementById('profile_image_url');
         const progressBar = document.querySelector('.progress-bar div');
-
-        // Save content
-        async function saveContent(event) {
-            event.preventDefault();
-            
-            const projectId = projectSelect.value;
-            if (!projectId || projectId === 'new') {
-                status.textContent = 'Please select or create a project first';
-                status.className = 'status error';
-                return;
-            }
-
-            try {
-                // Gather all form data
-                const formData = new FormData(form);
-                let updates = [];
-                
-                // Use a Set to track keys we've already added to prevent duplicates
-                const processedKeys = new Set();
-
-                // Process blog posts
-                for (let i = 1; i <= 4; i++) {
-                    const title = document.getElementById(`blog_post_${i}_title`).value;
-                    const description = document.getElementById(`blog_post_${i}_description`).value;
-                    const post = document.getElementById(`blog_post_${i}`).value;
-                    
-                    // Only save if any content is provided
-                    if (title || description || post) {
-                        const titleKey = `blog_post_${i}_title`;
-                        const descKey = `blog_post_${i}_description`;
-                        const postKey = `blog_post_${i}`;
-                        
-                        if (!processedKeys.has(titleKey)) {
-                            updates.push({
-                                project_id: projectId,
-                                key: titleKey,
-                                value: title
-                            });
-                            processedKeys.add(titleKey);
-                        }
-                        
-                        if (!processedKeys.has(descKey)) {
-                            updates.push({
-                                project_id: projectId,
-                                key: descKey,
-                                value: description
-                            });
-                            processedKeys.add(descKey);
-                        }
-                        
-                        if (!processedKeys.has(postKey)) {
-                            updates.push({
-                                project_id: projectId,
-                                key: postKey,
-                                value: post
-                            });
-                            processedKeys.add(postKey);
-                        }
-                    }
-                }
-
-                // Process social media fields
-                const socialPlatforms = ['facebook', 'twitter', 'instagram', 'linkedin'];
-                for (const platform of socialPlatforms) {
-                    const url = document.getElementById(`${platform}_url`).value;
-                    const post = document.getElementById(`${platform}_post`).value;
-                    
-                    // Only save if either URL or post is provided
-                    if (url || post) {
-                        const urlKey = `${platform}_url`;
-                        const postKey = `${platform}_post`;
-                        
-                        if (!processedKeys.has(urlKey)) {
-                            updates.push({
-                                project_id: projectId,
-                                key: urlKey,
-                                value: url
-                            });
-                            processedKeys.add(urlKey);
-                        }
-                        
-                        if (!processedKeys.has(postKey)) {
-                            updates.push({
-                                project_id: projectId,
-                                key: postKey,
-                                value: post
-                            });
-                            processedKeys.add(postKey);
-                        }
-                    }
-                }
-
-                // Process basic information fields
-                const basicFields = [
-                    'rendered_title',
-                    'rendered_subtitle',
-                    'rendered_bio_html',
-                    'rendered_footer_slogan',
-                    'profile_image_url',
-                    'quote_1',
-                    'quote_2',
-                    'quote_3',
-                    'rendered_bio_html_card_1',
-                    'rendered_bio_html_card_2',
-                    'rendered_bio_html_card_3',
-                    'email_address',
-                    'style_package'
-                ];
-                
-                for (const field of basicFields) {
-                    const element = document.getElementById(field);
-                    if (element && element.value && !processedKeys.has(field)) {
-                        updates.push({
-                            project_id: projectId,
-                            key: field,
-                            value: element.value
-                        });
-                        processedKeys.add(field);
-                    }
-                }
-
-                // Add remaining form fields
-                for (const [key, value] of formData.entries()) {
-                    // Skip fields we've already processed
-                    if (key === 'project_id' || 
-                        processedKeys.has(key) ||
-                        key.endsWith('_url') || 
-                        key.endsWith('_post') || 
-                        key.endsWith('_title') || 
-                        key.endsWith('_description') ||
-                        key.endsWith('_short') ||
-                        basicFields.includes(key)) continue;
-                    
-                    updates.push({
-                        project_id: projectId,
-                        key: key,
-                        value: value
-                    });
-                    processedKeys.add(key);
-                }
-
-                // Insert or update all values
-                const { error } = await supabase
-                    .from('dynamic_content')
-                    .upsert(updates, {
-                        onConflict: 'project_id,key'
-                    });
-
-                if (error) throw error;
-
-                status.textContent = 'Content saved successfully';
-                status.className = 'status success';
-
-                // Update character counts
-                const textareas = document.querySelectorAll('textarea[id$="_post"], textarea[id$="_short"]');
-                textareas.forEach(textarea => {
-                    const count = textarea.value.length;
-                    const countDisplay = textarea.nextElementSibling;
-                    if (countDisplay && countDisplay.classList.contains('character-count')) {
-                        countDisplay.textContent = count + ' characters';
-                    }
-                });
-
-                // Show view site button
-                document.getElementById('view-site-container').style.display = 'block';
-                
-                // Update the view site button with the correct project ID
-                const viewSiteButton = document.getElementById('view-site-button');
-                const currentProjectId = document.getElementById('project_id').value;
-                
-                // Set up the click handler for the view site button
-                viewSiteButton.onclick = function() {
-                    // Use the view-site.html page to handle the redirect
-                    const siteUrl = window.location.origin + '/view-site.html?project_id=' + projectId;
-                    console.log('Opening site URL:', siteUrl);
-                    window.open(siteUrl, '_blank');
-                };
-                
-            } catch (error) {
-                status.textContent = 'Error saving content: ' + error.message;
-                status.className = 'status error';
-            }
-        }
 
         // Attach form submit handler
         form.addEventListener('submit', saveContent);
