@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Content Editor</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            margin-top: 0;
+        }
+        .status {
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1rem 0;
+        }
+        .success { 
+            background: #d4edda;
+            color: #155724;
+        }
+        .error { 
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .info {
+            background: #e3f2fd;
+            color: #0d47a1;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 4px;
+            overflow: auto;
+            max-height: 300px;
+        }
+        button {
+            background: #3399FF;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-right: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+        select {
+            width: 100%;
+            padding: 0.5rem;
+            margin-bottom: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Simple Content Editor</h1>
+        <p>This editor uses direct fetch requests instead of the Supabase client library.</p>
+        
+        <div>
+            <label for="project-select">Select Project:</label>
+            <select id="project-select">
+                <option value="">Loading projects...</option>
+            </select>
+        </div>
+        
+        <button id="load-button">Load Content</button>
+        <button id="view-button">View Site</button>
+        
+        <div id="status" class="status info">Ready to load projects</div>
+        
+        <h2>Project Content</h2>
+        <pre id="content-display"></pre>
+    </div>
+
+    <script>
+        // Supabase Configuration
+        const SUPABASE_URL = 'https://aqicztygjpmunfljjuto.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxaWN6dHlnanBtdW5mbGpqdXRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3MDU1ODIsImV4cCI6MjA1OTI4MTU4Mn0.5e2hvTckSSbTFLBjQiccrvjoBd6QQDX0X4tccFOc1rs';
+        
+        // Elements
+        const statusElement = document.getElementById('status');
+        const projectSelect = document.getElementById('project-select');
+        const contentDisplay = document.getElementById('content-display');
+        const loadButton = document.getElementById('load-button');
+        const viewButton = document.getElementById('view-button');
+        
+        // Load projects
+        async function loadProjects() {
+            try {
+                statusElement.textContent = 'Loading projects...';
+                statusElement.className = 'status info';
+                
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/dynamic_content?select=project_id`, {
+                    method: 'GET',
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Failed to load projects: ${response.status} ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                
+                // Get unique project IDs
+                const projectIds = [...new Set(data.map(item => item.project_id))];
+                
+                // Clear existing options
+                projectSelect.innerHTML = '<option value="">Select a project</option>';
+                
+                // Add options for each project
+                projectIds.forEach(projectId => {
+                    const option = document.createElement('option');
+                    option.value = projectId;
+                    option.textContent = projectId;
+                    projectSelect.appendChild(option);
+                });
+                
+                statusElement.textContent = `Loaded ${projectIds.length} projects`;
+                statusElement.className = 'status success';
+                
+            } catch (error) {
+                console.error('Error loading projects:', error);
+                statusElement.textContent = 'Error loading projects: ' + error.message;
+                statusElement.className = 'status error';
+            }
+        }
+        
+        // Load content for a project
+        async function loadContent(projectId) {
+            try {
+                if (!projectId) {
+                    statusElement.textContent = 'Please select a project';
+                    statusElement.className = 'status error';
+                    return;
+                }
+                
+                statusElement.textContent = `Loading content for project: ${projectId}...`;
+                statusElement.className = 'status info';
+                contentDisplay.textContent = '';
+                
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/dynamic_content?project_id=eq.${encodeURIComponent(projectId)}&select=key,value`, {
+                    method: 'GET',
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Failed to load content: ${response.status} ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                
+                if (!data || data.length === 0) {
+                    statusElement.textContent = `No content found for project: ${projectId}`;
+                    statusElement.className = 'status error';
+                    return;
+                }
+                
+                // Display content
+                contentDisplay.textContent = JSON.stringify(data, null, 2);
+                
+                statusElement.textContent = `Loaded ${data.length} content items for project: ${projectId}`;
+                statusElement.className = 'status success';
+                
+            } catch (error) {
+                console.error('Error loading content:', error);
+                statusElement.textContent = 'Error loading content: ' + error.message;
+                statusElement.className = 'status error';
+            }
+        }
+        
+        // Event listeners
+        loadButton.addEventListener('click', function() {
+            const selectedProject = projectSelect.value;
+            loadContent(selectedProject);
+        });
+        
+        viewButton.addEventListener('click', function() {
+            const selectedProject = projectSelect.value;
+            if (selectedProject) {
+                window.open(`/?project_id=${selectedProject}`, '_blank');
+            } else {
+                statusElement.textContent = 'Please select a project';
+                statusElement.className = 'status error';
+            }
+        });
+        
+        // Load projects on page load
+        document.addEventListener('DOMContentLoaded', loadProjects);
+    </script>
+</body>
+</html>
