@@ -753,107 +753,67 @@
         // Supabase Configuration - Direct initialization for production reliability
         const SUPABASE_URL = 'https://aqicztygjpmunfljjjuto.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxaWN6dHlnanBtdW5mbGpqdXRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3MDU1ODIsImV4cCI6MjA1OTI4MTU4Mn0.5e2hvTckSSbTFLBjQiccrvjoBd6QQDX0X4tccFOc1rs';
-        let supabase;
         
-        console.log('Content Editor initializing...');
-        console.log('Supabase URL:', SUPABASE_URL);
+        // Status element for error reporting
+        const statusElement = document.getElementById('status');
         
         // Initialize Supabase client
+        let supabase;
+        
+        // Initialize immediately
         try {
+            console.log('Initializing Supabase with URL:', SUPABASE_URL);
             supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            console.log('Supabase client initialized successfully');
+            console.log('Supabase client initialized');
             
-            // Add a simple test query to verify connection
-            supabase
-                .from('dynamic_content')
-                .select('project_id')
-                .limit(1)
-                .then(response => {
-                    if (response.error) {
-                        console.error('Test query failed:', response.error);
-                        document.getElementById('status').textContent = 'Database connection test failed: ' + response.error.message;
-                        document.getElementById('status').className = 'status error';
-                    } else {
-                        console.log('Test query successful:', response.data);
-                        document.getElementById('status').textContent = 'Connected to database';
-                        document.getElementById('status').className = 'status success';
-                        
-                        // Load projects after confirming connection
-                        loadProjects();
-                    }
-                })
-                .catch(err => {
-                    console.error('Test query exception:', err);
-                    document.getElementById('status').textContent = 'Database connection test exception: ' + err.message;
-                    document.getElementById('status').className = 'status error';
-                });
+            // Load projects immediately after initialization
+            setTimeout(() => {
+                loadProjects();
+            }, 500);
         } catch (error) {
-            console.error('Error initializing Supabase client:', error);
-            document.getElementById('status').textContent = 'Error initializing database connection: ' + error.message;
-            document.getElementById('status').className = 'status error';
+            console.error('Error initializing Supabase:', error);
+            if (statusElement) {
+                statusElement.textContent = 'Error initializing database: ' + error.message;
+                statusElement.className = 'status error';
+            }
+            alert('Error initializing database: ' + error.message);
         }
         
         // Load available projects
         async function loadProjects() {
             try {
-                console.log('Starting to load projects...');
+                console.log('Loading projects...');
                 
-                // First, get all project IDs
-                const { data: projectData, error: projectError } = await supabase
+                // Simple query to get all project IDs
+                const { data, error } = await supabase
                     .from('dynamic_content')
                     .select('project_id')
-                    .order('project_id', { ascending: true });
+                    .order('project_id');
                 
-                if (projectError) {
-                    console.error('Error fetching project IDs:', projectError);
-                    throw projectError;
+                if (error) {
+                    console.error('Error loading projects:', error);
+                    if (statusElement) {
+                        statusElement.textContent = 'Error loading projects: ' + error.message;
+                        statusElement.className = 'status error';
+                    }
+                    return;
                 }
                 
-                console.log('Project data fetched:', projectData ? projectData.length : 0, 'rows');
+                console.log('Project data received:', data ? data.length : 0, 'rows');
                 
                 // Get unique project IDs
-                const projectIds = [...new Set(projectData.map(item => item.project_id))];
+                const projectIds = [...new Set(data.map(item => item.project_id))];
                 console.log('Unique project IDs:', projectIds.length);
                 
-                // Now get the full names for each project
-                const projectNames = {};
-                
-                // For each project, try to get the full_name
-                for (const projectId of projectIds) {
-                    try {
-                        const { data: nameData, error: nameError } = await supabase
-                            .from('dynamic_content')
-                            .select('value')
-                            .eq('project_id', projectId)
-                            .eq('key', 'full_name')
-                            .maybeSingle();
-                        
-                        if (nameError) {
-                            console.warn(`Error fetching name for project ${projectId}:`, nameError);
-                        }
-                        
-                        projectNames[projectId] = nameData && nameData.value ? nameData.value : projectId;
-                    } catch (err) {
-                        console.warn(`Error processing project ${projectId}:`, err);
-                        projectNames[projectId] = projectId;
-                    }
-                }
-                
                 // Clear existing options
+                const projectSelect = document.getElementById('project_id');
                 projectSelect.innerHTML = '<option value="">Select Project</option>';
                 
-                // Add options for each project with name + ID
+                // Add options for each project
                 projectIds.forEach(projectId => {
                     const option = document.createElement('option');
                     option.value = projectId;
-                    
-                    // Display name and ID together
-                    const displayName = projectNames[projectId] || projectId;
-                    const isNameSameAsId = displayName === projectId;
-                    
-                    // If name is different from ID, show both; otherwise just show ID
-                    option.textContent = isNameSameAsId ? projectId : `${displayName} (${projectId})`;
-                    
+                    option.textContent = projectId;
                     projectSelect.appendChild(option);
                 });
                 
@@ -867,26 +827,21 @@
                     console.log('Loading project from URL:', projectId);
                     projectSelect.value = projectId;
                     loadContent(projectId);
-                    
-                    // Update URL to include project_id if it's not already there
-                    if (!window.location.search.includes('project_id=')) {
-                        const newUrl = new URL(window.location.href);
-                        newUrl.searchParams.set('project_id', projectId);
-                        window.history.replaceState({}, '', newUrl);
-                    }
                 }
                 
                 // Update the blog management button
                 updateBlogManagementButton();
                 
             } catch (error) {
-                console.error('Error loading projects:', error);
-                document.getElementById('status').textContent = 'Error loading projects: ' + error.message;
-                document.getElementById('status').className = 'status error';
+                console.error('Error in loadProjects:', error);
+                if (statusElement) {
+                    statusElement.textContent = 'Error loading projects: ' + error.message;
+                    statusElement.className = 'status error';
+                }
                 alert('Error loading projects: ' + error.message);
             }
         }
-
+        
         // Populate form with project data
         function populateForm(data) {
             // Reset form
@@ -1133,8 +1088,8 @@
                     .then(({ data, error }) => {
                         if (error) {
                             console.error('Error applying style preset:', error);
-                            status.textContent = 'Error applying style preset: ' + error.message;
-                            status.className = 'status error';
+                            statusElement.textContent = 'Error applying style preset: ' + error.message;
+                            statusElement.className = 'status error';
                             return;
                         }
                         
@@ -1154,8 +1109,8 @@
                     });
             } catch (error) {
                 console.error('Error applying style preset:', error);
-                status.textContent = 'Error applying style preset: ' + error.message;
-                status.className = 'status error';
+                statusElement.textContent = 'Error applying style preset: ' + error.message;
+                statusElement.className = 'status error';
             }
         }
         
@@ -1178,7 +1133,6 @@
 
         // DOM Elements
         const form = document.getElementById('contentForm');
-        const status = document.getElementById('status');
         const projectSelect = document.getElementById('project_id');
         const profileUpload = document.getElementById('profile-upload');
         const profilePreview = document.getElementById('profile-preview');
@@ -1190,8 +1144,8 @@
             if (!projectId || projectId === 'new') return;
 
             try {
-                status.textContent = 'Loading project content...';
-                status.className = 'status info';
+                statusElement.textContent = 'Loading project content...';
+                statusElement.className = 'status info';
                 
                 // Fetch content for the selected project
                 const { data, error } = await supabase
@@ -1209,8 +1163,8 @@
                 // Populate form with project data
                 populateForm(data);
                 
-                status.textContent = `Loaded project: ${projectId}`;
-                status.className = 'status success';
+                statusElement.textContent = `Loaded project: ${projectId}`;
+                statusElement.className = 'status success';
                 
                 // Show the view site button for existing projects
                 document.getElementById('view-site-container').style.display = 'block';
@@ -1229,8 +1183,8 @@
                 
             } catch (error) {
                 console.error('Error loading project:', error);
-                status.textContent = 'Error loading project: ' + error.message;
-                status.className = 'status error';
+                statusElement.textContent = 'Error loading project: ' + error.message;
+                statusElement.className = 'status error';
             }
         }
 
@@ -1262,8 +1216,8 @@
             
             const projectId = projectSelect.value;
             if (!projectId || projectId === 'new') {
-                status.textContent = 'Please select or create a project first';
-                status.className = 'status error';
+                statusElement.textContent = 'Please select or create a project first';
+                statusElement.className = 'status error';
                 return;
             }
 
@@ -1405,8 +1359,8 @@
 
                 if (error) throw error;
 
-                status.textContent = 'Content saved successfully';
-                status.className = 'status success';
+                statusElement.textContent = 'Content saved successfully';
+                statusElement.className = 'status success';
 
                 // Update character counts
                 const textareas = document.querySelectorAll('textarea[id$="_post"], textarea[id$="_short"]');
@@ -1434,8 +1388,8 @@
                 };
                 
             } catch (error) {
-                status.textContent = 'Error saving content: ' + error.message;
-                status.className = 'status error';
+                statusElement.textContent = 'Error saving content: ' + error.message;
+                statusElement.className = 'status error';
             }
         }
 
@@ -1523,8 +1477,8 @@
             }
             
             try {
-                status.textContent = 'Loading project content...';
-                status.className = 'status info';
+                statusElement.textContent = 'Loading project content...';
+                statusElement.className = 'status info';
                 
                 // Fetch content for the selected project
                 const { data, error } = await supabase
@@ -1542,8 +1496,8 @@
                 // Populate form with project data
                 populateForm(data);
                 
-                status.textContent = `Loaded project: ${selectedProject}`;
-                status.className = 'status success';
+                statusElement.textContent = `Loaded project: ${selectedProject}`;
+                statusElement.className = 'status success';
                 
                 // Show the view site button for existing projects
                 document.getElementById('view-site-container').style.display = 'block';
@@ -1559,8 +1513,8 @@
                 
             } catch (error) {
                 console.error('Error loading project:', error);
-                status.textContent = 'Error loading project: ' + error.message;
-                status.className = 'status error';
+                statusElement.textContent = 'Error loading project: ' + error.message;
+                statusElement.className = 'status error';
             }
         });
 
