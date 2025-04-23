@@ -748,36 +748,73 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        // Supabase Configuration - Direct initialization for production reliability
+        // Supabase Configuration
         const SUPABASE_URL = 'https://aqicztygjpmunfljjjuto.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxaWN6dHlnanBtdW5mbGpqdXRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3MDU1ODIsImV4cCI6MjA1OTI4MTU4Mn0.5e2hvTckSSbTFLBjQiccrvjoBd6QQDX0X4tccFOc1rs';
         
         // Status element for error reporting
         const statusElement = document.getElementById('status');
         
-        // Initialize Supabase client
+        // Global Supabase client
         let supabase;
         
-        // Initialize immediately
-        try {
-            console.log('Initializing Supabase with URL:', SUPABASE_URL);
-            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            console.log('Supabase client initialized');
-            
-            // Load projects immediately after initialization
-            setTimeout(() => {
-                loadProjects();
-            }, 500);
-        } catch (error) {
-            console.error('Error initializing Supabase:', error);
-            if (statusElement) {
-                statusElement.textContent = 'Error initializing database: ' + error.message;
-                statusElement.className = 'status error';
-            }
-            alert('Error initializing database: ' + error.message);
+        // Properly load the Supabase script
+        function loadSupabaseScript() {
+            return new Promise((resolve, reject) => {
+                // Check if already loaded
+                if (window.supabase) {
+                    console.log('Supabase already loaded');
+                    resolve(window.supabase);
+                    return;
+                }
+                
+                console.log('Loading Supabase script...');
+                const script = document.createElement('script');
+                script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+                script.async = true;
+                
+                script.onload = () => {
+                    console.log('Supabase script loaded successfully');
+                    resolve(window.supabase);
+                };
+                
+                script.onerror = () => {
+                    const msg = 'Error loading Supabase script';
+                    console.error(msg);
+                    reject(new Error(msg));
+                };
+                
+                document.body.appendChild(script);
+            });
         }
+        
+        // Initialize Supabase client
+        async function initializeSupabase() {
+            try {
+                // First, ensure the script is loaded
+                await loadSupabaseScript();
+                
+                // Now initialize the client
+                console.log('Initializing Supabase client...');
+                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                console.log('Supabase client initialized successfully');
+                
+                // Load projects
+                await loadProjects();
+                
+            } catch (error) {
+                console.error('Supabase initialization failed:', error);
+                if (statusElement) {
+                    statusElement.textContent = 'Database connection failed: ' + error.message;
+                    statusElement.className = 'status error';
+                }
+                alert('Error connecting to database: ' + error.message);
+            }
+        }
+        
+        // Start initialization when the DOM is ready
+        document.addEventListener('DOMContentLoaded', initializeSupabase);
         
         // Load available projects
         async function loadProjects() {
@@ -838,7 +875,6 @@
                     statusElement.textContent = 'Error loading projects: ' + error.message;
                     statusElement.className = 'status error';
                 }
-                alert('Error loading projects: ' + error.message);
             }
         }
         
