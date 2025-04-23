@@ -809,37 +809,45 @@
         // Load available projects
         async function loadProjects() {
             try {
+                console.log('Starting to load projects...');
+                
                 // First, get all project IDs
                 const { data: projectData, error: projectError } = await supabase
                     .from('dynamic_content')
                     .select('project_id')
                     .order('project_id', { ascending: true });
                 
-                if (projectError) throw projectError;
+                if (projectError) {
+                    console.error('Error fetching project IDs:', projectError);
+                    throw projectError;
+                }
+                
+                console.log('Project data fetched:', projectData ? projectData.length : 0, 'rows');
                 
                 // Get unique project IDs
                 const projectIds = [...new Set(projectData.map(item => item.project_id))];
+                console.log('Unique project IDs:', projectIds.length);
                 
                 // Now get the full names for each project
                 const projectNames = {};
                 
-                // For each project, try to get the full_name or rendered_title
+                // For each project, try to get the full_name
                 for (const projectId of projectIds) {
-                    const { data: nameData, error: nameError } = await supabase
-                        .from('dynamic_content')
-                        .select('key, value')
-                        .eq('project_id', projectId)
-                        .in('key', ['full_name', 'rendered_title']);
-                    
-                    if (!nameError && nameData && nameData.length > 0) {
-                        // Prefer full_name if available, otherwise use rendered_title
-                        const fullNameItem = nameData.find(item => item.key === 'full_name');
-                        const titleItem = nameData.find(item => item.key === 'rendered_title');
+                    try {
+                        const { data: nameData, error: nameError } = await supabase
+                            .from('dynamic_content')
+                            .select('value')
+                            .eq('project_id', projectId)
+                            .eq('key', 'full_name')
+                            .maybeSingle();
                         
-                        projectNames[projectId] = fullNameItem ? fullNameItem.value : 
-                                                 titleItem ? titleItem.value : 
-                                                 projectId;
-                    } else {
+                        if (nameError) {
+                            console.warn(`Error fetching name for project ${projectId}:`, nameError);
+                        }
+                        
+                        projectNames[projectId] = nameData && nameData.value ? nameData.value : projectId;
+                    } catch (err) {
+                        console.warn(`Error processing project ${projectId}:`, err);
                         projectNames[projectId] = projectId;
                     }
                 }
@@ -854,16 +862,22 @@
                     
                     // Display name and ID together
                     const displayName = projectNames[projectId] || projectId;
-                    option.textContent = `${displayName} (${projectId})`;
+                    const isNameSameAsId = displayName === projectId;
+                    
+                    // If name is different from ID, show both; otherwise just show ID
+                    option.textContent = isNameSameAsId ? projectId : `${displayName} (${projectId})`;
                     
                     projectSelect.appendChild(option);
                 });
+                
+                console.log('Project dropdown populated with', projectIds.length, 'options');
                 
                 // Check if there's a project_id in the URL
                 const urlParams = new URLSearchParams(window.location.search);
                 const projectId = urlParams.get('project_id');
                 
                 if (projectId && projectIds.includes(projectId)) {
+                    console.log('Loading project from URL:', projectId);
                     projectSelect.value = projectId;
                     loadContent(projectId);
                     
@@ -880,6 +894,8 @@
                 
             } catch (error) {
                 console.error('Error loading projects:', error);
+                document.getElementById('status').textContent = 'Error loading projects: ' + error.message;
+                document.getElementById('status').className = 'status error';
                 alert('Error loading projects: ' + error.message);
             }
         }
