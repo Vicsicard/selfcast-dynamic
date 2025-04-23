@@ -749,63 +749,50 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="config.js"></script>
     <script>
-        // Supabase Configuration with fallbacks
-        let SUPABASE_URL, SUPABASE_ANON_KEY, supabase;
+        // Supabase Configuration - Direct initialization for production reliability
+        const SUPABASE_URL = 'https://aqicztygjpmunfljjjuto.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxaWN6dHlnanBtdW5mbGpqdXRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3MDU1ODIsImV4cCI6MjA1OTI4MTU4Mn0.5e2hvTckSSbTFLBjQiccrvjoBd6QQDX0X4tccFOc1rs';
+        let supabase;
         
-        // Try to use the configuration from config.js
-        if (window.SUPABASE_CONFIG) {
-            console.log('Using Supabase config from config.js');
-            SUPABASE_URL = window.SUPABASE_CONFIG.url;
-            SUPABASE_ANON_KEY = window.SUPABASE_CONFIG.key;
-        } else {
-            // Fallback to hardcoded values
-            console.log('Using hardcoded Supabase config');
-            SUPABASE_URL = 'https://aqicztygjpmunfljjjuto.supabase.co';
-            SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxaWN6dHlnanBtdW5mbGpqdXRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3MDU1ODIsImV4cCI6MjA1OTI4MTU4Mn0.5e2hvTckSSbTFLBjQiccrvjoBd6QQDX0X4tccFOc1rs';
-        }
-        
-        // Clean up URL if needed (remove markdown formatting if present)
-        if (SUPABASE_URL.includes('](')) {
-            SUPABASE_URL = SUPABASE_URL.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '$2');
-        }
-        
-        console.log('Connecting to Supabase URL:', SUPABASE_URL);
+        console.log('Content Editor initializing...');
+        console.log('Supabase URL:', SUPABASE_URL);
         
         // Initialize Supabase client
         try {
             supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            console.log('Supabase client initialized');
+            console.log('Supabase client initialized successfully');
             
-            // Load projects after Supabase client is initialized
-            loadProjects();
+            // Add a simple test query to verify connection
+            supabase
+                .from('dynamic_content')
+                .select('project_id')
+                .limit(1)
+                .then(response => {
+                    if (response.error) {
+                        console.error('Test query failed:', response.error);
+                        document.getElementById('status').textContent = 'Database connection test failed: ' + response.error.message;
+                        document.getElementById('status').className = 'status error';
+                    } else {
+                        console.log('Test query successful:', response.data);
+                        document.getElementById('status').textContent = 'Connected to database';
+                        document.getElementById('status').className = 'status success';
+                        
+                        // Load projects after confirming connection
+                        loadProjects();
+                    }
+                })
+                .catch(err => {
+                    console.error('Test query exception:', err);
+                    document.getElementById('status').textContent = 'Database connection test exception: ' + err.message;
+                    document.getElementById('status').className = 'status error';
+                });
         } catch (error) {
             console.error('Error initializing Supabase client:', error);
             document.getElementById('status').textContent = 'Error initializing database connection: ' + error.message;
             document.getElementById('status').className = 'status error';
         }
         
-        // Add connection check
-        async function checkConnection() {
-            try {
-                const { data, error } = await supabase
-                    .from('dynamic_content')
-                    .select('project_id')
-                    .limit(1);
-                
-                if (error) throw error;
-                
-                console.log('Supabase connected successfully');
-                status.textContent = 'Connected to database';
-                status.className = 'status success';
-            } catch (error) {
-                console.error('Supabase connection error:', error);
-                status.textContent = 'Database connection error: ' + error.message;
-                status.className = 'status error';
-            }
-        }
-
         // Load available projects
         async function loadProjects() {
             try {
@@ -1198,9 +1185,6 @@
         const profileImageUrl = document.getElementById('profile_image_url');
         const progressBar = document.querySelector('.progress-bar div');
 
-        // Check connection on load
-        checkConnection();
-        
         // Load content
         async function loadContent(projectId) {
             if (!projectId || projectId === 'new') return;
