@@ -2,7 +2,7 @@
 const { createClient } = require('@supabase/supabase-js');
 
 // Supabase credentials
-const SUPABASE_URL = 'https://aqicztygjpmunfljjjuto.supabase.co';
+const SUPABASE_URL = 'https://aqicztygjpmunfljjuto.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxaWN6dHlnanBtdW5mbGpqdXRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3MDU1ODIsImV4cCI6MjA1OTI4MTU4Mn0.5e2hvTckSSbTFLBjQiccrvjoBd6QQDX0X4tccFOc1rs';
 
 // Initialize Supabase client
@@ -64,7 +64,7 @@ module.exports = async (req, res) => {
           .from('dynamic_content')
           .select('*')
           .eq('project_id', projectId)
-          .eq('key', key)
+          .eq('content_key', key)
           .maybeSingle();
         
         if (checkError) throw checkError;
@@ -75,9 +75,9 @@ module.exports = async (req, res) => {
           // Update existing record
           const { data, error } = await supabase
             .from('dynamic_content')
-            .update({ value })
+            .update({ content_value: value })
             .eq('project_id', projectId)
-            .eq('key', key);
+            .eq('content_key', key);
           
           if (error) throw error;
           result = { key, action: 'updated' };
@@ -85,7 +85,7 @@ module.exports = async (req, res) => {
           // Insert new record
           const { data, error } = await supabase
             .from('dynamic_content')
-            .insert([{ project_id: projectId, key, value }]);
+            .insert([{ project_id: projectId, content_key: key, content_value: value }]);
           
           if (error) throw error;
           result = { key, action: 'inserted' };
