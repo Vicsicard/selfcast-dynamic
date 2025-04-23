@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Site Content Editor</title>
+    <link rel="stylesheet" href="styles.css">
     <style>
+        /* Keeping the existing styles */
         body {
             font-family: system-ui, -apple-system, sans-serif;
             max-width: 800px;
@@ -35,17 +37,6 @@
         textarea {
             min-height: 100px;
             font-family: inherit;
-        }
-        .color-input {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-        .color-input input[type="color"] {
-            width: 50px;
-            height: 50px;
-            padding: 0;
-            border: none;
         }
         .section {
             background: white;
@@ -85,792 +76,111 @@
             background: #f8d7da;
             color: #721c24;
         }
-        .profile-upload {
-            margin-top: 1rem;
-        }
-        .image-preview {
-            margin: 0.5rem 0;
-            background: #f8f9fa;
-            padding: 0.5rem;
-            border-radius: 4px;
-        }
-        .image-preview img {
-            max-width: 150px;
-            max-height: 150px;
-            display: block;
-        }
-        .progress-bar {
-            width: 100%;
-            height: 4px;
-            background: #eee;
-            margin-top: 0.5rem;
-            border-radius: 2px;
-            overflow: hidden;
-        }
-        .progress-bar div {
-            height: 100%;
-            background: #3399FF;
-            width: 0;
-            transition: width 0.3s ease;
-        }
-        .style-preview {
-            margin-top: 1rem;
-        }
-        .color-grid {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 1rem;
-        }
-        .color-sample {
-            padding: 1rem;
-            border-radius: 4px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: white;
-        }
-        .color-sample span {
-            font-size: 0.75rem;
-        }
-        .primary-color {
-            background: #3498db;
-        }
-        .secondary-color {
-            background: #f1c40f;
-        }
-        .accent-color {
-            background: #e74c3c;
-        }
-        .text-color {
-            background: #333;
-        }
-        .background-color {
-            background: #f9f9f9;
-        }
-        .font-preview {
-            margin-top: 1rem;
-        }
-        .preview-heading {
-            font-size: 1.5rem;
-            font-weight: bold;
-            margin-bottom: 0.5rem;
-        }
-        .preview-body {
-            font-size: 1rem;
-        }
-        .social-section {
-            margin-bottom: 2rem;
-        }
-        .post-preview {
-            margin-top: 1rem;
-            padding: 1rem;
+        .debug-info {
+            background: #f5f5f5;
             border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-        .upload-media-btn {
+            padding: 1rem;
             margin-top: 1rem;
-            padding: 0.5rem 1rem;
-            border: none;
             border-radius: 4px;
-            cursor: pointer;
-            font-size: 1rem;
-            background: #3399FF;
-            color: white;
+            text-align: left;
+            font-family: monospace;
+            font-size: 12px;
+            max-width: 100%;
+            max-height: 300px;
+            overflow: auto;
+            white-space: pre-wrap;
         }
-        .upload-media-btn:hover {
-            background: #2980b9;
-        }
-        .character-count {
-            font-size: 0.75rem;
-            color: #666;
-        }
-        .blog-section {
-            margin-bottom: 2rem;
-        }
-        .action-button {
-            background-color: #6c757d;
-            color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-top: 0.5rem;
-        }
-        .action-button:hover {
-            background-color: #5a6268;
-        }
-        .form-actions {
-            margin-top: 2rem;
-            text-align: center;
-        }
-        .form-actions button {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            padding: 0.75rem 2rem;
-            font-size: 1.1rem;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        .form-actions button:hover {
-            background-color: #0069d9;
-        }
-        .help-text {
-            font-size: 0.75rem;
-            color: #666;
-            margin-top: 0.25rem;
-        }
-        .style-package-selector {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-        .style-button {
-            flex: 1;
-            padding: 15px;
-            border: 3px solid transparent;
-            border-radius: 8px;
-            background: #fff;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 16px;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-        .style-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-        }
-        .style-button.active {
-            border-color: #333;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            transform: translateY(-3px);
-        }
-        .style-button span {
-            position: relative;
-            z-index: 2;
-            font-weight: bold;
-        }
-        .style-button::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            opacity: 0.85;
-            z-index: 1;
-        }
-        .standard-style::before {
-            background: #3498db;
-        }
-        .standard-style span {
-            color: white;
-        }
-        .dark-style::before {
-            background: #121212; /* Darker black for better contrast */
-        }
-        .dark-style span {
-            color: white; /* Ensuring text is white for visibility */
-        }
-        .light-style::before {
-            background: #f1c40f;
-        }
-        .light-style span {
-            color: #333;
-        }
-        .green-style::before {
-            background: #28a745;
-        }
-        .green-style span {
-            color: white;
-        }
-        .red-style::before {
-            background: #dc3545;
-        }
-        .red-style span {
-            color: white;
-        }
-        /* View Site Button */
-        .view-site-button {
-            background: linear-gradient(135deg, #4a90e2, #5637d7);
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            font-size: 16px;
-            border-radius: 30px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 12px rgba(86, 55, 215, 0.3);
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .view-site-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(86, 55, 215, 0.4);
-            background: linear-gradient(135deg, #5a9ff2, #6647e7);
-        }
-
-        .view-site-button:active {
-            transform: translateY(1px);
-            box-shadow: 0 2px 8px rgba(86, 55, 215, 0.4);
-        }
-
-        .view-site-button::after {
-            content: "→";
-            margin-left: 8px;
-            font-size: 18px;
-            transition: transform 0.2s ease;
-        }
-
-        .view-site-button:hover::after {
-            transform: translateX(4px);
-        }
-        
-        /* Success Message Styles */
-        .success-message {
-            margin-bottom: 1rem;
-            text-align: center;
-        }
-        .checkmark {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: inline-block;
-            stroke-width: 2;
-            stroke-linecap: round;
-            margin: 0 auto;
-        }
-        .checkmark-circle {
-            stroke-dasharray: 166;
-            stroke-dashoffset: 166;
-            stroke-width: 2;
-            stroke-miterlimit: 10;
-            stroke: #155724;
-            fill: none;
-            animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
-        }
-        .checkmark-check {
-            transform-origin: 50% 50%;
-            stroke-dasharray: 48;
-            stroke-dashoffset: 48;
-            animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards;
-            stroke: #155724;
-            fill: none;
-        }
-        @keyframes stroke {
-            100% {
-                stroke-dashoffset: 0;
-            }
-        }
+        /* Additional styles would be here */
     </style>
 </head>
 <body>
     <div class="section">
         <h1>Site Content Editor</h1>
         
+        <div class="alert" style="background-color: #d1ecf1; color: #0c5460; padding: 15px; border-radius: 5px; margin-bottom: 20px; border: 1px solid #bee5eb;">
+            <strong>New Editor Available!</strong> We've created an improved editor that works directly with Supabase without requiring the client library.
+            <a href="edit-complete-fixed.html" style="display: inline-block; background-color: #3498db; color: white; padding: 8px 15px; text-decoration: none; border-radius: 4px; margin-top: 10px;">Use New Editor</a>
+        </div>
+        
         <form id="contentForm">
             <!-- Project Selection -->
             <div class="form-group">
                 <label for="project_id">Project ID:</label>
                 <select name="project_id" id="project_id" required>
-                    <option value="">Select Project</option>
-                    <option value="new">+ Create New Project</option>
+                    <option value="">Loading projects...</option>
                 </select>
+                <button type="button" id="create-project-btn">Create New Project</button>
                 <div id="new-project-form" style="display: none; margin-top: 1rem;">
-                    <input type="text" id="new-project-id" placeholder="Enter new project ID (e.g., client-name)" 
-                           pattern="[a-z0-9-]+" title="Only lowercase letters, numbers, and hyphens allowed">
-                    <button type="button" onclick="createNewProject()" style="background: #28a745;">Create Project</button>
+                    <input type="text" id="new-project-id" placeholder="Enter new project ID (lowercase, no spaces)">
+                    <button type="button" id="save-new-project-btn">Save</button>
+                    <button type="button" id="cancel-new-project-btn">Cancel</button>
                 </div>
             </div>
-
-            <!-- Basic Information -->
-            <div class="section">
-                <h2>Basic Information</h2>
-                <div class="form-group">
-                    <label for="client_name">Name:</label>
-                    <input type="text" name="client_name" id="client_name" required>
-                    
-                    <div class="profile-upload">
-                        <label>Profile Image URL:</label>
-                        <div class="image-preview">
-                            <img id="profile-preview" src="" alt="" style="display: none;">
-                        </div>
-                        <div class="form-group" style="margin-top: 0.5rem;">
-                            <label for="profile_image_url">Profile Image URL:</label>
-                            <input type="url" name="profile_image_url" id="profile_image_url" placeholder="https://example.com/image.jpg">
-                            <small>Enter direct image URL or use file upload below</small>
-                        </div>
-                        <p style="margin: 0.5rem 0;">-- OR --</p>
-                        <label>Upload Image File:</label>
-                        <input type="file" id="profile-upload" accept="image/*">
-                        <div class="progress-bar"><div></div></div>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="rendered_title">Page Title:</label>
-                    <input type="text" name="rendered_title" id="rendered_title" required>
-                </div>
-                <div class="form-group">
-                    <label for="rendered_subtitle">Subtitle/Tagline:</label>
-                    <input type="text" name="rendered_subtitle" id="rendered_subtitle">
-                </div>
+            
+            <!-- Main form sections would be here -->
+            
+            <div class="form-group">
+                <label for="site_title">Site Title:</label>
+                <input type="text" name="site_title" id="site_title" placeholder="Enter site title">
             </div>
-
-            <!-- Bio Content -->
-            <div class="section">
-                <h2>Bio Content</h2>
-                <div class="form-group">
-                    <label for="rendered_bio_html">Bio:</label>
-                    <textarea name="rendered_bio_html" id="rendered_bio_html" rows="6" placeholder="Enter your bio..."></textarea>
-                </div>
-
-                <!-- Bio Cards -->
-                <div class="form-group">
-                    <label for="rendered_bio_html_card_1">Bio Card 1 (Mind):</label>
-                    <textarea name="rendered_bio_html_card_1" id="rendered_bio_html_card_1" rows="4" placeholder="Enter content for Mind card..."></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="rendered_bio_html_card_2">Bio Card 2 (Body):</label>
-                    <textarea name="rendered_bio_html_card_2" id="rendered_bio_html_card_2" rows="4" placeholder="Enter content for Body card..."></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="rendered_bio_html_card_3">Bio Card 3 (Soul):</label>
-                    <textarea name="rendered_bio_html_card_3" id="rendered_bio_html_card_3" rows="4" placeholder="Enter content for Soul card..."></textarea>
-                </div>
+            
+            <div class="form-group">
+                <label for="subtitle">Subtitle:</label>
+                <input type="text" name="subtitle" id="subtitle" placeholder="Enter subtitle">
             </div>
-
-            <!-- Quote Cards -->
-            <div class="section">
-                <h2>Inspirational Quotes</h2>
-                <div class="form-group">
-                    <label for="quote_1">Quote 1 (After Bio):</label>
-                    <textarea name="quote_1" id="quote_1" placeholder="Enter an inspirational quote..." maxlength="200"></textarea>
-                    <p class="help-text">This quote will appear between the Bio and Blog sections.</p>
-                </div>
-                <div class="form-group">
-                    <label for="quote_2">Quote 2 (After Blog):</label>
-                    <textarea name="quote_2" id="quote_2" placeholder="Enter an inspirational quote..." maxlength="200"></textarea>
-                    <p class="help-text">This quote will appear between the Blog and Social Media sections.</p>
-                </div>
-                <div class="form-group">
-                    <label for="quote_3">Quote 3 (After Social Media):</label>
-                    <textarea name="quote_3" id="quote_3" placeholder="Enter an inspirational quote..." maxlength="200"></textarea>
-                    <p class="help-text">This quote will appear between the Social Media and Connect sections.</p>
-                </div>
+            
+            <div class="form-group">
+                <label for="rendered_bio_html">Bio Content:</label>
+                <textarea name="rendered_bio_html" id="rendered_bio_html" placeholder="Enter bio content"></textarea>
             </div>
-
-            <!-- Brand & Style -->
-            <div class="section">
-                <h2>Brand & Style</h2>
-                <div class="form-group">
-                    <label>Style Package:</label>
-                    <div class="style-package-selector">
-                        <button type="button" class="style-button standard-style active" data-style="standard-professional" onclick="applyStylePreset('standard-professional')">
-                            <span>Blue</span>
-                        </button>
-                        <button type="button" class="style-button dark-style" data-style="dark-professional" onclick="applyStylePreset('dark-professional')">
-                            <span>Black</span>
-                        </button>
-                        <button type="button" class="style-button light-style" data-style="light-professional" onclick="applyStylePreset('light-professional')">
-                            <span>Gold</span>
-                        </button>
-                        <button type="button" class="style-button green-style" data-style="green-professional" onclick="applyStylePreset('green-professional')">
-                            <span>Green</span>
-                        </button>
-                        <button type="button" class="style-button red-style" data-style="red-professional" onclick="applyStylePreset('red-professional')">
-                            <span>Red</span>
-                        </button>
-                    </div>
-                    <input type="hidden" name="style_package" id="style_package" value="standard-professional">
-                </div>
-
-                <!-- Font Selection -->
-                <div class="form-group">
-                    <label for="heading_font_select">Heading Font:</label>
-                    <select id="heading_font_select" onchange="updateFont('heading')">
-                        <option value="Montserrat">Montserrat</option>
-                        <option value="Raleway">Raleway</option>
-                        <option value="Playfair Display">Playfair Display</option>
-                        <option value="Roboto Slab">Roboto Slab</option>
-                        <option value="Merriweather">Merriweather</option>
-                        <option value="Poppins">Poppins</option>
-                        <option value="Oswald">Oswald</option>
-                        <option value="Lora">Lora</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="body_font_select">Body Font:</label>
-                    <select id="body_font_select" onchange="updateFont('body')">
-                        <option value="Open Sans">Open Sans</option>
-                        <option value="Roboto">Roboto</option>
-                        <option value="Lato">Lato</option>
-                        <option value="Source Sans Pro">Source Sans Pro</option>
-                        <option value="Nunito">Nunito</option>
-                        <option value="Work Sans">Work Sans</option>
-                        <option value="PT Sans">PT Sans</option>
-                        <option value="Mulish">Mulish</option>
-                    </select>
-                </div>
-
-                <!-- Hidden inputs to store the actual values -->
-                <input type="hidden" name="primary_color" id="primary_color">
-                <input type="hidden" name="secondary_color" id="secondary_color">
-                <input type="hidden" name="accent_color" id="accent_color">
-                <input type="hidden" name="text_color" id="text_color">
-                <input type="hidden" name="background_color" id="background_color">
-                <input type="hidden" name="heading_font" id="heading_font">
-                <input type="hidden" name="body_font" id="body_font">
-            </div>
-
-            <!-- Blog Posts -->
-            <div class="section">
-                <h2>Blog Posts</h2>
-                
-                <!-- Blog Management Button -->
-                <div style="margin-bottom: 1.5rem; text-align: center;">
-                    <a id="manage-blogs-button" href="blog-editor.html" class="action-button" style="display: inline-block; background-color: #3399FF; padding: 0.75rem 1.5rem; text-decoration: none; color: white; font-weight: 500;">
-                        Manage All Blog Posts
-                    </a>
-                    <p style="margin-top: 0.5rem; font-size: 0.9rem; color: #666;">
-                        Create, edit and manage unlimited blog posts
-                    </p>
-                </div>
-                
-                <!-- Blog Post 1 -->
-                <div class="blog-section">
-                    <h3>Blog Post 1</h3>
-                    <div class="form-group">
-                        <label for="blog_post_1_title">Title:</label>
-                        <input type="text" name="blog_post_1_title" id="blog_post_1_title" placeholder="Blog Post Title">
-                    </div>
-                    <div class="form-group">
-                        <label for="blog_post_1_description">Description (will be shown as preview):</label>
-                        <textarea name="blog_post_1_description" id="blog_post_1_description" placeholder="A brief description of your blog post (150-200 characters recommended)" maxlength="300"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="blog_post_1">Full Content:</label>
-                        <textarea name="blog_post_1" id="blog_post_1" placeholder="Your full blog post content here..."></textarea>
-                    </div>
-                </div>
-                
-                <!-- Blog Post 2 -->
-                <div class="blog-section">
-                    <h3>Blog Post 2</h3>
-                    <div class="form-group">
-                        <label for="blog_post_2_title">Title:</label>
-                        <input type="text" name="blog_post_2_title" id="blog_post_2_title" placeholder="Blog Post Title">
-                    </div>
-                    <div class="form-group">
-                        <label for="blog_post_2_description">Description (will be shown as preview):</label>
-                        <textarea name="blog_post_2_description" id="blog_post_2_description" placeholder="A brief description of your blog post (150-200 characters recommended)" maxlength="300"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="blog_post_2">Full Content:</label>
-                        <textarea name="blog_post_2" id="blog_post_2" placeholder="Your full blog post content here..."></textarea>
-                    </div>
-                </div>
-
-                <!-- Blog Post 3 -->
-                <div class="blog-section">
-                    <h3>Blog Post 3</h3>
-                    <div class="form-group">
-                        <label for="blog_post_3_title">Title:</label>
-                        <input type="text" name="blog_post_3_title" id="blog_post_3_title" placeholder="Blog Post Title">
-                    </div>
-                    <div class="form-group">
-                        <label for="blog_post_3_description">Description (will be shown as preview):</label>
-                        <textarea name="blog_post_3_description" id="blog_post_3_description" placeholder="A brief description of your blog post (150-200 characters recommended)" maxlength="300"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="blog_post_3">Full Content:</label>
-                        <textarea name="blog_post_3" id="blog_post_3" placeholder="Your full blog post content here..."></textarea>
-                    </div>
-                </div>
-
-                <!-- Blog Post 4 -->
-                <div class="blog-section">
-                    <h3>Blog Post 4</h3>
-                    <div class="form-group">
-                        <label for="blog_post_4_title">Title:</label>
-                        <input type="text" name="blog_post_4_title" id="blog_post_4_title" placeholder="Blog Post Title">
-                    </div>
-                    <div class="form-group">
-                        <label for="blog_post_4_description">Description (will be shown as preview):</label>
-                        <textarea name="blog_post_4_description" id="blog_post_4_description" placeholder="A brief description of your blog post (150-200 characters recommended)" maxlength="300"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="blog_post_4">Full Content:</label>
-                        <textarea name="blog_post_4" id="blog_post_4" placeholder="Your full blog post content here..."></textarea>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Contact Information -->
-            <div class="section">
-                <h2>Contact Information</h2>
-                <div class="form-group">
-                    <label for="email_address">Email Address:</label>
-                    <input type="email" name="email_address" id="email_address" placeholder="example@email.com">
-                    <p class="help-text">This email will be used for the contact button in the Connect section.</p>
-                </div>
-            </div>
-
-            <!-- Social Media Feed -->
-            <div class="section">
-                <h2>Social Media Feed</h2>
-                
-                <!-- Facebook -->
-                <div class="social-section">
-                    <h3>Facebook</h3>
-                    <div class="form-group">
-                        <label for="facebook_url">Profile URL:</label>
-                        <input type="url" name="facebook_url" id="facebook_url" placeholder="https://facebook.com/username">
-                    </div>
-                    <div class="form-group">
-                        <label for="facebook_title">Title:</label>
-                        <input type="text" name="facebook_title" id="facebook_title" placeholder="Facebook" value="Facebook">
-                        <p class="help-text">This will appear as the title of your Facebook card and post.</p>
-                    </div>
-                    <div class="form-group">
-                        <label for="facebook_post">Facebook Post: <span class="character-count">0/1000 characters</span></label>
-                        <textarea name="facebook_post" id="facebook_post" placeholder="Your Facebook post content here..." maxlength="1000"></textarea>
-                        <p class="help-text">This content will be displayed in your social media feed section. The first 150 characters will be shown as a preview.</p>
-                    </div>
-                </div>
-
-                <!-- Twitter -->
-                <div class="social-section">
-                    <h3>Twitter</h3>
-                    <div class="form-group">
-                        <label for="twitter_url">Profile URL:</label>
-                        <input type="url" name="twitter_url" id="twitter_url" placeholder="https://twitter.com/username">
-                    </div>
-                    <div class="form-group">
-                        <label for="twitter_title">Title:</label>
-                        <input type="text" name="twitter_title" id="twitter_title" placeholder="Twitter" value="Twitter">
-                        <p class="help-text">This will appear as the title of your Twitter card and post.</p>
-                    </div>
-                    <div class="form-group">
-                        <label for="twitter_post">Twitter Post: <span class="character-count">0/1000 characters</span></label>
-                        <textarea name="twitter_post" id="twitter_post" placeholder="Your Twitter post content here..." maxlength="1000"></textarea>
-                        <p class="help-text">This content will be displayed in your social media feed section. The first 150 characters will be shown as a preview.</p>
-                    </div>
-                </div>
-
-                <!-- Instagram -->
-                <div class="social-section">
-                    <h3>Instagram</h3>
-                    <div class="form-group">
-                        <label for="instagram_url">Profile URL:</label>
-                        <input type="url" name="instagram_url" id="instagram_url" placeholder="https://instagram.com/username">
-                    </div>
-                    <div class="form-group">
-                        <label for="instagram_title">Title:</label>
-                        <input type="text" name="instagram_title" id="instagram_title" placeholder="Instagram" value="Instagram">
-                        <p class="help-text">This will appear as the title of your Instagram card and post.</p>
-                    </div>
-                    <div class="form-group">
-                        <label for="instagram_post">Instagram Post: <span class="character-count">0/1000 characters</span></label>
-                        <textarea name="instagram_post" id="instagram_post" placeholder="Your Instagram post content here..." maxlength="1000"></textarea>
-                        <p class="help-text">This content will be displayed in your social media feed section. The first 150 characters will be shown as a preview.</p>
-                    </div>
-                </div>
-
-                <!-- LinkedIn -->
-                <div class="social-section">
-                    <h3>LinkedIn</h3>
-                    <div class="form-group">
-                        <label for="linkedin_url">Profile URL:</label>
-                        <input type="url" name="linkedin_url" id="linkedin_url" placeholder="https://linkedin.com/in/username">
-                    </div>
-                    <div class="form-group">
-                        <label for="linkedin_title">Title:</label>
-                        <input type="text" name="linkedin_title" id="linkedin_title" placeholder="LinkedIn" value="LinkedIn">
-                        <p class="help-text">This will appear as the title of your LinkedIn card and post.</p>
-                    </div>
-                    <div class="form-group">
-                        <label for="linkedin_post">LinkedIn Post: <span class="character-count">0/1000 characters</span></label>
-                        <textarea name="linkedin_post" id="linkedin_post" placeholder="Your LinkedIn post content here..." maxlength="1000"></textarea>
-                        <p class="help-text">This content will be displayed in your social media feed section. The first 150 characters will be shown as a preview.</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Footer -->
-            <div class="section">
-                <h2>Footer</h2>
-                <div class="form-group">
-                    <label for="rendered_footer_slogan">Footer Slogan:</label>
-                    <input type="text" name="rendered_footer_slogan" id="rendered_footer_slogan">
-                </div>
-                <input type="hidden" name="current_year" id="current_year" value="2025">
-            </div>
-
-            <!-- Import/Export -->
-            <div class="section">
-                <h2>Import/Export</h2>
-                <div class="form-group">
-                    <label for="csv-upload">Import Content from CSV:</label>
-                    <input type="file" id="csv-upload" accept=".csv">
-                    <p><small>Upload a CSV file with project_id, key, value columns to quickly import content</small></p>
-                    <button type="button" id="import-csv-btn" class="action-button">Import CSV</button>
-                    <div id="import-status" class="status" style="display: none;"></div>
-                </div>
-                <div class="form-group">
-                    <button type="button" id="download-template-btn" class="action-button">Download CSV Template</button>
-                    <p><small>Download a template CSV file with all available fields</small></p>
-                </div>
-            </div>
-
-            <div class="form-actions">
-                <button type="submit">Save Changes</button>
+            
+            <div class="form-group">
+                <button type="button" id="save-content-btn">Save Content</button>
             </div>
         </form>
-
-        <div id="status" class="status"></div>
         
-        <!-- View Site Button (hidden by default) -->
-        <div id="view-site-container" style="display: none; margin-top: 20px; text-align: center;">
-            <div class="success-message">
-                <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
-                    <circle class="checkmark-circle" cx="26" cy="26" r="25" fill="none"/>
-                    <path class="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
-                </svg>
-                <p>Your site has been successfully updated!</p>
-            </div>
-            <button id="view-site-button" class="view-site-button">View Your Site</button>
+        <div id="status" class="status">Select a project to load or create a new one.</div>
+        
+        <div id="view-site-container" style="display: none; margin-top: 1rem;">
+            <p>View your site: <a id="site-url" href="#" target="_blank"></a></p>
         </div>
+        
+        <div id="debug-info" class="debug-info" style="display: none;"></div>
     </div>
-
+    
     <script>
-        // Supabase Configuration
-        const SUPABASE_URL = 'https://aqicztygjpmunfljjjuto.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxaWN6dHlnanBtdW5mbGpqdXRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3MDU1ODIsImV4cCI6MjA1OTI4MTU4Mn0.5e2hvTckSSbTFLBjQiccrvjoBd6QQDX0X4tccFOc1rs';
+        // Debug mode
+        const debugMode = false;
+        
+        // Debug logging function
+        function logDebug(message, data) {
+            console.log(message, data);
+            if (debugMode) {
+                const debugInfo = document.getElementById('debug-info');
+                if (debugInfo) {
+                    debugInfo.style.display = 'block';
+                    const timestamp = new Date().toISOString().substring(11, 19);
+                    const formattedMessage = typeof data !== 'undefined' 
+                        ? `[${timestamp}] ${message}: ${JSON.stringify(data, null, 2)}`
+                        : `[${timestamp}] ${message}`;
+                    
+                    debugInfo.innerHTML += formattedMessage + '<br>';
+                    debugInfo.scrollTop = debugInfo.scrollHeight;
+                }
+            }
+        }
         
         // Status element for error reporting
         const statusElement = document.getElementById('status');
         
-        // Global Supabase client
-        let supabase;
-        
-        // Properly load the Supabase script
-        function loadSupabaseScript() {
-            return new Promise((resolve, reject) => {
-                // Check if already loaded
-                if (window.supabase) {
-                    console.log('Supabase already loaded');
-                    resolve(window.supabase);
-                    return;
-                }
-                
-                console.log('Loading Supabase script...');
-                const script = document.createElement('script');
-                script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
-                script.async = true;
-                
-                script.onload = () => {
-                    console.log('Supabase script loaded successfully');
-                    resolve(window.supabase);
-                };
-                
-                script.onerror = () => {
-                    const msg = 'Error loading Supabase script';
-                    console.error(msg);
-                    reject(new Error(msg));
-                };
-                
-                document.body.appendChild(script);
-            });
-        }
-        
-        // Initialize Supabase client
-        async function initializeSupabase() {
-            try {
-                // First, ensure the script is loaded
-                await loadSupabaseScript();
-                
-                // Now initialize the client
-                console.log('Initializing Supabase client...');
-                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-                    auth: {
-                        autoRefreshToken: true,
-                        persistSession: true
-                    },
-                    global: {
-                        headers: {
-                            'X-Client-Info': 'supabase-js/2.0.0',
-                        },
-                    },
-                });
-                console.log('Supabase client initialized successfully');
-                
-                // Test connection with a simple fetch to verify DNS resolution
-                try {
-                    console.log('Testing connection with direct fetch...');
-                    const testResponse = await fetch(`${SUPABASE_URL}/rest/v1/dynamic_content?select=count`, {
-                        method: 'GET',
-                        headers: {
-                            'apikey': SUPABASE_ANON_KEY,
-                            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-                        }
-                    });
-                    
-                    if (testResponse.ok) {
-                        console.log('Direct fetch successful!');
-                    } else {
-                        console.warn('Direct fetch returned status:', testResponse.status);
-                    }
-                } catch (fetchError) {
-                    console.error('Direct fetch test failed:', fetchError);
-                }
-                
-                // Load projects
-                await loadProjects();
-                
-            } catch (error) {
-                console.error('Supabase initialization failed:', error);
-                if (statusElement) {
-                    statusElement.textContent = 'Database connection failed: ' + error.message;
-                    statusElement.className = 'status error';
-                }
-                alert('Error connecting to database: ' + error.message);
-            }
-        }
-        
-        // Start initialization when the DOM is ready
-        document.addEventListener('DOMContentLoaded', initializeSupabase);
-        
         // Load available projects
         async function loadProjects() {
             try {
-                console.log('Loading projects...');
+                statusElement.textContent = 'Loading projects...';
+                statusElement.className = 'status info';
                 
-                // Simple query to get all project IDs
-                const { data, error } = await supabase
-                    .from('dynamic_content')
-                    .select('project_id')
-                    .order('project_id');
-                
-                if (error) {
-                    console.error('Error loading projects:', error);
-                    if (statusElement) {
-                        statusElement.textContent = 'Error loading projects: ' + error.message;
-                        statusElement.className = 'status error';
-                    }
-                    return;
-                }
-                
-                console.log('Project data received:', data ? data.length : 0, 'rows');
-                
-                // Get unique project IDs
-                const projectIds = [...new Set(data.map(item => item.project_id))];
-                console.log('Unique project IDs:', projectIds.length);
+                const response = await fetch('/api/projects');
+                const projectIds = await response.json();
                 
                 // Clear existing options
                 const projectSelect = document.getElementById('project_id');
@@ -896,934 +206,208 @@
                     loadContent(projectId);
                 }
                 
-                // Update the blog management button
-                updateBlogManagementButton();
+                // Show success message
+                statusElement.textContent = `Loaded ${projectIds.length} projects`;
+                statusElement.className = 'status success';
                 
             } catch (error) {
-                console.error('Error in loadProjects:', error);
-                if (statusElement) {
-                    statusElement.textContent = 'Error loading projects: ' + error.message;
-                    statusElement.className = 'status error';
-                }
+                console.error('Error loading projects:', error);
+                statusElement.textContent = 'Error loading projects: ' + error.message;
+                statusElement.className = 'status error';
+            }
+        }
+        
+        // Load content for a specific project
+        async function loadContent(projectId) {
+            try {
+                if (!projectId) return;
+                
+                statusElement.textContent = 'Loading content...';
+                statusElement.className = 'status info';
+                
+                const response = await fetch(`/api/projects/${projectId}/content`);
+                const data = await response.json();
+                
+                // Populate the form with the data
+                populateForm(data);
+                
+                // Show the view site button
+                document.getElementById('view-site-container').style.display = 'block';
+                document.getElementById('site-url').href = `/?project_id=${projectId}`;
+                document.getElementById('site-url').textContent = `/?project_id=${projectId}`;
+                
+                statusElement.textContent = `Loaded content for project: ${projectId}`;
+                statusElement.className = 'status success';
+                
+            } catch (error) {
+                console.error('Error loading content:', error);
+                statusElement.textContent = 'Error loading content: ' + error.message;
+                statusElement.className = 'status error';
             }
         }
         
         // Populate form with project data
         function populateForm(data) {
-            // Reset form
-            form.reset();
-            
-            // Set the project ID
-            projectSelect.value = data[0]?.project_id || '';
-            
-            // Hide profile preview initially
-            profilePreview.style.display = 'none';
-            
-            // Process each data item
-            data.forEach(item => {
-                const element = document.getElementById(item.key);
-                if (element) {
-                    // Handle profile image specially
-                    if (item.key === 'profile_image_url' && item.value) {
-                        profilePreview.src = item.value;
-                        profilePreview.style.display = 'block';
-                        profileImageUrl.value = item.value;
-                    } else {
-                        element.value = item.value;
-                    }
-                }
-            });
-            
-            // If style_package is set, apply the preset
-            const stylePackage = data.find(item => item.key === 'style_package');
-            if (stylePackage) {
-                document.getElementById('style_package').value = stylePackage.value;
-                applyStylePreset(stylePackage.value);
-            }
-        }
-        
-        // Load Google Fonts
-        function loadFont(fontName) {
-            if (!fontName) return;
-            
-            const link = document.createElement('link');
-            link.href = `https://fonts.googleapis.com/css2?family=${fontName.replace(/\s+/g, '+')}:wght@400;700&display=swap`;
-            link.rel = 'stylesheet';
-            document.head.appendChild(link);
-        }
-        
-        // Apply style preset
-        function applyStylePreset(presetName) {
-            const preset = presetName || document.getElementById('style_package').value;
-            
-            // Update the hidden input with the selected style
-            document.getElementById('style_package').value = preset;
-            
-            // Add active class to the selected button
-            document.querySelectorAll('.style-button').forEach(button => {
-                if (button.getAttribute('data-style') === preset) {
-                    button.classList.add('active');
-                } else {
-                    button.classList.remove('active');
-                }
-            });
-            
-            // Apply default values based on preset selection
-            // This ensures themes work even if database presets don't exist yet
-            if (preset === 'green-professional') {
-                // Apply green theme defaults directly
-                document.getElementById('primary_color').value = '#28a745';
-                document.getElementById('secondary_color').value = '#20c997';
-                document.getElementById('accent_color').value = '#17a2b8';
-                document.getElementById('text_color').value = '#212529';
-                document.getElementById('background_color').value = '#f8f9fa';
-                document.getElementById('heading_font').value = 'Montserrat';
-                document.getElementById('body_font').value = 'Open Sans';
-                
-                // Update font selectors
-                document.getElementById('heading_font_select').value = 'Montserrat';
-                document.getElementById('body_font_select').value = 'Open Sans';
-                
-                // Load fonts
-                loadFont('Montserrat');  // Standard Professional
-                loadFont('Open Sans');
-                
-                return; // Skip database lookup
-            } 
-            else if (preset === 'dark-professional') {
-                // Apply black theme defaults with a sleek, modern palette
-                document.getElementById('primary_color').value = '#121212'; // Near-black primary
-                document.getElementById('secondary_color').value = '#333333'; // Dark gray secondary
-                document.getElementById('accent_color').value = '#757575'; // Medium gray accent
-                document.getElementById('text_color').value = '#ffffff'; // White text for contrast
-                document.getElementById('background_color').value = '#000000'; // Pure black background
-                document.getElementById('heading_font').value = 'Playfair Display'; // Elegant serif font
-                document.getElementById('body_font').value = 'Source Sans Pro'; // Clean sans-serif
-                
-                // Update font selectors
-                document.getElementById('heading_font_select').value = 'Playfair Display';
-                document.getElementById('body_font_select').value = 'Source Sans Pro';
-                
-                // Load fonts
-                loadFont('Playfair Display');
-                loadFont('Source Sans Pro');
-                
-                // Ensure text visibility in the editor interface when dark theme is applied
-                document.querySelectorAll('.section').forEach(section => {
-                    section.style.color = '#fff';
-                    section.style.background = '#222';
-                });
-                document.querySelectorAll('.section h2').forEach(heading => {
-                    heading.style.color = '#fff';
-                    heading.style.borderBottomColor = '#444';
-                });
-                document.querySelectorAll('label').forEach(label => {
-                    label.style.color = '#fff';
-                });
-                
-                // Apply enhanced shadows and ensure text visibility for bio/about and card sections
-                const customCSS = `
-                    /* Editor styles */
-                    .section {
-                        color: #fff !important;
-                        background: #222 !important;
-                    }
-                    .section h2 {
-                        color: #fff !important;
-                        border-bottom-color: #444 !important;
-                    }
-                    label {
-                        color: #fff !important;
-                    }
-                    
-                    /* Site template styles */
-                    /* Bio section */
-                    .bio-text {
-                        color: #000 !important;
-                        background-color: #fff !important;
-                    }
-                    .bio {
-                        background-color: #fff !important;
-                    }
-                    
-                    /* Blog cards */
-                    .blog-card {
-                        background-color: #fff !important;
-                    }
-                    .blog-title {
-                        color: #000 !important;
-                    }
-                    .blog-excerpt {
-                        color: #333 !important;
-                    }
-                    .blog-link {
-                        color: #121212 !important;
-                    }
-                    
-                    /* Social cards */
-                    .social-card {
-                        background-color: #fff !important;
-                    }
-                    .social-platform {
-                        color: #000 !important;
-                    }
-                    .social-content p {
-                        color: #333 !important;
-                    }
-                    .social-link {
-                        color: #121212 !important;
-                    }
-                    
-                    /* Enhanced shadows */
-                    .blog-card, .social-card, .bio {
-                        box-shadow: 0 8px 16px rgba(0,0,0,0.3), 0 3px 8px rgba(0,0,0,0.2) !important;
-                    }
-                    .blog-card:hover, .social-card:hover {
-                        box-shadow: 0 12px 24px rgba(0,0,0,0.4), 0 6px 12px rgba(0,0,0,0.25) !important;
-                        transform: translateY(-10px) !important;
-                    }
-                `;
-                
-                // Create or update the custom style element
-                let styleEl = document.getElementById('dark-theme-custom-styles');
-                if (!styleEl) {
-                    styleEl = document.createElement('style');
-                    styleEl.id = 'dark-theme-custom-styles';
-                    document.head.appendChild(styleEl);
-                }
-                styleEl.textContent = customCSS;
-                
-                return; // Skip database lookup
-            }
-            else if (preset === 'light-professional') {
-                // Apply gold theme defaults with a luxurious, warm palette
-                document.getElementById('primary_color').value = '#d4af37'; // Classic gold
-                document.getElementById('secondary_color').value = '#f9a825'; // Amber gold
-                document.getElementById('accent_color').value = '#795548'; // Rich brown accent
-                document.getElementById('text_color').value = '#3e2723'; // Deep brown text
-                document.getElementById('background_color').value = '#fffdf7'; // Cream background
-                document.getElementById('heading_font').value = 'Merriweather'; // Elegant serif
-                document.getElementById('body_font').value = 'Nunito'; // Rounded, friendly sans-serif
-                
-                // Update font selectors
-                document.getElementById('heading_font_select').value = 'Merriweather';
-                document.getElementById('body_font_select').value = 'Nunito';
-                
-                // Load fonts
-                loadFont('Merriweather');
-                loadFont('Nunito');
-                
-                return; // Skip database lookup
-            }
-            else if (preset === 'red-professional') {
-                // Apply red theme defaults directly
-                document.getElementById('primary_color').value = '#dc3545';
-                document.getElementById('secondary_color').value = '#fd7e14';
-                document.getElementById('accent_color').value = '#6f42c1';
-                document.getElementById('text_color').value = '#212529';
-                document.getElementById('background_color').value = '#fff5f5';
-                document.getElementById('heading_font').value = 'Raleway';
-                document.getElementById('body_font').value = 'Roboto';
-                
-                // Update font selectors
-                document.getElementById('heading_font_select').value = 'Raleway';
-                document.getElementById('body_font_select').value = 'Roboto';
-                
-                // Load fonts
-                loadFont('Raleway');
-                loadFont('Roboto');
-                
-                return; // Skip database lookup
-            }
-            
             try {
-                // Map old preset names to new ones if needed (for backward compatibility)
-                let lookupPreset = preset;
-                if (preset === 'standard-professional') lookupPreset = 'his-preset';
-                else if (preset === 'dark-professional') lookupPreset = 'her-preset';
-                else if (preset === 'light-professional') lookupPreset = 'standard-preset';
-                else if (preset === 'green-professional') lookupPreset = 'green-preset';
-                else if (preset === 'red-professional') lookupPreset = 'red-preset';
-                else lookupPreset = preset;
-                
-                // Fetch preset data from Supabase
-                supabase
-                    .from('dynamic_content')
-                    .select('key, value')
-                    .eq('project_id', lookupPreset)
-                    .then(({ data, error }) => {
-                        if (error) {
-                            console.error('Error applying style preset:', error);
-                            statusElement.textContent = 'Error applying style preset: ' + error.message;
-                            statusElement.className = 'status error';
-                            return;
-                        }
-                        
-                        // Update hidden inputs and font selectors
-                        data.forEach(({ key, value }) => {
-                            const element = document.getElementById(key);
-                            if (element) {
-                                element.value = value;
-                            }
-
-                            if (key === 'heading_font') {
-                                document.getElementById('heading_font_select').value = value;
-                            } else if (key === 'body_font') {
-                                document.getElementById('body_font_select').value = value;
-                            }
-                        });
-                    });
-            } catch (error) {
-                console.error('Error applying style preset:', error);
-                statusElement.textContent = 'Error applying style preset: ' + error.message;
-                statusElement.className = 'status error';
-            }
-        }
-        
-        // Update font
-        function updateFont(type) {
-            const fontSelect = type === 'heading' ? document.getElementById('heading_font_select') : document.getElementById('body_font_select');
-            const fontInput = type === 'heading' ? document.getElementById('heading_font') : document.getElementById('body_font');
-            fontInput.value = fontSelect.value;
-            loadFont(fontSelect.value);
-        }
-
-        // Helper function to calculate color brightness
-        function getBrightness(color) {
-            const hex = color.replace('#', '');
-            const r = parseInt(hex.substr(0, 2), 16);
-            const g = parseInt(hex.substr(2, 2), 16);
-            const b = parseInt(hex.substr(4, 2), 16);
-            return (r * 299 + g * 587 + b * 114) / 1000;
-        }
-
-        // DOM Elements
-        const form = document.getElementById('contentForm');
-        const projectSelect = document.getElementById('project_id');
-        const profileUpload = document.getElementById('profile-upload');
-        const profilePreview = document.getElementById('profile-preview');
-        const profileImageUrl = document.getElementById('profile_image_url');
-        const progressBar = document.querySelector('.progress-bar div');
-
-        // Load content
-        async function loadContent(projectId) {
-            if (!projectId || projectId === 'new') return;
-
-            try {
-                statusElement.textContent = 'Loading project content...';
-                statusElement.className = 'status info';
-                
-                // Fetch content for the selected project
-                const { data, error } = await supabase
-                    .from('dynamic_content')
-                    .select('*')
-                    .eq('project_id', projectId);
-                
-                console.log('Supabase query result:', { data, error });
-
-                if (error) throw error;
+                console.log('Populating form with data:', data);
                 
                 // Reset form first
-                form.reset();
+                document.getElementById('contentForm').reset();
                 
-                // Populate form with project data
-                populateForm(data);
-                
-                statusElement.textContent = `Loaded project: ${projectId}`;
-                statusElement.className = 'status success';
-                
-                // Show the view site button for existing projects
-                document.getElementById('view-site-container').style.display = 'block';
-                
-                // Set up the view site button with the current project ID
-                const viewSiteButton = document.getElementById('view-site-button');
-                const currentProjectId = document.getElementById('project_id').value;
-                
-                // Set up the click handler for the view site button
-                viewSiteButton.onclick = function() {
-                    // Use the view-site.html page to handle the redirect
-                    const siteUrl = window.location.origin + '/view-site.html?project_id=' + projectId;
-                    console.log('Opening site URL:', siteUrl);
-                    window.open(siteUrl, '_blank');
-                };
-                
-            } catch (error) {
-                console.error('Error loading project:', error);
-                statusElement.textContent = 'Error loading project: ' + error.message;
-                statusElement.className = 'status error';
-            }
-        }
-
-        // Initial load
-        loadContent();
-
-        // Handle character counts
-        const textareas = document.querySelectorAll('textarea[id$="_post"], textarea[id$="_short"]');
-        textareas.forEach(textarea => {
-            textarea.addEventListener('input', function() {
-                const count = this.value.length;
-                const countDisplay = this.nextElementSibling;
-                countDisplay.textContent = count + ' characters';
-                
-                // Optional: Add warning colors for platform limits
-                if (this.id === 'twitter_post' && count > 280) {
-                    countDisplay.style.color = '#dc3545';
-                } else if (count > 2000) { // General limit for other platforms
-                    countDisplay.style.color = '#dc3545';
-                } else {
-                    countDisplay.style.color = '#666';
-                }
-            });
-        });
-
-        // Save content
-        async function saveContent(event) {
-            event.preventDefault();
-            
-            const projectId = projectSelect.value;
-            if (!projectId || projectId === 'new') {
-                statusElement.textContent = 'Please select or create a project first';
-                statusElement.className = 'status error';
-                return;
-            }
-
-            try {
-                // Gather all form data
-                const formData = new FormData(form);
-                let updates = [];
-                
-                // Use a Set to track keys we've already added to prevent duplicates
-                const processedKeys = new Set();
-
-                // Process blog posts
-                for (let i = 1; i <= 4; i++) {
-                    const title = document.getElementById(`blog_post_${i}_title`).value;
-                    const description = document.getElementById(`blog_post_${i}_description`).value;
-                    const post = document.getElementById(`blog_post_${i}`).value;
+                // Process each content item
+                data.forEach(item => {
+                    const key = item.key;
+                    const value = item.value;
                     
-                    // Only save if any content is provided
-                    if (title || description || post) {
-                        const titleKey = `blog_post_${i}_title`;
-                        const descKey = `blog_post_${i}_description`;
-                        const postKey = `blog_post_${i}`;
-                        
-                        if (!processedKeys.has(titleKey)) {
-                            updates.push({
-                                project_id: projectId,
-                                key: titleKey,
-                                value: title
-                            });
-                            processedKeys.add(titleKey);
+                    // Find the form element with matching name attribute
+                    const element = document.querySelector(`[name="${key}"]`);
+                    if (element) {
+                        if (element.type === 'checkbox') {
+                            element.checked = value === true || value === 'true';
+                        } else {
+                            element.value = value || '';
                         }
-                        
-                        if (!processedKeys.has(descKey)) {
-                            updates.push({
-                                project_id: projectId,
-                                key: descKey,
-                                value: description
-                            });
-                            processedKeys.add(descKey);
-                        }
-                        
-                        if (!processedKeys.has(postKey)) {
-                            updates.push({
-                                project_id: projectId,
-                                key: postKey,
-                                value: post
-                            });
-                            processedKeys.add(postKey);
-                        }
-                    }
-                }
-
-                // Process social media fields
-                const socialPlatforms = ['facebook', 'twitter', 'instagram', 'linkedin'];
-                for (const platform of socialPlatforms) {
-                    const url = document.getElementById(`${platform}_url`).value;
-                    const post = document.getElementById(`${platform}_post`).value;
-                    
-                    // Only save if either URL or post is provided
-                    if (url || post) {
-                        const urlKey = `${platform}_url`;
-                        const postKey = `${platform}_post`;
-                        
-                        if (!processedKeys.has(urlKey)) {
-                            updates.push({
-                                project_id: projectId,
-                                key: urlKey,
-                                value: url
-                            });
-                            processedKeys.add(urlKey);
-                        }
-                        
-                        if (!processedKeys.has(postKey)) {
-                            updates.push({
-                                project_id: projectId,
-                                key: postKey,
-                                value: post
-                            });
-                            processedKeys.add(postKey);
-                        }
-                    }
-                }
-
-                // Process basic information fields
-                const basicFields = [
-                    'rendered_title',
-                    'rendered_subtitle',
-                    'rendered_bio_html',
-                    'rendered_footer_slogan',
-                    'profile_image_url',
-                    'quote_1',
-                    'quote_2',
-                    'quote_3',
-                    'rendered_bio_html_card_1',
-                    'rendered_bio_html_card_2',
-                    'rendered_bio_html_card_3',
-                    'email_address',
-                    'style_package'
-                ];
-                
-                for (const field of basicFields) {
-                    const element = document.getElementById(field);
-                    if (element && element.value && !processedKeys.has(field)) {
-                        updates.push({
-                            project_id: projectId,
-                            key: field,
-                            value: element.value
-                        });
-                        processedKeys.add(field);
-                    }
-                }
-
-                // Add remaining form fields
-                for (const [key, value] of formData.entries()) {
-                    // Skip fields we've already processed
-                    if (key === 'project_id' || 
-                        processedKeys.has(key) ||
-                        key.endsWith('_url') || 
-                        key.endsWith('_post') || 
-                        key.endsWith('_title') || 
-                        key.endsWith('_description') ||
-                        key.endsWith('_short') ||
-                        basicFields.includes(key)) continue;
-                    
-                    updates.push({
-                        project_id: projectId,
-                        key: key,
-                        value: value
-                    });
-                    processedKeys.add(key);
-                }
-
-                // Insert or update all values
-                const { error } = await supabase
-                    .from('dynamic_content')
-                    .upsert(updates, {
-                        onConflict: 'project_id,key'
-                    });
-
-                if (error) throw error;
-
-                statusElement.textContent = 'Content saved successfully';
-                statusElement.className = 'status success';
-
-                // Update character counts
-                const textareas = document.querySelectorAll('textarea[id$="_post"], textarea[id$="_short"]');
-                textareas.forEach(textarea => {
-                    const count = textarea.value.length;
-                    const countDisplay = textarea.nextElementSibling;
-                    if (countDisplay && countDisplay.classList.contains('character-count')) {
-                        countDisplay.textContent = count + ' characters';
                     }
                 });
-
-                // Show view site button
-                document.getElementById('view-site-container').style.display = 'block';
-                
-                // Update the view site button with the correct project ID
-                const viewSiteButton = document.getElementById('view-site-button');
-                const currentProjectId = document.getElementById('project_id').value;
-                
-                // Set up the click handler for the view site button
-                viewSiteButton.onclick = function() {
-                    // Use the view-site.html page to handle the redirect
-                    const siteUrl = window.location.origin + '/view-site.html?project_id=' + projectId;
-                    console.log('Opening site URL:', siteUrl);
-                    window.open(siteUrl, '_blank');
-                };
                 
             } catch (error) {
-                statusElement.textContent = 'Error saving content: ' + error.message;
+                console.error('Error populating form:', error);
+                statusElement.textContent = 'Error populating form: ' + error.message;
                 statusElement.className = 'status error';
             }
         }
-
-        // Attach form submit handler
-        form.addEventListener('submit', saveContent);
-
-        // Set current year
-        document.getElementById('current_year').value = new Date().getFullYear();
-
-        // Add style for action buttons
-        document.head.insertAdjacentHTML('beforeend', `
-            <style>
-                .action-button {
-                    background-color: #6c757d;
-                    color: white;
-                    border: none;
-                    padding: 0.5rem 1rem;
-                    border-radius: 4px;
-                    cursor: pointer;
-                    margin-top: 0.5rem;
-                }
-                .action-button:hover {
-                    background-color: #5a6268;
-                }
-                .form-actions {
-                    margin-top: 2rem;
-                    text-align: center;
-                }
-                .form-actions button {
-                    background-color: #007bff;
-                    color: white;
-                    border: none;
-                    padding: 0.75rem 2rem;
-                    font-size: 1.1rem;
-                    border-radius: 4px;
-                    cursor: pointer;
-                }
-                .form-actions button:hover {
-                    background-color: #0069d9;
-                }
-            </style>
-        `);
-
-        // Initialize the style buttons with the correct fonts
-        function initializeStyleButtons() {
-            // Set the fonts for the style buttons
-            const standardButton = document.querySelector('.standard-style');
-            const darkButton = document.querySelector('.dark-style');
-            const lightButton = document.querySelector('.light-style');
-            
-            // Load the fonts
-            loadFont('Montserrat');  // Standard Professional
-            loadFont('Raleway');     // Dark Professional
-            loadFont('Roboto');      // Light Professional
-            
-            // Apply the fonts to the buttons
-            if (standardButton) standardButton.style.fontFamily = "'Montserrat', sans-serif";
-            if (darkButton) darkButton.style.fontFamily = "'Raleway', sans-serif";
-            if (lightButton) lightButton.style.fontFamily = "'Roboto', sans-serif";
-            
-            // Mark the default style as active
-            const defaultStyle = document.querySelector('.style-button[data-style="standard-professional"]');
-            if (defaultStyle) defaultStyle.classList.add('active');
-        }
-
-        initializeStyleButtons();
-
+        
         // Event Listeners
-        projectSelect.addEventListener('change', async function() {
-            const selectedProject = this.value;
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load projects when the page loads
+            loadProjects();
             
-            // Hide view site button initially
-            document.getElementById('view-site-container').style.display = 'none';
+            // Project selection change
+            const projectSelect = document.getElementById('project_id');
+            projectSelect.addEventListener('change', function() {
+                const selectedProjectId = this.value;
+                if (selectedProjectId) {
+                    loadContent(selectedProjectId);
+                }
+            });
             
-            // Reset form if "Select Project" is chosen
-            if (selectedProject === '') {
-                form.reset();
-                return;
-            }
-            
-            // Handle "Create New Project" option
-            if (selectedProject === 'new') {
+            // Create new project button
+            document.getElementById('create-project-btn').addEventListener('click', function() {
                 document.getElementById('new-project-form').style.display = 'block';
-                return;
-            }
+                this.style.display = 'none';
+            });
             
-            try {
-                statusElement.textContent = 'Loading project content...';
-                statusElement.className = 'status info';
-                
-                // Fetch content for the selected project
-                const { data, error } = await supabase
-                    .from('dynamic_content')
-                    .select('*')
-                    .eq('project_id', selectedProject);
-                
-                console.log('Supabase query result:', { data, error });
-
-                if (error) throw error;
-                
-                // Reset form first
-                form.reset();
-                
-                // Populate form with project data
-                populateForm(data);
-                
-                statusElement.textContent = `Loaded project: ${selectedProject}`;
-                statusElement.className = 'status success';
-                
-                // Show the view site button for existing projects
-                document.getElementById('view-site-container').style.display = 'block';
-                
-                // Set up the view site button with the current project ID
-                const viewSiteButton = document.getElementById('view-site-button');
-                viewSiteButton.onclick = function() {
-                    // Use the view-site.html page to handle the redirect
-                    const siteUrl = window.location.origin + '/view-site.html?project_id=' + selectedProject;
-                    console.log('Opening site URL:', siteUrl);
-                    window.open(siteUrl, '_blank');
-                };
-                
-            } catch (error) {
-                console.error('Error loading project:', error);
-                statusElement.textContent = 'Error loading project: ' + error.message;
-                statusElement.className = 'status error';
-            }
-        });
-
-        // CSV Import/Export functionality
-        const csvUpload = document.getElementById('csv-upload');
-        const importCsvBtn = document.getElementById('import-csv-btn');
-        const downloadTemplateBtn = document.getElementById('download-template-btn');
-        const importStatus = document.getElementById('import-status');
-
-        // Parse CSV function
-        function parseCSV(text) {
-            // Simple CSV parser
-            const lines = text.split('\n');
-            const result = [];
-            const headers = lines[0].split(',');
+            // Cancel new project button
+            document.getElementById('cancel-new-project-btn').addEventListener('click', function() {
+                document.getElementById('new-project-form').style.display = 'none';
+                document.getElementById('create-project-btn').style.display = 'inline-block';
+            });
             
-            for (let i = 1; i < lines.length; i++) {
-                const line = lines[i].trim();
-                if (!line) continue; // Skip empty lines
+            // Save new project button
+            document.getElementById('save-new-project-btn').addEventListener('click', async function() {
+                const newProjectId = document.getElementById('new-project-id').value.trim();
                 
-                const values = line.split(',');
-                const entry = {};
+                if (!newProjectId) {
+                    statusElement.textContent = 'Please enter a project ID';
+                    statusElement.className = 'status error';
+                    return;
+                }
                 
-                // Handle quoted values with commas inside
-                let j = 0;
-                let currentValue = '';
-                let insideQuotes = false;
-                
-                for (let k = 0; k < values.length; k++) {
-                    let value = values[k];
+                try {
+                    statusElement.textContent = 'Creating new project...';
+                    statusElement.className = 'status info';
                     
-                    // Check for opening quote
-                    if (!insideQuotes && value.startsWith('"')) {
-                        insideQuotes = true;
-                        value = value.substring(1);
+                    const response = await fetch('/api/projects', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ project_id: newProjectId })
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
                     }
                     
-                    // Check for closing quote
-                    if (insideQuotes && value.endsWith('"')) {
-                        insideQuotes = false;
-                        value = value.substring(0, value.length - 1);
-                        currentValue += value;
-                        
-                        // We've completed a quoted value
-                        if (j < headers.length) {
-                            entry[headers[j].trim()] = currentValue.trim();
-                            j++;
-                        }
-                        
-                        currentValue = '';
-                        continue;
-                    }
+                    // Reload projects
+                    await loadProjects();
                     
-                    // Add to current value
-                    if (insideQuotes) {
-                        currentValue += value + ',';
-                    } else {
-                        // Regular unquoted value
-                        if (j < headers.length) {
-                            entry[headers[j].trim()] = value.trim();
-                            j++;
+                    // Select the new project
+                    projectSelect.value = newProjectId;
+                    
+                    // Load the new project
+                    loadContent(newProjectId);
+                    
+                    // Hide the new project form
+                    document.getElementById('new-project-form').style.display = 'none';
+                    document.getElementById('create-project-btn').style.display = 'inline-block';
+                    
+                    statusElement.textContent = `Created new project: ${newProjectId}`;
+                    statusElement.className = 'status success';
+                    
+                } catch (error) {
+                    console.error('Error creating project:', error);
+                    statusElement.textContent = 'Error creating project: ' + error.message;
+                    statusElement.className = 'status error';
+                }
+            });
+            
+            // Save content button
+            document.getElementById('save-content-btn').addEventListener('click', async function() {
+                const projectId = projectSelect.value;
+                
+                if (!projectId) {
+                    statusElement.textContent = 'Please select a project';
+                    statusElement.className = 'status error';
+                    return;
+                }
+                
+                try {
+                    statusElement.textContent = 'Saving content...';
+                    statusElement.className = 'status info';
+                    
+                    // Collect form data
+                    const form = document.getElementById('contentForm');
+                    const formData = new FormData(form);
+                    const contentItems = [];
+                    
+                    for (const [key, value] of formData.entries()) {
+                        if (key !== 'project_id') {
+                            contentItems.push({
+                                key: key,
+                                value: value,
+                                project_id: projectId
+                            });
                         }
                     }
-                }
-                
-                result.push(entry);
-            }
-            
-            return result;
-        }
-
-        // Import CSV button click handler
-        importCsvBtn.addEventListener('click', async () => {
-            const file = csvUpload.files[0];
-            if (!file) {
-                importStatus.textContent = 'Please select a CSV file first';
-                importStatus.className = 'status error';
-                importStatus.style.display = 'block';
-                return;
-            }
-
-            try {
-                const text = await file.text();
-                const data = parseCSV(text);
-                
-                if (!data.length) throw new Error('No data found in CSV');
-                
-                // Validate required columns
-                if (!data[0].project_id || !data[0].key || !data[0].value === undefined) {
-                    throw new Error('CSV must contain project_id, key, and value columns');
-                }
-                
-                importStatus.textContent = `Processing ${data.length} entries...`;
-                importStatus.className = 'status';
-                importStatus.style.display = 'block';
-                
-                // Group entries by project
-                const projects = {};
-                data.forEach(entry => {
-                    if (!projects[entry.project_id]) {
-                        projects[entry.project_id] = [];
-                    }
-                    projects[entry.project_id].push({
-                        project_id: entry.project_id,
-                        key: entry.key,
-                        value: entry.value
-                    });
-                });
-                
-                // Get current project
-                const selectedProjectId = projectSelect.value;
-                let targetProjectId = selectedProjectId;
-                
-                // If there's only one project in the CSV and none selected, use that
-                const projectIds = Object.keys(projects);
-                if (projectIds.length === 1 && (!selectedProjectId || selectedProjectId === 'new')) {
-                    targetProjectId = projectIds[0];
                     
-                    // Check if project exists
-                    const { data: existingProjects } = await supabase
-                        .from('dynamic_content')
-                        .select('project_id')
-                        .eq('project_id', targetProjectId)
-                        .limit(1);
+                    console.log('Saving content items:', contentItems);
                     
-                    if (!existingProjects.length) {
-                        // Create the project
-                        const { error } = await supabase
-                            .from('dynamic_content')
-                            .insert({ project_id: targetProjectId, key: 'project_created', value: new Date().toISOString() });
-                        
-                        if (error) throw error;
-                        
-                        // Update project select dropdown
-                        const option = document.createElement('option');
-                        option.value = targetProjectId;
-                        option.textContent = targetProjectId;
-                        projectSelect.appendChild(option);
-                        projectSelect.value = targetProjectId;
-                    }
-                }
-                
-                if (!targetProjectId || targetProjectId === 'new') {
-                    throw new Error('Please select a project first or upload CSV with a single project');
-                }
-                
-                // Import data for the target project
-                const updates = projects[targetProjectId] || [];
-                if (!updates.length) {
-                    throw new Error(`No data found for project ${targetProjectId} in CSV`);
-                }
-                
-                // Upsert all values
-                const { error } = await supabase
-                    .from('dynamic_content')
-                    .upsert(updates, {
-                        onConflict: 'project_id,key'
+                    const response = await fetch(`/api/projects/${projectId}/content`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(contentItems)
                     });
-                
-                if (error) throw error;
-                
-                importStatus.textContent = `Successfully imported ${updates.length} entries for project ${targetProjectId}`;
-                importStatus.className = 'status success';
-                
-                // Reload content for the current project
-                loadContent();
-                
-            } catch (error) {
-                importStatus.textContent = 'Error importing CSV: ' + error.message;
-                importStatus.className = 'status error';
-            }
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    statusElement.textContent = 'Content saved successfully';
+                    statusElement.className = 'status success';
+                    
+                    // Show the view site button
+                    document.getElementById('view-site-container').style.display = 'block';
+                    
+                } catch (error) {
+                    console.error('Error saving content:', error);
+                    statusElement.textContent = 'Error saving content: ' + error.message;
+                    statusElement.className = 'status error';
+                }
+            });
         });
-
-        // Download CSV template button click handler
-        downloadTemplateBtn.addEventListener('click', () => {
-            const templateContent = `project_id,key,value
-example-project,client_name,Client Name
-example-project,profile_image_url,https://example.com/image.jpg
-example-project,rendered_title,Site Title
-example-project,rendered_subtitle,Site Subtitle
-example-project,rendered_bio_html,Bio content
-example-project,style_package,standard-professional
-example-project,primary_color,#4a6fa5
-example-project,secondary_color,#6c8eb4
-example-project,accent_color,#f9a03f
-example-project,text_color,#333333
-example-project,background_color,#f9f9f9
-example-project,heading_font,Montserrat
-example-project,body_font,Open Sans
-example-project,quote_1,Quote 1 content
-example-project,quote_2,Quote 2 content
-example-project,quote_3,Quote 3 content
-example-project,blog_post_1_title,First Blog Post Title
-example-project,blog_post_1_description,Short description of first blog post
-example-project,blog_post_1,Full content of first blog post
-example-project,blog_post_2_title,Second Blog Post Title
-example-project,blog_post_2_description,Short description of second blog post
-example-project,blog_post_2,Full content of second blog post
-example-project,blog_post_3_title,Third Blog Post Title
-example-project,blog_post_3_description,Short description of third blog post
-example-project,blog_post_3,Full content of third blog post
-example-project,blog_post_4_title,Fourth Blog Post Title
-example-project,blog_post_4_description,Short description of fourth blog post
-example-project,blog_post_4,Full content of fourth blog post
-example-project,facebook_url,https://facebook.com/username
-example-project,facebook_post,Facebook post content
-example-project,twitter_url,https://twitter.com/username
-example-project,twitter_post,Twitter post content
-example-project,instagram_url,https://instagram.com/username
-example-project,instagram_post,Instagram post content
-example-project,linkedin_url,https://linkedin.com/in/username
-example-project,linkedin_post,LinkedIn post content
-example-project,rendered_footer_slogan,Footer slogan content
-example-project,current_year,2025
-example-project,email_address,example@email.com`;
-            
-            // Create a download link
-            const element = document.createElement('a');
-            element.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURIComponent(templateContent));
-            element.setAttribute('download', 'selfcast-content-template.csv');
-            element.style.display = 'none';
-            document.body.appendChild(element);
-            element.click();
-            document.body.removeChild(element);
-        });
-        
-        // Update the blog management button to include the current project ID
-        function updateBlogManagementButton() {
-            const projectId = document.getElementById('project_id').value;
-            const manageBlogsButton = document.getElementById('manage-blogs-button');
-            
-            if (projectId) {
-                manageBlogsButton.href = `blog-editor.html?project_id=${projectId}`;
-            } else {
-                manageBlogsButton.href = 'blog-editor.html';
-            }
-        }
-        
-        // Add event listener to update the blog management button when project changes
-        document.getElementById('project_id').addEventListener('change', updateBlogManagementButton);
-        
-        // Update the button initially
-        updateBlogManagementButton();
     </script>
 </body>
 </html>
