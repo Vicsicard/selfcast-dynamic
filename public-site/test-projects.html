@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supabase Project Test</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            background: #f5f5f5;
+        }
+        #status {
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        #projectList {
+            background: white;
+            padding: 1rem;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <h1>Supabase Project Test</h1>
+    <div id="status">Connecting to database...</div>
+    <div id="projectList"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // Direct Supabase initialization
+        const SUPABASE_URL = 'https://aqicztygjpmunfljjjuto.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxaWN6dHlnanBtdW5mbGpqdXRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3MDU1ODIsImV4cCI6MjA1OTI4MTU4Mn0.5e2hvTckSSbTFLBjQiccrvjoBd6QQDX0X4tccFOc1rs';
+        
+        const status = document.getElementById('status');
+        const projectList = document.getElementById('projectList');
+        
+        console.log('Test page initializing...');
+        console.log('Supabase URL:', SUPABASE_URL);
+        
+        // Initialize Supabase
+        let supabase;
+        try {
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            console.log('Supabase client initialized');
+            
+            // Test query
+            fetchProjects();
+            
+        } catch (error) {
+            console.error('Error initializing Supabase:', error);
+            status.textContent = 'Error initializing Supabase: ' + error.message;
+            status.className = 'error';
+        }
+        
+        // Fetch projects function
+        async function fetchProjects() {
+            try {
+                console.log('Fetching projects...');
+                
+                // Simple query to get all project IDs
+                const { data, error } = await supabase
+                    .from('dynamic_content')
+                    .select('project_id')
+                    .order('project_id', { ascending: true });
+                
+                if (error) {
+                    console.error('Error fetching projects:', error);
+                    status.textContent = 'Error fetching projects: ' + error.message;
+                    status.className = 'error';
+                    return;
+                }
+                
+                console.log('Projects data:', data);
+                
+                // Get unique project IDs
+                const projectIds = [...new Set(data.map(item => item.project_id))];
+                console.log('Unique project IDs:', projectIds);
+                
+                // Display success message
+                status.textContent = `Successfully connected to database. Found ${projectIds.length} unique projects.`;
+                status.className = 'success';
+                
+                // Display projects
+                if (projectIds.length > 0) {
+                    const projectHTML = `
+                        <h2>Projects (${projectIds.length})</h2>
+                        <ul>
+                            ${projectIds.map(id => `<li>${id}</li>`).join('')}
+                        </ul>
+                    `;
+                    projectList.innerHTML = projectHTML;
+                } else {
+                    projectList.innerHTML = '<p>No projects found in the database.</p>';
+                }
+                
+            } catch (error) {
+                console.error('Error in fetchProjects:', error);
+                status.textContent = 'Error fetching projects: ' + error.message;
+                status.className = 'error';
+            }
+        }
+    </script>
+</body>
+</html>
