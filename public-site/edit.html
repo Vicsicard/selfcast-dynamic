@@ -826,25 +826,9 @@
                 let projectIds = [];
                 let error = null;
                 
-                try {
-                    // First, try to load from Supabase
-                    console.log('Attempting to load projects from Supabase...');
-                    const { data, error: supabaseError } = await supabase
-                        .from('dynamic_content')
-                        .select('project_id')
-                        .order('project_id', { ascending: true });
-                    
-                    if (supabaseError) {
-                        console.error('Error fetching project IDs from Supabase:', supabaseError);
-                        throw supabaseError;
-                    }
-                    
-                    // Get unique project IDs
-                    projectIds = [...new Set(data.map(item => item.project_id))];
-                    console.log('Successfully loaded projects from Supabase:', projectIds.length);
-                } catch (supabaseError) {
-                    console.warn('Supabase connection failed, using fallback project data');
-                    error = supabaseError;
+                // Immediately use fallback data in production environment
+                if (window.location.hostname.includes('vercel.app')) {
+                    console.log('Running in Vercel environment, using fallback project data directly');
                     
                     // Fallback to hardcoded project data
                     projectIds = [
@@ -857,6 +841,42 @@
                         'sicard-vic-20250422-1102',
                         'default-project'
                     ];
+                    
+                    error = new Error('Skipping Supabase connection in Vercel environment');
+                } else {
+                    // Only try Supabase in non-Vercel environments
+                    try {
+                        // First, try to load from Supabase
+                        console.log('Attempting to load projects from Supabase...');
+                        const { data, error: supabaseError } = await supabase
+                            .from('dynamic_content')
+                            .select('project_id')
+                            .order('project_id', { ascending: true });
+                        
+                        if (supabaseError) {
+                            console.error('Error fetching project IDs from Supabase:', supabaseError);
+                            throw supabaseError;
+                        }
+                        
+                        // Get unique project IDs
+                        projectIds = [...new Set(data.map(item => item.project_id))];
+                        console.log('Successfully loaded projects from Supabase:', projectIds.length);
+                    } catch (supabaseError) {
+                        console.warn('Supabase connection failed, using fallback project data');
+                        error = supabaseError;
+                        
+                        // Fallback to hardcoded project data
+                        projectIds = [
+                            'Ann sicard2025-04-23T15:36:44.516Z',
+                            'Opie sicard2025-04-23T15:31:47.006Z',
+                            '2025-04-23T15:15:38.214Z',
+                            'test-manual-insert-20250423',
+                            'sicard-vic-20250422-0856',
+                            'sicard-vic-20250422-0948',
+                            'sicard-vic-20250422-1102',
+                            'default-project'
+                        ];
+                    }
                 }
                 
                 console.log('Project IDs to display:', projectIds.length);
@@ -915,24 +935,10 @@
                 let contentData = [];
                 let error = null;
                 
-                try {
-                    // First, try to load from Supabase
-                    console.log('Attempting to load content from Supabase for project:', projectId);
-                    const { data, error: supabaseError } = await supabase
-                        .from('dynamic_content')
-                        .select('key, value')
-                        .eq('project_id', projectId);
-                    
-                    if (supabaseError) {
-                        console.error('Error fetching content from Supabase:', supabaseError);
-                        throw supabaseError;
-                    }
-                    
-                    contentData = data;
-                    console.log('Successfully loaded content from Supabase:', contentData.length, 'items');
-                } catch (supabaseError) {
-                    console.warn('Supabase connection failed, using fallback content data');
-                    error = supabaseError;
+                // Immediately use fallback data in production environment
+                if (window.location.hostname.includes('vercel.app')) {
+                    console.log('Running in Vercel environment, using fallback content data directly');
+                    error = new Error('Skipping Supabase connection in Vercel environment');
                     
                     // Generate some fallback content data based on the project ID
                     const namePart = projectId.split('T')[0].replace(/-/g, ' ');
@@ -945,6 +951,38 @@
                         { key: 'current_year', value: '2025' },
                         { key: 'rendered_footer_slogan', value: ` 2025 ${namePart} | All Rights Reserved` }
                     ];
+                } else {
+                    try {
+                        // First, try to load from Supabase
+                        console.log('Attempting to load content from Supabase for project:', projectId);
+                        const { data, error: supabaseError } = await supabase
+                            .from('dynamic_content')
+                            .select('key, value')
+                            .eq('project_id', projectId);
+                        
+                        if (supabaseError) {
+                            console.error('Error fetching content from Supabase:', supabaseError);
+                            throw supabaseError;
+                        }
+                        
+                        contentData = data;
+                        console.log('Successfully loaded content from Supabase:', contentData.length, 'items');
+                    } catch (supabaseError) {
+                        console.warn('Supabase connection failed, using fallback content data');
+                        error = supabaseError;
+                        
+                        // Generate some fallback content data based on the project ID
+                        const namePart = projectId.split('T')[0].replace(/-/g, ' ');
+                        
+                        contentData = [
+                            { key: 'rendered_title', value: namePart },
+                            { key: 'full_name', value: namePart },
+                            { key: 'email_address', value: 'example@example.com' },
+                            { key: 'onboarding_phone', value: '555-123-4567' },
+                            { key: 'current_year', value: '2025' },
+                            { key: 'rendered_footer_slogan', value: ` 2025 ${namePart} | All Rights Reserved` }
+                        ];
+                    }
                 }
                 
                 // Populate form with project data
