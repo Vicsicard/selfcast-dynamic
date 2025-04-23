@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Site Content Editor</title>
+    <link rel="stylesheet" href="styles.css">
     <style>
         /* Keeping the existing styles */
         body {
@@ -96,6 +97,11 @@
     <div class="section">
         <h1>Site Content Editor</h1>
         
+        <div class="alert" style="background-color: #d1ecf1; color: #0c5460; padding: 15px; border-radius: 5px; margin-bottom: 20px; border: 1px solid #bee5eb;">
+            <strong>New Editor Available!</strong> We've created an improved editor that works directly with Supabase without requiring the client library.
+            <a href="edit-complete-fixed.html" style="display: inline-block; background-color: #3498db; color: white; padding: 8px 15px; text-decoration: none; border-radius: 4px; margin-top: 10px;">Use New Editor</a>
+        </div>
+        
         <form id="contentForm">
             <!-- Project Selection -->
             <div class="form-group">
@@ -132,7 +138,6 @@
         </div>
     </div>
 
-    <script src="fallback-data.js"></script>
     <script>
         // Debug mode
         const urlParams = new URLSearchParams(window.location.search);
@@ -156,88 +161,17 @@
             }
         }
         
-        // Supabase Configuration with fallbacks - FIXED URL
-        const SUPABASE_URL = 'https://aqicztygjpmunfljjuto.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxaWN6dHlnanBtdW5mbGpqdXRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3MDU1ODIsImV4cCI6MjA1OTI4MTU4Mn0.5e2hvTckSSbTFLBjQiccrvjoBd6QQDX0X4tccFOc1rs';
-        let supabase;
-        
         // Status element for error reporting
         const statusElement = document.getElementById('status');
-        
-        // Properly load the Supabase script
-        function loadSupabaseScript() {
-            return new Promise((resolve, reject) => {
-                // Check if already loaded
-                if (window.supabase) {
-                    logDebug('Supabase already loaded');
-                    resolve(window.supabase);
-                    return;
-                }
-                
-                logDebug('Loading Supabase script...');
-                const script = document.createElement('script');
-                script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
-                script.async = true;
-                
-                script.onload = () => {
-                    logDebug('Supabase script loaded successfully');
-                    resolve(window.supabase);
-                };
-                
-                script.onerror = () => {
-                    const msg = 'Error loading Supabase script';
-                    console.error(msg);
-                    reject(new Error(msg));
-                };
-                
-                document.body.appendChild(script);
-            });
-        }
-        
-        // Initialize Supabase client
-        async function initializeSupabase() {
-            try {
-                logDebug('Initializing Supabase client...');
-                await loadSupabaseScript();
-                
-                // Create Supabase client
-                const { createClient } = supabase;
-                supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-                
-                logDebug('Supabase client initialized successfully');
-                
-                // Load projects
-                await loadProjects();
-                
-            } catch (error) {
-                console.error('Error initializing Supabase:', error);
-                statusElement.textContent = 'Error initializing Supabase: ' + error.message;
-                statusElement.className = 'status error';
-            }
-        }
-        
-        // Start initialization when the DOM is ready
-        document.addEventListener('DOMContentLoaded', initializeSupabase);
         
         // Load available projects
         async function loadProjects() {
             try {
-                logDebug('Starting to load projects...');
                 statusElement.textContent = 'Loading projects...';
                 statusElement.className = 'status info';
                 
-                // Use direct Supabase query instead of API proxy
-                const { data, error } = await supabase
-                    .from('dynamic_content')
-                    .select('project_id')
-                    .order('project_id');
-                
-                if (error) throw error;
-                
-                // Get unique project IDs
-                const projectIds = [...new Set(data.map(item => item.project_id))];
-                
-                logDebug('Projects loaded:', projectIds);
+                const response = await fetch('/api/projects');
+                const projectIds = await response.json();
                 
                 // Clear existing options
                 const projectSelect = document.getElementById('project_id');
@@ -251,15 +185,16 @@
                     projectSelect.appendChild(option);
                 });
                 
-                logDebug('Project dropdown populated with', projectIds.length, 'options');
+                console.log('Project dropdown populated with', projectIds.length, 'options');
                 
                 // Check if there's a project_id in the URL
-                const urlProjectId = urlParams.get('project_id');
+                const urlParams = new URLSearchParams(window.location.search);
+                const projectId = urlParams.get('project_id');
                 
-                if (urlProjectId && projectIds.includes(urlProjectId)) {
-                    logDebug('Loading project from URL:', urlProjectId);
-                    projectSelect.value = urlProjectId;
-                    loadContent(urlProjectId);
+                if (projectId && projectIds.includes(projectId)) {
+                    console.log('Loading project from URL:', projectId);
+                    projectSelect.value = projectId;
+                    loadContent(projectId);
                 }
                 
                 // Update the blog management button
@@ -283,27 +218,11 @@
             try {
                 if (!projectId) return;
                 
-                logDebug('Loading content for project:', projectId);
                 statusElement.textContent = 'Loading content...';
                 statusElement.className = 'status info';
                 
-                // Direct Supabase query
-                const { data, error } = await supabase
-                    .from('dynamic_content')
-                    .select('content_key, content_value')
-                    .eq('project_id', projectId);
-                
-                logDebug('Supabase query result:', { data, error });
-                
-                if (error) throw error;
-                
-                if (!data || data.length === 0) {
-                    statusElement.textContent = `No content found for project: ${projectId}`;
-                    statusElement.className = 'status error';
-                    return;
-                }
-                
-                logDebug(`Loaded ${data.length} content items for project: ${projectId}`);
+                const response = await fetch(`/api/projects/${projectId}/content`);
+                const data = await response.json();
                 
                 // Populate the form with the data
                 populateForm(data);
@@ -313,7 +232,7 @@
                 document.getElementById('site-url').href = `/?project_id=${projectId}`;
                 document.getElementById('site-url').textContent = `/?project_id=${projectId}`;
                 
-                statusElement.textContent = `Loaded content for project: ${projectId}`;
+                statusElement.textContent = `Loaded ${data.length} content items for project: ${projectId}`;
                 statusElement.className = 'status success';
                 
             } catch (error) {
@@ -326,15 +245,15 @@
         // Populate form with project data
         function populateForm(data) {
             try {
-                logDebug('Populating form with data:', data);
+                console.log('Populating form with data:', data);
                 
                 // Reset form first
                 document.getElementById('contentForm').reset();
                 
                 // Process each content item
                 data.forEach(item => {
-                    const key = item.content_key;
-                    const value = item.content_value;
+                    const key = item.key;
+                    const value = item.value;
                     
                     // Find form element with matching name/id
                     const element = document.getElementById(key) || document.querySelector(`[name="${key}"]`);
@@ -360,7 +279,7 @@
                     }
                 });
                 
-                logDebug('Form populated successfully');
+                console.log('Form populated successfully');
                 
             } catch (error) {
                 console.error('Error populating form:', error);
@@ -401,60 +320,27 @@
                 for (const [key, value] of formData.entries()) {
                     if (key !== 'project_id') {
                         contentItems.push({
-                            content_key: key,
-                            content_value: value
+                            key: key,
+                            value: value
                         });
                     }
                 }
                 
-                logDebug('Saving content items:', contentItems);
+                console.log('Saving content items:', contentItems);
                 
-                // Save each content item
-                let successCount = 0;
-                let errorCount = 0;
+                const response = await fetch(`/api/projects/${projectId}/content`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(contentItems)
+                });
                 
-                for (const item of contentItems) {
-                    try {
-                        // Check if the item already exists
-                        const { data: existingData, error: checkError } = await supabase
-                            .from('dynamic_content')
-                            .select('*')
-                            .eq('project_id', projectId)
-                            .eq('content_key', item.content_key)
-                            .maybeSingle();
-                        
-                        if (checkError) throw checkError;
-                        
-                        let result;
-                        
-                        if (existingData) {
-                            // Update existing record
-                            const { data, error } = await supabase
-                                .from('dynamic_content')
-                                .update({ content_value: item.content_value })
-                                .eq('project_id', projectId)
-                                .eq('content_key', item.content_key);
-                            
-                            if (error) throw error;
-                            successCount++;
-                        } else {
-                            // Insert new record
-                            const { data, error } = await supabase
-                                .from('dynamic_content')
-                                .insert([{ 
-                                    project_id: projectId, 
-                                    content_key: item.content_key, 
-                                    content_value: item.content_value 
-                                }]);
-                            
-                            if (error) throw error;
-                            successCount++;
-                        }
-                    } catch (error) {
-                        console.error('Error saving item:', item, error);
-                        errorCount++;
-                    }
-                }
+                const results = await response.json();
+                
+                // Count successes and errors
+                const successCount = results.filter(r => r.action === 'updated' || r.action === 'inserted').length;
+                const errorCount = results.filter(r => r.action === 'error').length;
                 
                 // Show results
                 if (errorCount === 0) {
@@ -519,16 +405,15 @@
                 statusElement.textContent = 'Creating new project...';
                 statusElement.className = 'status info';
                 
-                // Create a basic record to establish the project
-                const { data, error } = await supabase
-                    .from('dynamic_content')
-                    .insert([{ 
-                        project_id: newProjectId, 
-                        content_key: 'rendered_title', 
-                        content_value: 'New Site' 
-                    }]);
+                const response = await fetch('/api/projects', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ projectId: newProjectId })
+                });
                 
-                if (error) throw error;
+                const result = await response.json();
                 
                 // Reload projects
                 await loadProjects();
