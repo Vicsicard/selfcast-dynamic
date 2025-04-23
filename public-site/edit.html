@@ -797,8 +797,38 @@
                 
                 // Now initialize the client
                 console.log('Initializing Supabase client...');
-                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+                    auth: {
+                        autoRefreshToken: true,
+                        persistSession: true
+                    },
+                    global: {
+                        headers: {
+                            'X-Client-Info': 'supabase-js/2.0.0',
+                        },
+                    },
+                });
                 console.log('Supabase client initialized successfully');
+                
+                // Test connection with a simple fetch to verify DNS resolution
+                try {
+                    console.log('Testing connection with direct fetch...');
+                    const testResponse = await fetch(`${SUPABASE_URL}/rest/v1/dynamic_content?select=count`, {
+                        method: 'GET',
+                        headers: {
+                            'apikey': SUPABASE_ANON_KEY,
+                            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                        }
+                    });
+                    
+                    if (testResponse.ok) {
+                        console.log('Direct fetch successful!');
+                    } else {
+                        console.warn('Direct fetch returned status:', testResponse.status);
+                    }
+                } catch (fetchError) {
+                    console.error('Direct fetch test failed:', fetchError);
+                }
                 
                 // Load projects
                 await loadProjects();
