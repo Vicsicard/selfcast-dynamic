@@ -1,0 +1,1624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SelfCast Content Editor</title>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2c3e50;
+            --accent-color: #e74c3c;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --error-color: #e74c3c;
+            --info-color: #3498db;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+            --border-color: #dee2e6;
+            --border-radius: 4px;
+            --box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: var(--box-shadow);
+        }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border-color);
+        }
+        
+        h1, h2, h3, h4 {
+            color: var(--secondary-color);
+            margin-top: 0;
+        }
+        
+        h1 {
+            font-size: 1.8rem;
+        }
+        
+        h2 {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+        }
+        
+        h3 {
+            font-size: 1.2rem;
+            margin-top: 1rem;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: var(--box-shadow);
+            border-top: 3px solid var(--primary-color);
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            cursor: pointer;
+        }
+        
+        .section-header h2 {
+            margin: 0;
+        }
+        
+        .section-content {
+            display: block;
+        }
+        
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            margin: 0 -10px 15px;
+        }
+        
+        .form-col {
+            flex: 1;
+            padding: 0 10px;
+            min-width: 200px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            font-family: inherit;
+            font-size: 14px;
+        }
+        
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        input[type="color"] {
+            height: 40px;
+            padding: 2px;
+        }
+        
+        input[type="checkbox"] {
+            width: auto;
+            margin-right: 5px;
+        }
+        
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+        }
+        
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+            transition: background-color 0.2s;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        button.secondary {
+            background-color: var(--secondary-color);
+        }
+        
+        button.secondary:hover {
+            background-color: #1a252f;
+        }
+        
+        button.success {
+            background-color: var(--success-color);
+        }
+        
+        button.success:hover {
+            background-color: #27ae60;
+        }
+        
+        button.warning {
+            background-color: var(--warning-color);
+        }
+        
+        button.warning:hover {
+            background-color: #e67e22;
+        }
+        
+        button.error {
+            background-color: var(--error-color);
+        }
+        
+        button.error:hover {
+            background-color: #c0392b;
+        }
+        
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: var(--border-radius);
+        }
+        
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        .warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+        
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 20px;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .tab:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .tab.active {
+            border-bottom-color: var(--primary-color);
+            font-weight: bold;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .project-selector {
+            margin-bottom: 20px;
+        }
+        
+        .project-selector select {
+            margin-right: 10px;
+        }
+        
+        .new-project-form {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .debug-section {
+            margin-top: 30px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: var(--border-radius);
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            display: block;
+        }
+        
+        .debug-toggle {
+            background-color: #f8f9fa;
+            color: #333;
+            border: 1px solid var(--border-color);
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+        
+        .blog-post-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .color-preview {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-left: 10px;
+            border: 1px solid #ccc;
+        }
+        
+        @media (max-width: 768px) {
+            .form-col {
+                flex: 100%;
+            }
+            
+            .tabs {
+                flex-wrap: wrap;
+            }
+            
+            .tab {
+                flex: 1 0 auto;
+                text-align: center;
+            }
+        }
+        
+        .validation-error {
+            border-color: var(--error-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>SelfCast Content Editor</h1>
+            <div>
+                <button id="view-site-button" style="display: none;" class="secondary">View Your Website</button>
+                <button id="save-all-btn" class="success">Save All Content</button>
+                <button id="toggle-debug-btn" class="debug-toggle">Hide Debug Info</button>
+            </div>
+        </header>
+        
+        <div class="project-selector">
+            <div class="form-row">
+                <div class="form-col">
+                    <label for="project-select">Select Project:</label>
+                    <select id="project-select">
+                        <option value="">-- Select a project --</option>
+                    </select>
+                </div>
+                <div class="form-col" style="display: flex; align-items: flex-end;">
+                    <button id="load-project-btn">Load Project</button>
+                </div>
+            </div>
+            
+            <div class="new-project-form">
+                <div class="form-row">
+                    <div class="form-col">
+                        <label for="new-project-id">Create New Project:</label>
+                        <input type="text" id="new-project-id" placeholder="Enter project ID (e.g., lastname-firstname-0001)">
+                    </div>
+                    <div class="form-col" style="display: flex; align-items: flex-end;">
+                        <button id="save-new-project-btn">Create Project</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="status" class="status info">Select a project to load or create a new one.</div>
+        
+        <form id="contentForm">
+            <!-- Tabs Navigation -->
+            <div class="tabs">
+                <div class="tab active" data-tab="main-content">Main Content</div>
+                <div class="tab" data-tab="blog-posts">Blog Posts</div>
+                <div class="tab" data-tab="social-media">Social Media</div>
+                <div class="tab" data-tab="styling">Styling</div>
+                <div class="tab" data-tab="quotes">Quotes</div>
+                <div class="tab" data-tab="contact">Contact & Footer</div>
+                <div class="tab" data-tab="misc">Miscellaneous</div>
+            </div>
+            
+            <!-- Main Content Tab -->
+            <div class="tab-content active" id="main-content">
+                <!-- Basic Info Section -->
+                <div class="section">
+                    <div class="section-header">
+                        <h2>Basic Information</h2>
+                        <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
+                    </div>
+                    <div class="section-content">
+                        <div class="form-row">
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label for="site_title">Site Title:</label>
+                                    <input type="text" id="site_title" name="site_title" placeholder="Enter site title">
+                                </div>
+                            </div>
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label for="site_subtitle">Subtitle:</label>
+                                    <input type="text" id="site_subtitle" name="site_subtitle" placeholder="Enter subtitle">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Bio Section -->
+                <div class="section">
+                    <div class="section-header">
+                        <h2>Bio</h2>
+                        <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
+                    </div>
+                    <div class="section-content">
+                        <div class="form-group">
+                            <label for="rendered_bio_html">Bio Content:</label>
+                            <textarea id="rendered_bio_html" name="rendered_bio_html" placeholder="Enter bio content"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Blog Posts Tab -->
+            <div class="tab-content" id="blog-posts">
+                <!-- Blog Post 1 Section -->
+                <div class="section">
+                    <div class="section-header">
+                        <h2>Blog Post 1</h2>
+                        <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
+                    </div>
+                    <div class="section-content">
+                        <div class="form-row">
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label for="blog_post_1_title">Title:</label>
+                                    <input type="text" id="blog_post_1_title" name="blog_post_1_title" placeholder="Enter blog post title">
+                                </div>
+                            </div>
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label for="blog_post_1_date">Date:</label>
+                                    <input type="date" id="blog_post_1_date" name="blog_post_1_date">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="blog_post_1_description">Description:</label>
+                            <textarea id="blog_post_1_description" name="blog_post_1_description" placeholder="Enter blog post description"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="blog_post_1_content">Content:</label>
+                            <textarea id="blog_post_1_content" name="blog_post_1_content" placeholder="Enter blog post content"></textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Blog Post 2 Section -->
+                <div class="section">
+                    <div class="section-header">
+                        <h2>Blog Post 2</h2>
+                        <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
+                    </div>
+                    <div class="section-content">
+                        <div class="form-row">
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label for="blog_post_2_title">Title:</label>
+                                    <input type="text" id="blog_post_2_title" name="blog_post_2_title" placeholder="Enter blog post title">
+                                </div>
+                            </div>
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label for="blog_post_2_date">Date:</label>
+                                    <input type="date" id="blog_post_2_date" name="blog_post_2_date">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="blog_post_2_description">Description:</label>
+                            <textarea id="blog_post_2_description" name="blog_post_2_description" placeholder="Enter blog post description"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="blog_post_2_content">Content:</label>
+                            <textarea id="blog_post_2_content" name="blog_post_2_content" placeholder="Enter blog post content"></textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Blog Post 3 Section -->
+                <div class="section">
+                    <div class="section-header">
+                        <h2>Blog Post 3</h2>
+                        <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
+                    </div>
+                    <div class="section-content">
+                        <div class="form-row">
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label for="blog_post_3_title">Title:</label>
+                                    <input type="text" id="blog_post_3_title" name="blog_post_3_title" placeholder="Enter blog post title">
+                                </div>
+                            </div>
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label for="blog_post_3_date">Date:</label>
+                                    <input type="date" id="blog_post_3_date" name="blog_post_3_date">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="blog_post_3_description">Description:</label>
+                            <textarea id="blog_post_3_description" name="blog_post_3_description" placeholder="Enter blog post description"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="blog_post_3_content">Content:</label>
+                            <textarea id="blog_post_3_content" name="blog_post_3_content" placeholder="Enter blog post content"></textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Blog Post 4 Section -->
+                <div class="section">
+                    <div class="section-header">
+                        <h2>Blog Post 4</h2>
+                        <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
+                    </div>
+                    <div class="section-content">
+                        <div class="form-row">
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label for="blog_post_4_title">Title:</label>
+                                    <input type="text" id="blog_post_4_title" name="blog_post_4_title" placeholder="Enter blog post title">
+                                </div>
+                            </div>
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label for="blog_post_4_date">Date:</label>
+                                    <input type="date" id="blog_post_4_date" name="blog_post_4_date">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="blog_post_4_description">Description:</label>
+                            <textarea id="blog_post_4_description" name="blog_post_4_description" placeholder="Enter blog post description"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="blog_post_4_content">Content:</label>
+                            <textarea id="blog_post_4_content" name="blog_post_4_content" placeholder="Enter blog post content"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Social Media Tab -->
+            <div class="tab-content" id="social-media">
+                <!-- Facebook Section -->
+                <div class="section">
+                    <div class="section-header">
+                        <h2>Facebook</h2>
+                        <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
+                    </div>
+                    <div class="section-content">
+                        <div class="form-group">
+                            <label for="facebook_url">Facebook URL:</label>
+                            <input type="url" id="facebook_url" name="facebook_url" placeholder="https://facebook.com/username">
+                        </div>
+                        <div class="form-group">
+                            <label for="facebook_title">Facebook Title:</label>
+                            <input type="text" id="facebook_title" name="facebook_title" placeholder="Enter Facebook title">
+                        </div>
+                        <div class="form-group">
+                            <label for="facebook_description">Facebook Description:</label>
+                            <textarea id="facebook_description" name="facebook_description" placeholder="Enter Facebook description"></textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Twitter Section -->
+                <div class="section">
+                    <div class="section-header">
+                        <h2>Twitter</h2>
+                        <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
+                    </div>
+                    <div class="section-content">
+                        <div class="form-group">
+                            <label for="twitter_url">Twitter URL:</label>
+                            <input type="url" id="twitter_url" name="twitter_url" placeholder="https://twitter.com/username">
+                        </div>
+                        <div class="form-group">
+                            <label for="twitter_title">Twitter Title:</label>
+                            <input type="text" id="twitter_title" name="twitter_title" placeholder="Enter Twitter title">
+                        </div>
+                        <div class="form-group">
+                            <label for="twitter_description">Twitter Description:</label>
+                            <textarea id="twitter_description" name="twitter_description" placeholder="Enter Twitter description"></textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Instagram Section -->
+                <div class="section">
+                    <div class="section-header">
+                        <h2>Instagram</h2>
+                        <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
+                    </div>
+                    <div class="section-content">
+                        <div class="form-group">
+                            <label for="instagram_url">Instagram URL:</label>
+                            <input type="url" id="instagram_url" name="instagram_url" placeholder="https://instagram.com/username">
+                        </div>
+                        <div class="form-group">
+                            <label for="instagram_title">Instagram Title:</label>
+                            <input type="text" id="instagram_title" name="instagram_title" placeholder="Enter Instagram title">
+                        </div>
+                        <div class="form-group">
+                            <label for="instagram_description">Instagram Description:</label>
+                            <textarea id="instagram_description" name="instagram_description" placeholder="Enter Instagram description"></textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- LinkedIn Section -->
+                <div class="section">
+                    <div class="section-header">
+                        <h2>LinkedIn</h2>
+                        <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
+                    </div>
+                    <div class="section-content">
+                        <div class="form-group">
+                            <label for="linkedin_url">LinkedIn URL:</label>
+                            <input type="url" id="linkedin_url" name="linkedin_url" placeholder="https://linkedin.com/in/username">
+                        </div>
+                        <div class="form-group">
+                            <label for="linkedin_title">LinkedIn Title:</label>
+                            <input type="text" id="linkedin_title" name="linkedin_title" placeholder="Enter LinkedIn title">
+                        </div>
+                        <div class="form-group">
+                            <label for="linkedin_description">LinkedIn Description:</label>
+                            <textarea id="linkedin_description" name="linkedin_description" placeholder="Enter LinkedIn description"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Styling Tab -->
+            <div class="tab-content" id="styling">
+                <!-- Colors Section -->
+                <div class="section">
+                    <div class="section-header">
+                        <h2>Colors</h2>
+                        <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
+                    </div>
+                    <div class="section-content">
+                        <div class="form-row">
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label for="primary_color">Primary Color:</label>
+                                    <input type="color" id="primary_color" name="primary_color" value="#3498db">
+                                </div>
+                            </div>
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label for="secondary_color">Secondary Color:</label>
+                                    <input type="color" id="secondary_color" name="secondary_color" value="#2c3e50">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label for="accent_color">Accent Color:</label>
+                                    <input type="color" id="accent_color" name="accent_color" value="#e74c3c">
+                                </div>
+                            </div>
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label for="text_color">Text Color:</label>
+                                    <input type="color" id="text_color" name="text_color" value="#333333">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label for="background_color">Background Color:</label>
+                                    <input type="color" id="background_color" name="background_color" value="#ffffff">
+                                </div>
+                            </div>
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label for="link_color">Link Color:</label>
+                                    <input type="color" id="link_color" name="link_color" value="#3498db">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Fonts Section -->
+                <div class="section">
+                    <div class="section-header">
+                        <h2>Fonts</h2>
+                        <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
+                    </div>
+                    <div class="section-content">
+                        <div class="form-row">
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label for="heading_font">Heading Font:</label>
+                                    <select id="heading_font" name="heading_font">
+                                        <option value="Arial, sans-serif">Arial</option>
+                                        <option value="Helvetica, sans-serif">Helvetica</option>
+                                        <option value="Georgia, serif">Georgia</option>
+                                        <option value="'Times New Roman', serif">Times New Roman</option>
+                                        <option value="'Courier New', monospace">Courier New</option>
+                                        <option value="Verdana, sans-serif">Verdana</option>
+                                        <option value="Tahoma, sans-serif">Tahoma</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label for="body_font">Body Font:</label>
+                                    <select id="body_font" name="body_font">
+                                        <option value="Arial, sans-serif">Arial</option>
+                                        <option value="Helvetica, sans-serif">Helvetica</option>
+                                        <option value="Georgia, serif">Georgia</option>
+                                        <option value="'Times New Roman', serif">Times New Roman</option>
+                                        <option value="'Courier New', monospace">Courier New</option>
+                                        <option value="Verdana, sans-serif">Verdana</option>
+                                        <option value="Tahoma, sans-serif">Tahoma</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Style Package Section -->
+                <div class="section">
+                    <div class="section-header">
+                        <h2>Style Package</h2>
+                        <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
+                    </div>
+                    <div class="section-content">
+                        <div class="form-group">
+                            <label for="style_package">Select Style Package:</label>
+                            <select id="style_package" name="style_package">
+                                <option value="default">Default</option>
+                                <option value="modern">Modern</option>
+                                <option value="classic">Classic</option>
+                                <option value="minimal">Minimal</option>
+                                <option value="bold">Bold</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Quotes Tab -->
+            <div class="tab-content" id="quotes">
+                <!-- Quote 1 Section -->
+                <div class="section">
+                    <div class="section-header">
+                        <h2>Quote 1</h2>
+                        <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
+                    </div>
+                    <div class="section-content">
+                        <div class="form-group">
+                            <label for="quote_1_text">Quote Text:</label>
+                            <textarea id="quote_1_text" name="quote_1_text" placeholder="Enter quote text"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="quote_1_author">Quote Author:</label>
+                            <input type="text" id="quote_1_author" name="quote_1_author" placeholder="Enter quote author">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Quote 2 Section -->
+                <div class="section">
+                    <div class="section-header">
+                        <h2>Quote 2</h2>
+                        <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
+                    </div>
+                    <div class="section-content">
+                        <div class="form-group">
+                            <label for="quote_2_text">Quote Text:</label>
+                            <textarea id="quote_2_text" name="quote_2_text" placeholder="Enter quote text"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="quote_2_author">Quote Author:</label>
+                            <input type="text" id="quote_2_author" name="quote_2_author" placeholder="Enter quote author">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Quote 3 Section -->
+                <div class="section">
+                    <div class="section-header">
+                        <h2>Quote 3</h2>
+                        <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
+                    </div>
+                    <div class="section-content">
+                        <div class="form-group">
+                            <label for="quote_3_text">Quote Text:</label>
+                            <textarea id="quote_3_text" name="quote_3_text" placeholder="Enter quote text"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="quote_3_author">Quote Author:</label>
+                            <input type="text" id="quote_3_author" name="quote_3_author" placeholder="Enter quote author">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Contact & Footer Tab -->
+            <div class="tab-content" id="contact">
+                <!-- Contact Information Section -->
+                <div class="section">
+                    <div class="section-header">
+                        <h2>Contact Information</h2>
+                        <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
+                    </div>
+                    <div class="section-content">
+                        <div class="form-row">
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label for="contact_email">Email:</label>
+                                    <input type="email" id="contact_email" name="contact_email" placeholder="Enter email address">
+                                </div>
+                            </div>
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label for="contact_phone">Phone:</label>
+                                    <input type="tel" id="contact_phone" name="contact_phone" placeholder="Enter phone number">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="contact_address">Address:</label>
+                            <textarea id="contact_address" name="contact_address" placeholder="Enter address"></textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Footer Section -->
+                <div class="section">
+                    <div class="section-header">
+                        <h2>Footer</h2>
+                        <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
+                    </div>
+                    <div class="section-content">
+                        <div class="form-group">
+                            <label for="footer_text">Footer Text:</label>
+                            <textarea id="footer_text" name="footer_text" placeholder="Enter footer text"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="copyright_text">Copyright Text:</label>
+                            <input type="text" id="copyright_text" name="copyright_text" placeholder="Enter copyright text">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Miscellaneous Tab -->
+            <div class="tab-content" id="misc">
+                <!-- Onboarding Information Section -->
+                <div class="section">
+                    <div class="section-header">
+                        <h2>Onboarding Information</h2>
+                        <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
+                    </div>
+                    <div class="section-content">
+                        <div class="form-row">
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label for="client_name">Client Name:</label>
+                                    <input type="text" id="client_name" name="client_name" placeholder="Enter client name">
+                                </div>
+                            </div>
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label for="client_company">Company:</label>
+                                    <input type="text" id="client_company" name="client_company" placeholder="Enter company name">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="client_notes">Notes:</label>
+                            <textarea id="client_notes" name="client_notes" placeholder="Enter additional notes"></textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Additional Content Section -->
+                <div class="section">
+                    <div class="section-header">
+                        <h2>Additional Content</h2>
+                        <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
+                    </div>
+                    <div class="section-content">
+                        <div class="form-group">
+                            <label for="additional_content_1">Additional Content 1:</label>
+                            <textarea id="additional_content_1" name="additional_content_1" placeholder="Enter additional content"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="additional_content_2">Additional Content 2:</label>
+                            <textarea id="additional_content_2" name="additional_content_2" placeholder="Enter additional content"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+        
+        <div id="debug-info" class="debug-section"></div>
+    </div>
+</body>
+</html>
+
+<script>
+    // Constants
+    const SUPABASE_URL = 'https://aqicztygjpmunfljjuto.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxaWN6dHlnanBtdW5mbGpqdXRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3MDU1ODIsImV4cCI6MjA1OTI4MTU4Mn0.5e2hvTckSSbTFLBjQiccrvjoBd6QQDX0X4tccFOc1rs';
+    
+    // DOM Elements
+    const projectSelect = document.getElementById('project-select');
+    const loadProjectBtn = document.getElementById('load-project-btn');
+    const saveAllBtn = document.getElementById('save-all-btn');
+    const saveNewProjectBtn = document.getElementById('save-new-project-btn');
+    const newProjectIdInput = document.getElementById('new-project-id');
+    const statusElement = document.getElementById('status');
+    const contentForm = document.getElementById('contentForm');
+    const debugInfoElement = document.getElementById('debug-info');
+    const toggleDebugBtn = document.getElementById('toggle-debug-btn');
+    const viewSiteButton = document.getElementById('view-site-button');
+    
+    // Debug mode
+    let debugMode = true; // Set to true by default for troubleshooting
+    
+    // Auto-save timer
+    let autoSaveTimer = null;
+    const AUTO_SAVE_DELAY = 30000; // 30 seconds
+    
+    // Initialize
+    document.addEventListener('DOMContentLoaded', async function() {
+        // Load projects
+        await loadProjects();
+        
+        // Check for project in URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const projectParam = urlParams.get('project');
+        
+        if (projectParam) {
+            // Set the project select value
+            projectSelect.value = projectParam;
+            
+            // Load the project content if it exists
+            if (projectSelect.value === projectParam) {
+                await loadContent(projectParam);
+            } else {
+                statusElement.textContent = `Project '${projectParam}' not found`;
+                statusElement.className = 'status warning';
+            }
+        }
+        
+        // Set up event listeners
+        setupEventListeners();
+    });
+    
+    // Set up event listeners
+    function setupEventListeners() {
+        // Tab navigation
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                const tabId = this.getAttribute('data-tab');
+                activateTab(tabId);
+            });
+        });
+        
+        // Load project button
+        loadProjectBtn.addEventListener('click', async function() {
+            const projectId = projectSelect.value;
+            if (projectId) {
+                await loadContent(projectId);
+            } else {
+                statusElement.textContent = 'Please select a project';
+                statusElement.className = 'status warning';
+            }
+        });
+        
+        // Save all content button
+        saveAllBtn.addEventListener('click', async function() {
+            const projectId = projectSelect.value;
+            if (projectId) {
+                const contentItems = collectFormData();
+                const validation = validateFormData(contentItems);
+                
+                if (validation.valid) {
+                    await saveContent(projectId, contentItems);
+                } else {
+                    statusElement.textContent = validation.message;
+                    statusElement.className = 'status error';
+                }
+            } else {
+                statusElement.textContent = 'Please select a project';
+                statusElement.className = 'status warning';
+            }
+        });
+        
+        // Create new project button
+        saveNewProjectBtn.addEventListener('click', async function() {
+            const newProjectId = newProjectIdInput.value.trim();
+            
+            if (!newProjectId) {
+                statusElement.textContent = 'Please enter a project ID';
+                statusElement.className = 'status warning';
+                return;
+            }
+            
+            await createProject(newProjectId);
+        });
+        
+        // Toggle debug info
+        toggleDebugBtn.addEventListener('click', function() {
+            debugMode = !debugMode;
+            debugInfoElement.classList.toggle('visible', debugMode);
+            toggleDebugBtn.textContent = debugMode ? 'Hide Debug Info' : 'Show Debug Info';
+        });
+        
+        // View site button
+        viewSiteButton.addEventListener('click', function() {
+            const projectId = projectSelect.value;
+            if (projectId) {
+                // Open the site in a new tab
+                window.open(`/?project_id=${projectId}`, '_blank');
+            }
+        });
+        
+        // Set up auto-save
+        setupAutoSave();
+    }
+    
+    // Set up auto-save
+    function setupAutoSave() {
+        // Add input event listeners to all form elements
+        const formElements = contentForm.querySelectorAll('input, textarea, select');
+        
+        formElements.forEach(element => {
+            element.addEventListener('input', function() {
+                // Reset the auto-save timer
+                resetAutoSaveTimer();
+                
+                // Show saving indicator
+                statusElement.textContent = 'Changes detected. Will auto-save in 30 seconds...';
+                statusElement.className = 'status info';
+            });
+        });
+    }
+    
+    // Reset auto-save timer
+    function resetAutoSaveTimer() {
+        // Clear existing timer
+        if (autoSaveTimer) {
+            clearTimeout(autoSaveTimer);
+        }
+        
+        // Set new timer
+        autoSaveTimer = setTimeout(function() {
+            autoSave();
+        }, AUTO_SAVE_DELAY);
+    }
+    
+    // Auto-save function
+    async function autoSave() {
+        const projectId = projectSelect.value;
+        
+        if (projectId) {
+            statusElement.textContent = 'Auto-saving...';
+            statusElement.className = 'status info';
+            
+            const contentItems = collectFormData();
+            const validation = validateFormData(contentItems);
+            
+            if (validation.valid) {
+                await saveContent(projectId, contentItems);
+                
+                // Update status with auto-save time
+                const now = new Date();
+                const timeString = now.toLocaleTimeString();
+                statusElement.textContent = `Auto-saved at ${timeString}`;
+                statusElement.className = 'status success';
+                
+                viewSiteButton.style.display = 'inline-block';
+            } else {
+                statusElement.textContent = `Auto-save failed: ${validation.message}`;
+                statusElement.className = 'status warning';
+            }
+        }
+    }
+    
+    // Activate tab
+    function activateTab(tabId) {
+        // Deactivate all tabs
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.classList.remove('active');
+        });
+        
+        document.querySelectorAll('.tab-content').forEach(content => {
+            content.classList.remove('active');
+        });
+        
+        // Activate selected tab
+        document.querySelector(`.tab[data-tab="${tabId}"]`).classList.add('active');
+        document.getElementById(tabId).classList.add('active');
+    }
+    
+    // Toggle section collapse
+    function toggleSection(button) {
+        const section = button.closest('.section');
+        const content = section.querySelector('.section-content');
+        
+        if (content.style.display === 'none') {
+            content.style.display = 'block';
+            button.textContent = '−';
+        } else {
+            content.style.display = 'none';
+            button.textContent = '+';
+        }
+    }
+    
+    // Load projects
+    async function loadProjects() {
+        try {
+            statusElement.textContent = 'Loading projects...';
+            statusElement.className = 'status info';
+            
+            // Clear previous debug info
+            debugInfoElement.innerHTML = '<h3>Debug Information</h3>';
+            
+            // Show debug info about the connection attempt
+            debugInfoElement.innerHTML += `<p><strong>Attempting to connect to Supabase</strong></p>`;
+            debugInfoElement.innerHTML += `<p><strong>URL:</strong> ${SUPABASE_URL}</p>`;
+            debugInfoElement.innerHTML += `<p><strong>API key (first 10 chars):</strong> ${SUPABASE_ANON_KEY.substring(0, 10)}...</p>`;
+            
+            // Add console logs for debugging
+            console.log('Loading projects from Supabase...');
+            console.log('Supabase URL:', SUPABASE_URL);
+            console.log('API Key (first 10 chars):', SUPABASE_ANON_KEY.substring(0, 10) + '...');
+            
+            const response = await fetch(`${SUPABASE_URL}/rest/v1/dynamic_content?select=project_id`, {
+                headers: {
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                }
+            });
+            
+            // Log response status
+            debugInfoElement.innerHTML += `<p><strong>Response status:</strong> ${response.status} ${response.statusText}</p>`;
+            console.log('Response status:', response.status, response.statusText);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const projects = await response.json();
+            
+            // Log projects data
+            console.log('Projects data:', projects);
+            debugInfoElement.innerHTML += `<p><strong>Projects loaded:</strong> ${projects.length}</p>`;
+            
+            // Clear select options
+            projectSelect.innerHTML = '<option value="">-- Select a project --</option>';
+            
+            // Add projects to select
+            projects.forEach(project => {
+                const option = document.createElement('option');
+                option.value = project.project_id;
+                option.textContent = project.project_id;
+                projectSelect.appendChild(option);
+            });
+            
+            statusElement.textContent = `Loaded ${projects.length} projects`;
+            statusElement.className = 'status success';
+            
+            // Show sample of projects
+            const sampleSize = Math.min(5, projects.length);
+            const sampleProjects = projects.slice(0, sampleSize);
+            
+            debugInfoElement.innerHTML += `<p><strong>Sample of projects (${sampleSize} of ${projects.length}):</strong></p>`;
+            debugInfoElement.innerHTML += `<pre>${JSON.stringify(sampleProjects, null, 2)}</pre>`;
+        } catch (error) {
+            console.error('Error loading projects:', error);
+            statusElement.textContent = `Error loading projects: ${error.message}`;
+            statusElement.className = 'status error';
+            
+            // Show more detailed error information
+            debugInfoElement.innerHTML += `<p><strong>Error loading projects:</strong> ${error.message}</p>`;
+            debugInfoElement.innerHTML += `<p><strong>Error stack:</strong></p>`;
+            debugInfoElement.innerHTML += `<pre>${error.stack}</pre>`;
+            
+            debugInfoElement.innerHTML += `<p><strong>Check your network connection and Supabase credentials.</strong></p>`;
+            debugInfoElement.innerHTML += `<p><strong>Supabase URL:</strong> ${SUPABASE_URL}</p>`;
+            
+            // Provide troubleshooting steps
+            debugInfoElement.innerHTML += `<h4>Troubleshooting Steps:</h4>`;
+            debugInfoElement.innerHTML += `<ol>`;
+            debugInfoElement.innerHTML += `<li>Verify that the Supabase URL is correct: ${SUPABASE_URL}</li>`;
+            debugInfoElement.innerHTML += `<li>Check that the API key is valid</li>`;
+            debugInfoElement.innerHTML += `<li>Ensure your network connection is stable</li>`;
+            debugInfoElement.innerHTML += `<li>Check if the Supabase service is up and running</li>`;
+            debugInfoElement.innerHTML += `<li>Try accessing the Supabase URL directly in your browser</li>`;
+            debugInfoElement.innerHTML += `</ol>`;
+            
+            // Enable debug mode automatically on error
+            debugMode = true;
+            toggleDebugBtn.textContent = 'Hide Debug Info';
+        }
+    }
+    
+    // Load content for a project
+    async function loadContent(projectId) {
+        try {
+            if (!projectId) return;
+            
+            statusElement.textContent = 'Loading content...';
+            statusElement.className = 'status info';
+            
+            // Clear previous debug info
+            debugInfoElement.innerHTML = '<h3>Debug Information</h3>';
+            
+            // Log the request details
+            debugInfoElement.innerHTML += `<p><strong>Loading project:</strong> ${projectId}</p>`;
+            debugInfoElement.innerHTML += `<p><strong>Request URL:</strong> ${SUPABASE_URL}/rest/v1/dynamic_content?project_id=eq.${projectId}</p>`;
+            
+            const response = await fetch(`${SUPABASE_URL}/rest/v1/dynamic_content?project_id=eq.${projectId}`, {
+                headers: {
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                }
+            });
+            
+            // Log the response status
+            debugInfoElement.innerHTML += `<p><strong>Response status:</strong> ${response.status} ${response.statusText}</p>`;
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const contentData = await response.json();
+            
+            // Log the raw response data
+            debugInfoElement.innerHTML += `<p><strong>Raw response data:</strong></p>`;
+            debugInfoElement.innerHTML += `<pre>${JSON.stringify(contentData, null, 2)}</pre>`;
+            
+            if (contentData.length === 0) {
+                throw new Error('No content found for this project');
+            }
+            
+            // Convert key-value format to flat object format
+            const content = {};
+            contentData.forEach(item => {
+                content[item.key] = item.value;
+            });
+            
+            // Add project_id to the content object
+            content.project_id = projectId;
+            
+            // Log the converted content object
+            debugInfoElement.innerHTML += `<p><strong>Converted content object:</strong></p>`;
+            debugInfoElement.innerHTML += `<pre>${JSON.stringify(content, null, 2)}</pre>`;
+            
+            // Count the number of properties in the content object
+            const propertyCount = Object.keys(content).length;
+            debugInfoElement.innerHTML += `<p><strong>Number of properties in content object:</strong> ${propertyCount}</p>`;
+            
+            // Populate form fields
+            populateFormFields(content);
+            
+            statusElement.textContent = `Loaded content for project: ${projectId}`;
+            statusElement.className = 'status success';
+            
+            // Show view site button
+            viewSiteButton.style.display = 'inline-block';
+        } catch (error) {
+            console.error('Error loading content:', error);
+            statusElement.textContent = `Error loading content: ${error.message}`;
+            statusElement.className = 'status error';
+            
+            // Show detailed error information
+            debugInfoElement.innerHTML += `<p><strong>Error loading content:</strong> ${error.message}</p>`;
+            debugInfoElement.innerHTML += `<p><strong>Error stack:</strong></p>`;
+            debugInfoElement.innerHTML += `<pre>${error.stack}</pre>`;
+            
+            // Provide troubleshooting suggestions
+            debugInfoElement.innerHTML += `<h4>Troubleshooting Suggestions:</h4>`;
+            debugInfoElement.innerHTML += `<ul>`;
+            debugInfoElement.innerHTML += `<li>Check if the project ID exists in the database</li>`;
+            debugInfoElement.innerHTML += `<li>Verify that the Supabase URL and API key are correct</li>`;
+            debugInfoElement.innerHTML += `<li>Check if the content structure matches the expected format</li>`;
+            debugInfoElement.innerHTML += `<li>Ensure that the required fields are present in the database</li>`;
+            debugInfoElement.innerHTML += `</ul>`;
+        }
+    }
+    
+    // Populate form fields with content data
+    function populateFormFields(content) {
+        // Get all input, textarea, and select elements in the form
+        const formElements = contentForm.querySelectorAll('input, textarea, select');
+        
+        // Show debug info about the content
+        if (debugMode) {
+            debugInfoElement.innerHTML += `<p>Content data received from Supabase:</p>`;
+            debugInfoElement.innerHTML += `<pre>${JSON.stringify(content, null, 2)}</pre>`;
+            
+            // Count how many fields were populated
+            let populatedCount = 0;
+            
+            // Log which fields are being populated
+            debugInfoElement.innerHTML += `<p>Populating form fields:</p>`;
+            debugInfoElement.innerHTML += `<ul>`;
+            
+            // Loop through form elements and set values from content
+            formElements.forEach(element => {
+                const name = element.name;
+                if (name && content[name] !== undefined) {
+                    debugInfoElement.innerHTML += `<li>${name}: ${content[name]}</li>`;
+                    populatedCount++;
+                    
+                    if (element.type === 'checkbox') {
+                        element.checked = content[name] === true;
+                    } else {
+                        element.value = content[name] || '';
+                    }
+                }
+            });
+            
+            debugInfoElement.innerHTML += `</ul>`;
+            debugInfoElement.innerHTML += `<p>Populated ${populatedCount} fields out of ${formElements.length} total form elements.</p>`;
+        } else {
+            // Loop through form elements and set values from content
+            formElements.forEach(element => {
+                const name = element.name;
+                if (name && content[name] !== undefined) {
+                    if (element.type === 'checkbox') {
+                        element.checked = content[name] === true;
+                    } else {
+                        element.value = content[name] || '';
+                    }
+                }
+            });
+        }
+    }
+    
+    // Collect form data
+    function collectFormData() {
+        const formData = {};
+        
+        // Get all input, textarea, and select elements in the form
+        const formElements = contentForm.querySelectorAll('input, textarea, select');
+        
+        // Loop through form elements and collect values
+        formElements.forEach(element => {
+            const name = element.name;
+            if (name) {
+                if (element.type === 'checkbox') {
+                    formData[name] = element.checked;
+                } else {
+                    formData[name] = element.value;
+                }
+            }
+        });
+        
+        return formData;
+    }
+    
+    // Validate form data
+    function validateFormData(contentItems) {
+        // Required fields
+        const requiredFields = [
+            'site_title',
+            'rendered_bio_html'
+        ];
+        
+        const missingFields = [];
+        
+        requiredFields.forEach(field => {
+            if (!contentItems[field] || contentItems[field].trim() === '') {
+                missingFields.push(field);
+                
+                // Highlight the missing field
+                const element = document.getElementById(field);
+                if (element) {
+                    element.classList.add('validation-error');
+                    element.addEventListener('input', function() {
+                        this.classList.remove('validation-error');
+                    }, { once: true });
+                }
+            }
+        });
+        
+        if (missingFields.length > 0) {
+            // Activate the tab that contains the first missing field
+            const firstMissingField = document.getElementById(missingFields[0]);
+            if (firstMissingField) {
+                const tabContent = firstMissingField.closest('.tab-content');
+                if (tabContent) {
+                    const tabId = tabContent.id;
+                    activateTab(tabId);
+                }
+            }
+            
+            return {
+                valid: false,
+                message: `Please fill in the following required fields: ${missingFields.join(', ')}`
+            };
+        }
+        
+        return { valid: true };
+    }
+    
+    // Save content for a project
+    async function saveContent(projectId, contentItems) {
+        try {
+            if (!projectId) {
+                throw new Error('No project ID specified');
+            }
+            
+            statusElement.textContent = 'Saving content...';
+            statusElement.className = 'status info';
+            
+            // Clear previous debug info
+            debugInfoElement.innerHTML = '<h3>Debug Information</h3>';
+            debugInfoElement.innerHTML += `<p><strong>Saving content for project:</strong> ${projectId}</p>`;
+            
+            // Check if project exists
+            const checkResponse = await fetch(`${SUPABASE_URL}/rest/v1/dynamic_content?project_id=eq.${projectId}`, {
+                headers: {
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                }
+            });
+            
+            if (!checkResponse.ok) {
+                throw new Error(`HTTP error! status: ${checkResponse.status}`);
+            }
+            
+            const existingContent = await checkResponse.json();
+            
+            debugInfoElement.innerHTML += `<p><strong>Existing content entries:</strong> ${existingContent.length}</p>`;
+            
+            if (existingContent.length === 0) {
+                throw new Error('Project does not exist');
+            }
+            
+            // Convert flat object to key-value format
+            const existingKeys = new Set(existingContent.map(item => item.key));
+            const updates = [];
+            const inserts = [];
+            
+            // Process each content item
+            for (const [key, value] of Object.entries(contentItems)) {
+                // Skip the project_id field
+                if (key === 'project_id') continue;
+                
+                // Prepare the data in key-value format
+                const contentItem = {
+                    key: key,
+                    value: value,
+                    project_id: projectId
+                };
+                
+                // Check if the key already exists
+                if (existingKeys.has(key)) {
+                    updates.push(contentItem);
+                } else {
+                    inserts.push(contentItem);
+                }
+            }
+            
+            // Log the updates and inserts
+            debugInfoElement.innerHTML += `<p><strong>Updates:</strong> ${updates.length}</p>`;
+            debugInfoElement.innerHTML += `<p><strong>Inserts:</strong> ${inserts.length}</p>`;
+            
+            // Process updates
+            if (updates.length > 0) {
+                debugInfoElement.innerHTML += `<p><strong>Processing updates...</strong></p>`;
+                
+                // Update each item individually
+                for (const item of updates) {
+                    const updateResponse = await fetch(`${SUPABASE_URL}/rest/v1/dynamic_content?key=eq.${item.key}&project_id=eq.${projectId}`, {
+                        method: 'PATCH',
+                        headers: {
+                            'apikey': SUPABASE_ANON_KEY,
+                            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                            'Content-Type': 'application/json',
+                            'Prefer': 'return=minimal'
+                        },
+                        body: JSON.stringify({ value: item.value })
+                    });
+                    
+                    if (!updateResponse.ok) {
+                        throw new Error(`Error updating item ${item.key}: ${updateResponse.status}`);
+                    }
+                }
+            }
+            
+            // Process inserts
+            if (inserts.length > 0) {
+                debugInfoElement.innerHTML += `<p><strong>Processing inserts...</strong></p>`;
+                
+                const insertResponse = await fetch(`${SUPABASE_URL}/rest/v1/dynamic_content`, {
+                    method: 'POST',
+                    headers: {
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                        'Content-Type': 'application/json',
+                        'Prefer': 'return=minimal'
+                    },
+                    body: JSON.stringify(inserts)
+                });
+                
+                if (!insertResponse.ok) {
+                    throw new Error(`Error inserting new items: ${insertResponse.status}`);
+                }
+            }
+            
+            statusElement.textContent = `Content saved for project: ${projectId}`;
+            statusElement.className = 'status success';
+            
+            viewSiteButton.style.display = 'inline-block';
+            
+            debugInfoElement.innerHTML += `<p><strong>Content saved successfully!</strong></p>`;
+        } catch (error) {
+            console.error('Error saving content:', error);
+            statusElement.textContent = `Error saving content: ${error.message}`;
+            statusElement.className = 'status error';
+            
+            // Show detailed error information
+            debugInfoElement.innerHTML += `<p><strong>Error saving content:</strong> ${error.message}</p>`;
+            debugInfoElement.innerHTML += `<p><strong>Error stack:</strong></p>`;
+            debugInfoElement.innerHTML += `<pre>${error.stack}</pre>`;
+        }
+    }
+    
+    // Create a new project
+    async function createProject(projectId) {
+        try {
+            if (!projectId) {
+                throw new Error('No project ID specified');
+            }
+            
+            statusElement.textContent = 'Creating project...';
+            statusElement.className = 'status info';
+            
+            // Clear previous debug info
+            debugInfoElement.innerHTML = '<h3>Debug Information</h3>';
+            debugInfoElement.innerHTML += `<p><strong>Creating new project:</strong> ${projectId}</p>`;
+            
+            // Check if project already exists
+            const checkResponse = await fetch(`${SUPABASE_URL}/rest/v1/dynamic_content?project_id=eq.${projectId}`, {
+                headers: {
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                }
+            });
+            
+            if (!checkResponse.ok) {
+                throw new Error(`HTTP error! status: ${checkResponse.status}`);
+            }
+            
+            const existingContent = await checkResponse.json();
+            
+            if (existingContent.length > 0) {
+                throw new Error('Project already exists');
+            }
+            
+            // Create initial content items with empty values
+            const initialContent = [
+                { key: 'site_title', value: 'New Site', project_id: projectId },
+                { key: 'subtitle', value: 'Your catchy subtitle', project_id: projectId },
+                { key: 'rendered_bio_html', value: 'Enter your bio here', project_id: projectId }
+            ];
+            
+            // Log the initial content
+            debugInfoElement.innerHTML += `<p><strong>Initial content:</strong></p>`;
+            debugInfoElement.innerHTML += `<pre>${JSON.stringify(initialContent, null, 2)}</pre>`;
+            
+            // Create project with initial content
+            const response = await fetch(`${SUPABASE_URL}/rest/v1/dynamic_content`, {
+                method: 'POST',
+                headers: {
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                    'Content-Type': 'application/json',
+                    'Prefer': 'return=minimal'
+                },
+                body: JSON.stringify(initialContent)
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            statusElement.textContent = `Project created: ${projectId}`;
+            statusElement.className = 'status success';
+            
+            // Refresh project list
+            await loadProjects();
+            
+            // Set the selected project
+            projectSelect.value = projectId;
+            
+            // Load the content for the new project
+            await loadContent(projectId);
+            
+            debugInfoElement.innerHTML += `<p><strong>Project created successfully!</strong></p>`;
+        } catch (error) {
+            console.error('Error creating project:', error);
+            statusElement.textContent = `Error creating project: ${error.message}`;
+            statusElement.className = 'status error';
+            
+            // Show detailed error information
+            debugInfoElement.innerHTML += `<p><strong>Error creating project:</strong> ${error.message}</p>`;
+            debugInfoElement.innerHTML += `<p><strong>Error stack:</strong></p>`;
+            debugInfoElement.innerHTML += `<pre>${error.stack}</pre>`;
+        }
+    }
+</script>
