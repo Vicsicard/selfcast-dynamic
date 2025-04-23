@@ -809,24 +809,53 @@
         // Load available projects
         async function loadProjects() {
             try {
-                const { data, error } = await supabase
+                // First, get all project IDs
+                const { data: projectData, error: projectError } = await supabase
                     .from('dynamic_content')
                     .select('project_id')
                     .order('project_id', { ascending: true });
                 
-                if (error) throw error;
+                if (projectError) throw projectError;
                 
                 // Get unique project IDs
-                const projectIds = [...new Set(data.map(item => item.project_id))];
+                const projectIds = [...new Set(projectData.map(item => item.project_id))];
+                
+                // Now get the full names for each project
+                const projectNames = {};
+                
+                // For each project, try to get the full_name or rendered_title
+                for (const projectId of projectIds) {
+                    const { data: nameData, error: nameError } = await supabase
+                        .from('dynamic_content')
+                        .select('key, value')
+                        .eq('project_id', projectId)
+                        .in('key', ['full_name', 'rendered_title']);
+                    
+                    if (!nameError && nameData && nameData.length > 0) {
+                        // Prefer full_name if available, otherwise use rendered_title
+                        const fullNameItem = nameData.find(item => item.key === 'full_name');
+                        const titleItem = nameData.find(item => item.key === 'rendered_title');
+                        
+                        projectNames[projectId] = fullNameItem ? fullNameItem.value : 
+                                                 titleItem ? titleItem.value : 
+                                                 projectId;
+                    } else {
+                        projectNames[projectId] = projectId;
+                    }
+                }
                 
                 // Clear existing options
                 projectSelect.innerHTML = '<option value="">Select Project</option>';
                 
-                // Add options for each project
+                // Add options for each project with name + ID
                 projectIds.forEach(projectId => {
                     const option = document.createElement('option');
                     option.value = projectId;
-                    option.textContent = projectId;
+                    
+                    // Display name and ID together
+                    const displayName = projectNames[projectId] || projectId;
+                    option.textContent = `${displayName} (${projectId})`;
+                    
                     projectSelect.appendChild(option);
                 });
                 
