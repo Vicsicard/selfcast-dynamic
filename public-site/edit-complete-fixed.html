@@ -262,32 +262,6 @@
             margin-right: 10px;
         }
         
-        .new-project-form {
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid var(--border-color);
-        }
-        
-        .debug-section {
-            margin-top: 30px;
-            padding: 15px;
-            background-color: #f8f9fa;
-            border-radius: var(--border-radius);
-            font-family: monospace;
-            font-size: 12px;
-            max-height: 300px;
-            overflow-y: auto;
-            display: block;
-        }
-        
-        .debug-toggle {
-            background-color: #f8f9fa;
-            color: #333;
-            border: 1px solid var(--border-color);
-            padding: 5px 10px;
-            font-size: 12px;
-        }
-        
         .blog-post-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -330,7 +304,6 @@
             <div>
                 <button id="view-site-button" style="display: none;" class="secondary">View Your Website</button>
                 <button id="save-all-btn" class="success">Save All Content</button>
-                <button id="toggle-debug-btn" class="debug-toggle">Hide Debug Info</button>
             </div>
         </header>
         
@@ -346,21 +319,9 @@
                     <button id="load-project-btn">Load Project</button>
                 </div>
             </div>
-            
-            <div class="new-project-form">
-                <div class="form-row">
-                    <div class="form-col">
-                        <label for="new-project-id">Create New Project:</label>
-                        <input type="text" id="new-project-id" placeholder="Enter project ID (e.g., lastname-firstname-0001)">
-                    </div>
-                    <div class="form-col" style="display: flex; align-items: flex-end;">
-                        <button id="save-new-project-btn">Create Project</button>
-                    </div>
-                </div>
-            </div>
         </div>
         
-        <div id="status" class="status info">Select a project to load or create a new one.</div>
+        <div id="status" class="status info">Select your project to load content.</div>
         
         <form id="contentForm">
             <!-- Tabs Navigation -->
@@ -730,26 +691,6 @@
                         </div>
                     </div>
                 </div>
-                
-                <!-- Style Package Section -->
-                <div class="section">
-                    <div class="section-header">
-                        <h2>Style Package</h2>
-                        <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
-                    </div>
-                    <div class="section-content">
-                        <div class="form-group">
-                            <label for="style_package">Select Style Package:</label>
-                            <select id="style_package" name="style_package">
-                                <option value="default">Default</option>
-                                <option value="modern">Modern</option>
-                                <option value="classic">Classic</option>
-                                <option value="minimal">Minimal</option>
-                                <option value="bold">Bold</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
             </div>
             
             <!-- Quotes Tab -->
@@ -907,8 +848,6 @@
                 </div>
             </div>
         </form>
-        
-        <div id="debug-info" class="debug-section"></div>
     </div>
 </body>
 </html>
@@ -922,16 +861,12 @@
     const projectSelect = document.getElementById('project-select');
     const loadProjectBtn = document.getElementById('load-project-btn');
     const saveAllBtn = document.getElementById('save-all-btn');
-    const saveNewProjectBtn = document.getElementById('save-new-project-btn');
-    const newProjectIdInput = document.getElementById('new-project-id');
     const statusElement = document.getElementById('status');
     const contentForm = document.getElementById('contentForm');
-    const debugInfoElement = document.getElementById('debug-info');
-    const toggleDebugBtn = document.getElementById('toggle-debug-btn');
     const viewSiteButton = document.getElementById('view-site-button');
     
     // Debug mode
-    let debugMode = true; // Set to true by default for troubleshooting
+    let debugMode = false; // Set to false to hide debug info
     
     // Auto-save timer
     let autoSaveTimer = null;
@@ -1001,26 +936,6 @@
                 statusElement.textContent = 'Please select a project';
                 statusElement.className = 'status warning';
             }
-        });
-        
-        // Create new project button
-        saveNewProjectBtn.addEventListener('click', async function() {
-            const newProjectId = newProjectIdInput.value.trim();
-            
-            if (!newProjectId) {
-                statusElement.textContent = 'Please enter a project ID';
-                statusElement.className = 'status warning';
-                return;
-            }
-            
-            await createProject(newProjectId);
-        });
-        
-        // Toggle debug info
-        toggleDebugBtn.addEventListener('click', function() {
-            debugMode = !debugMode;
-            debugInfoElement.classList.toggle('visible', debugMode);
-            toggleDebugBtn.textContent = debugMode ? 'Hide Debug Info' : 'Show Debug Info';
         });
         
         // View site button
@@ -1131,12 +1046,12 @@
             statusElement.className = 'status info';
             
             // Clear previous debug info
-            debugInfoElement.innerHTML = '<h3>Debug Information</h3>';
+            // debugInfoElement.innerHTML = '<h3>Debug Information</h3>';
             
             // Show debug info about the connection attempt
-            debugInfoElement.innerHTML += `<p><strong>Attempting to connect to Supabase</strong></p>`;
-            debugInfoElement.innerHTML += `<p><strong>URL:</strong> ${SUPABASE_URL}</p>`;
-            debugInfoElement.innerHTML += `<p><strong>API key (first 10 chars):</strong> ${SUPABASE_ANON_KEY.substring(0, 10)}...</p>`;
+            // debugInfoElement.innerHTML += `<p><strong>Attempting to connect to Supabase</strong></p>`;
+            // debugInfoElement.innerHTML += `<p><strong>URL:</strong> ${SUPABASE_URL}</p>`;
+            // debugInfoElement.innerHTML += `<p><strong>API key (first 10 chars):</strong> ${SUPABASE_ANON_KEY.substring(0, 10)}...</p>`;
             
             // Add console logs for debugging
             console.log('Loading projects from Supabase...');
@@ -1151,7 +1066,7 @@
             });
             
             // Log response status
-            debugInfoElement.innerHTML += `<p><strong>Response status:</strong> ${response.status} ${response.statusText}</p>`;
+            // debugInfoElement.innerHTML += `<p><strong>Response status:</strong> ${response.status} ${response.statusText}</p>`;
             console.log('Response status:', response.status, response.statusText);
             
             if (!response.ok) {
@@ -1162,7 +1077,7 @@
             
             // Log projects data
             console.log('Projects data:', projects);
-            debugInfoElement.innerHTML += `<p><strong>Projects loaded:</strong> ${projects.length}</p>`;
+            // debugInfoElement.innerHTML += `<p><strong>Projects loaded:</strong> ${projects.length}</p>`;
             
             // Clear select options
             projectSelect.innerHTML = '<option value="">-- Select a project --</option>';
@@ -1182,34 +1097,16 @@
             const sampleSize = Math.min(5, projects.length);
             const sampleProjects = projects.slice(0, sampleSize);
             
-            debugInfoElement.innerHTML += `<p><strong>Sample of projects (${sampleSize} of ${projects.length}):</strong></p>`;
-            debugInfoElement.innerHTML += `<pre>${JSON.stringify(sampleProjects, null, 2)}</pre>`;
+            // debugInfoElement.innerHTML += `<p><strong>Sample of projects (${sampleSize} of ${projects.length}):</strong></p>`;
+            // debugInfoElement.innerHTML += `<pre>${JSON.stringify(sampleProjects, null, 2)}</pre>`;
         } catch (error) {
             console.error('Error loading projects:', error);
             statusElement.textContent = `Error loading projects: ${error.message}`;
             statusElement.className = 'status error';
             
-            // Show more detailed error information
-            debugInfoElement.innerHTML += `<p><strong>Error loading projects:</strong> ${error.message}</p>`;
-            debugInfoElement.innerHTML += `<p><strong>Error stack:</strong></p>`;
-            debugInfoElement.innerHTML += `<pre>${error.stack}</pre>`;
-            
-            debugInfoElement.innerHTML += `<p><strong>Check your network connection and Supabase credentials.</strong></p>`;
-            debugInfoElement.innerHTML += `<p><strong>Supabase URL:</strong> ${SUPABASE_URL}</p>`;
-            
-            // Provide troubleshooting steps
-            debugInfoElement.innerHTML += `<h4>Troubleshooting Steps:</h4>`;
-            debugInfoElement.innerHTML += `<ol>`;
-            debugInfoElement.innerHTML += `<li>Verify that the Supabase URL is correct: ${SUPABASE_URL}</li>`;
-            debugInfoElement.innerHTML += `<li>Check that the API key is valid</li>`;
-            debugInfoElement.innerHTML += `<li>Ensure your network connection is stable</li>`;
-            debugInfoElement.innerHTML += `<li>Check if the Supabase service is up and running</li>`;
-            debugInfoElement.innerHTML += `<li>Try accessing the Supabase URL directly in your browser</li>`;
-            debugInfoElement.innerHTML += `</ol>`;
-            
             // Enable debug mode automatically on error
             debugMode = true;
-            toggleDebugBtn.textContent = 'Hide Debug Info';
+            // debugInfoElement.classList.add('visible');
         }
     }
     
@@ -1222,11 +1119,13 @@
             statusElement.className = 'status info';
             
             // Clear previous debug info
-            debugInfoElement.innerHTML = '<h3>Debug Information</h3>';
+            // debugInfoElement.innerHTML = '<h3>Debug Information</h3>';
+            // debugInfoElement.innerHTML += `<p><strong>Loading project:</strong> ${projectId}</p>`;
+            // debugInfoElement.innerHTML += `<p><strong>Request URL:</strong> ${SUPABASE_URL}/rest/v1/dynamic_content?project_id=eq.${projectId}</p>`;
             
             // Log the request details
-            debugInfoElement.innerHTML += `<p><strong>Loading project:</strong> ${projectId}</p>`;
-            debugInfoElement.innerHTML += `<p><strong>Request URL:</strong> ${SUPABASE_URL}/rest/v1/dynamic_content?project_id=eq.${projectId}</p>`;
+            console.log('Loading project:', projectId);
+            console.log('Request URL:', `${SUPABASE_URL}/rest/v1/dynamic_content?project_id=eq.${projectId}`);
             
             const response = await fetch(`${SUPABASE_URL}/rest/v1/dynamic_content?project_id=eq.${projectId}`, {
                 headers: {
@@ -1236,7 +1135,8 @@
             });
             
             // Log the response status
-            debugInfoElement.innerHTML += `<p><strong>Response status:</strong> ${response.status} ${response.statusText}</p>`;
+            console.log('Response status:', response.status, response.statusText);
+            // debugInfoElement.innerHTML += `<p><strong>Response status:</strong> ${response.status} ${response.statusText}</p>`;
             
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -1245,8 +1145,9 @@
             const contentData = await response.json();
             
             // Log the raw response data
-            debugInfoElement.innerHTML += `<p><strong>Raw response data:</strong></p>`;
-            debugInfoElement.innerHTML += `<pre>${JSON.stringify(contentData, null, 2)}</pre>`;
+            console.log('Raw response data:', contentData);
+            // debugInfoElement.innerHTML += `<p><strong>Raw response data:</strong></p>`;
+            // debugInfoElement.innerHTML += `<pre>${JSON.stringify(contentData, null, 2)}</pre>`;
             
             if (contentData.length === 0) {
                 throw new Error('No content found for this project');
@@ -1262,12 +1163,13 @@
             content.project_id = projectId;
             
             // Log the converted content object
-            debugInfoElement.innerHTML += `<p><strong>Converted content object:</strong></p>`;
-            debugInfoElement.innerHTML += `<pre>${JSON.stringify(content, null, 2)}</pre>`;
+            console.log('Converted content object:', content);
+            // debugInfoElement.innerHTML += `<p><strong>Converted content object:</strong></p>`;
+            // debugInfoElement.innerHTML += `<pre>${JSON.stringify(content, null, 2)}</pre>`;
             
             // Count the number of properties in the content object
             const propertyCount = Object.keys(content).length;
-            debugInfoElement.innerHTML += `<p><strong>Number of properties in content object:</strong> ${propertyCount}</p>`;
+            // debugInfoElement.innerHTML += `<p><strong>Number of properties in content object:</strong> ${propertyCount}</p>`;
             
             // Populate form fields
             populateFormFields(content);
@@ -1282,19 +1184,9 @@
             statusElement.textContent = `Error loading content: ${error.message}`;
             statusElement.className = 'status error';
             
-            // Show detailed error information
-            debugInfoElement.innerHTML += `<p><strong>Error loading content:</strong> ${error.message}</p>`;
-            debugInfoElement.innerHTML += `<p><strong>Error stack:</strong></p>`;
-            debugInfoElement.innerHTML += `<pre>${error.stack}</pre>`;
-            
-            // Provide troubleshooting suggestions
-            debugInfoElement.innerHTML += `<h4>Troubleshooting Suggestions:</h4>`;
-            debugInfoElement.innerHTML += `<ul>`;
-            debugInfoElement.innerHTML += `<li>Check if the project ID exists in the database</li>`;
-            debugInfoElement.innerHTML += `<li>Verify that the Supabase URL and API key are correct</li>`;
-            debugInfoElement.innerHTML += `<li>Check if the content structure matches the expected format</li>`;
-            debugInfoElement.innerHTML += `<li>Ensure that the required fields are present in the database</li>`;
-            debugInfoElement.innerHTML += `</ul>`;
+            // Enable debug mode automatically on error
+            debugMode = true;
+            // debugInfoElement.classList.add('visible');
         }
     }
     
@@ -1305,21 +1197,21 @@
         
         // Show debug info about the content
         if (debugMode) {
-            debugInfoElement.innerHTML += `<p>Content data received from Supabase:</p>`;
-            debugInfoElement.innerHTML += `<pre>${JSON.stringify(content, null, 2)}</pre>`;
+            // debugInfoElement.innerHTML += `<p>Content data received from Supabase:</p>`;
+            // debugInfoElement.innerHTML += `<pre>${JSON.stringify(content, null, 2)}</pre>`;
             
             // Count how many fields were populated
             let populatedCount = 0;
             
             // Log which fields are being populated
-            debugInfoElement.innerHTML += `<p>Populating form fields:</p>`;
-            debugInfoElement.innerHTML += `<ul>`;
+            // debugInfoElement.innerHTML += `<p>Populating form fields:</p>`;
+            // debugInfoElement.innerHTML += `<ul>`;
             
             // Loop through form elements and set values from content
             formElements.forEach(element => {
                 const name = element.name;
                 if (name && content[name] !== undefined) {
-                    debugInfoElement.innerHTML += `<li>${name}: ${content[name]}</li>`;
+                    // debugInfoElement.innerHTML += `<li>${name}: ${content[name]}</li>`;
                     populatedCount++;
                     
                     if (element.type === 'checkbox') {
@@ -1330,8 +1222,8 @@
                 }
             });
             
-            debugInfoElement.innerHTML += `</ul>`;
-            debugInfoElement.innerHTML += `<p>Populated ${populatedCount} fields out of ${formElements.length} total form elements.</p>`;
+            // debugInfoElement.innerHTML += `</ul>`;
+            // debugInfoElement.innerHTML += `<p>Populated ${populatedCount} fields out of ${formElements.length} total form elements.</p>`;
         } else {
             // Loop through form elements and set values from content
             formElements.forEach(element => {
@@ -1425,8 +1317,8 @@
             statusElement.className = 'status info';
             
             // Clear previous debug info
-            debugInfoElement.innerHTML = '<h3>Debug Information</h3>';
-            debugInfoElement.innerHTML += `<p><strong>Saving content for project:</strong> ${projectId}</p>`;
+            // debugInfoElement.innerHTML = '<h3>Debug Information</h3>';
+            // debugInfoElement.innerHTML += `<p><strong>Saving content for project:</strong> ${projectId}</p>`;
             
             // Check if project exists
             const checkResponse = await fetch(`${SUPABASE_URL}/rest/v1/dynamic_content?project_id=eq.${projectId}`, {
@@ -1442,7 +1334,7 @@
             
             const existingContent = await checkResponse.json();
             
-            debugInfoElement.innerHTML += `<p><strong>Existing content entries:</strong> ${existingContent.length}</p>`;
+            // debugInfoElement.innerHTML += `<p><strong>Existing content entries:</strong> ${existingContent.length}</p>`;
             
             if (existingContent.length === 0) {
                 throw new Error('Project does not exist');
@@ -1474,12 +1366,12 @@
             }
             
             // Log the updates and inserts
-            debugInfoElement.innerHTML += `<p><strong>Updates:</strong> ${updates.length}</p>`;
-            debugInfoElement.innerHTML += `<p><strong>Inserts:</strong> ${inserts.length}</p>`;
+            // debugInfoElement.innerHTML += `<p><strong>Updates:</strong> ${updates.length}</p>`;
+            // debugInfoElement.innerHTML += `<p><strong>Inserts:</strong> ${inserts.length}</p>`;
             
             // Process updates
             if (updates.length > 0) {
-                debugInfoElement.innerHTML += `<p><strong>Processing updates...</strong></p>`;
+                // debugInfoElement.innerHTML += `<p><strong>Processing updates...</strong></p>`;
                 
                 // Update each item individually
                 for (const item of updates) {
@@ -1502,7 +1394,7 @@
             
             // Process inserts
             if (inserts.length > 0) {
-                debugInfoElement.innerHTML += `<p><strong>Processing inserts...</strong></p>`;
+                // debugInfoElement.innerHTML += `<p><strong>Processing inserts...</strong></p>`;
                 
                 const insertResponse = await fetch(`${SUPABASE_URL}/rest/v1/dynamic_content`, {
                     method: 'POST',
@@ -1525,100 +1417,15 @@
             
             viewSiteButton.style.display = 'inline-block';
             
-            debugInfoElement.innerHTML += `<p><strong>Content saved successfully!</strong></p>`;
+            // debugInfoElement.innerHTML += `<p><strong>Content saved successfully!</strong></p>`;
         } catch (error) {
             console.error('Error saving content:', error);
             statusElement.textContent = `Error saving content: ${error.message}`;
             statusElement.className = 'status error';
             
-            // Show detailed error information
-            debugInfoElement.innerHTML += `<p><strong>Error saving content:</strong> ${error.message}</p>`;
-            debugInfoElement.innerHTML += `<p><strong>Error stack:</strong></p>`;
-            debugInfoElement.innerHTML += `<pre>${error.stack}</pre>`;
-        }
-    }
-    
-    // Create a new project
-    async function createProject(projectId) {
-        try {
-            if (!projectId) {
-                throw new Error('No project ID specified');
-            }
-            
-            statusElement.textContent = 'Creating project...';
-            statusElement.className = 'status info';
-            
-            // Clear previous debug info
-            debugInfoElement.innerHTML = '<h3>Debug Information</h3>';
-            debugInfoElement.innerHTML += `<p><strong>Creating new project:</strong> ${projectId}</p>`;
-            
-            // Check if project already exists
-            const checkResponse = await fetch(`${SUPABASE_URL}/rest/v1/dynamic_content?project_id=eq.${projectId}`, {
-                headers: {
-                    'apikey': SUPABASE_ANON_KEY,
-                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-                }
-            });
-            
-            if (!checkResponse.ok) {
-                throw new Error(`HTTP error! status: ${checkResponse.status}`);
-            }
-            
-            const existingContent = await checkResponse.json();
-            
-            if (existingContent.length > 0) {
-                throw new Error('Project already exists');
-            }
-            
-            // Create initial content items with empty values
-            const initialContent = [
-                { key: 'site_title', value: 'New Site', project_id: projectId },
-                { key: 'subtitle', value: 'Your catchy subtitle', project_id: projectId },
-                { key: 'rendered_bio_html', value: 'Enter your bio here', project_id: projectId }
-            ];
-            
-            // Log the initial content
-            debugInfoElement.innerHTML += `<p><strong>Initial content:</strong></p>`;
-            debugInfoElement.innerHTML += `<pre>${JSON.stringify(initialContent, null, 2)}</pre>`;
-            
-            // Create project with initial content
-            const response = await fetch(`${SUPABASE_URL}/rest/v1/dynamic_content`, {
-                method: 'POST',
-                headers: {
-                    'apikey': SUPABASE_ANON_KEY,
-                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-                    'Content-Type': 'application/json',
-                    'Prefer': 'return=minimal'
-                },
-                body: JSON.stringify(initialContent)
-            });
-            
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            
-            statusElement.textContent = `Project created: ${projectId}`;
-            statusElement.className = 'status success';
-            
-            // Refresh project list
-            await loadProjects();
-            
-            // Set the selected project
-            projectSelect.value = projectId;
-            
-            // Load the content for the new project
-            await loadContent(projectId);
-            
-            debugInfoElement.innerHTML += `<p><strong>Project created successfully!</strong></p>`;
-        } catch (error) {
-            console.error('Error creating project:', error);
-            statusElement.textContent = `Error creating project: ${error.message}`;
-            statusElement.className = 'status error';
-            
-            // Show detailed error information
-            debugInfoElement.innerHTML += `<p><strong>Error creating project:</strong> ${error.message}</p>`;
-            debugInfoElement.innerHTML += `<p><strong>Error stack:</strong></p>`;
-            debugInfoElement.innerHTML += `<pre>${error.stack}</pre>`;
+            // Enable debug mode automatically on error
+            debugMode = true;
+            // debugInfoElement.classList.add('visible');
         }
     }
 </script>
