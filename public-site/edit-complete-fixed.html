@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SelfCast Content Editor</title>
-    <script src="https://cdn.jsdelivr.net/npm/@clerk/clerk-js@latest/dist/clerk.browser.js"></script>
     <style>
         :root {
             --primary-color: #3498db;
@@ -857,7 +856,7 @@
     // Constants
     const SUPABASE_URL = 'https://aqicztygjpmunfljjuto.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxaWN6dHlnanBtdW5mbGpqdXRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3MDU1ODIsImV4cCI6MjA1OTI4MTU4Mn0.5e2hvTckSSbTFLBjQiccrvjoBd6QQDX0X4tccFOc1rs';
-    const CLERK_PUBLISHABLE_KEY = 'YOUR_CLERK_PUBLISHABLE_KEY'; // Replace with your actual Clerk key
+    const CLERK_PUBLISHABLE_KEY = 'pk_test_Y2xlcmsuY2xlcmsuZGV2JA'; // Replace with your actual Clerk key
     
     // Authentication state
     let currentUser = null;
@@ -881,68 +880,92 @@
     // Initialize
     document.addEventListener('DOMContentLoaded', async function() {
         try {
-            // Initialize Clerk
-            const clerk = Clerk(CLERK_PUBLISHABLE_KEY);
-            await clerk.load();
-            
-            // Check if user is authenticated
-            if (!clerk.user) {
-                // Not authenticated, redirect to login
-                window.location.href = 'login.html';
-                return;
-            }
-            
-            // Get user information
-            currentUser = {
-                id: clerk.user.id,
-                email: clerk.user.primaryEmailAddress.emailAddress,
-                name: clerk.user.fullName || clerk.user.primaryEmailAddress.emailAddress
+            // Initialize Clerk properly
+            window.Clerk = window.Clerk || {};
+            window.Clerk.load = function(callback) {
+                const script = document.createElement('script');
+                script.async = true;
+                script.src = `https://cdn.jsdelivr.net/npm/@clerk/clerk-js@latest/dist/clerk.browser.js`;
+                script.crossOrigin = 'anonymous';
+                script.onload = () => {
+                    if (callback) callback();
+                };
+                script.onerror = () => {
+                    throw new Error('Failed to load Clerk script');
+                };
+                document.body.appendChild(script);
             };
             
-            // Check if user is admin (can be set in Clerk user metadata)
-            isAdmin = clerk.user.publicMetadata.isAdmin || false;
-            
-            // Display user info
-            const headerDiv = document.querySelector('header div');
-            const userInfoSpan = document.createElement('span');
-            userInfoSpan.textContent = `Logged in as: ${currentUser.name} `;
-            userInfoSpan.style.marginRight = '10px';
-            headerDiv.insertBefore(userInfoSpan, headerDiv.firstChild);
-            
-            // Add logout button
-            const logoutBtn = document.createElement('button');
-            logoutBtn.textContent = 'Logout';
-            logoutBtn.className = 'error';
-            logoutBtn.style.marginLeft = '10px';
-            logoutBtn.addEventListener('click', () => {
-                clerk.signOut().then(() => {
-                    window.location.href = 'login.html';
-                });
-            });
-            headerDiv.appendChild(logoutBtn);
-            
-            // Load projects
-            await loadProjects();
-            
-            // Check for project in URL
-            const urlParams = new URLSearchParams(window.location.search);
-            const projectParam = urlParams.get('project');
-            
-            if (projectParam) {
-                // Set the project select value
-                projectSelect.value = projectParam;
-                
-                // Load the project content if it exists
-                if (projectSelect.value === projectParam) {
-                    await loadContent(projectParam);
-                } else {
-                    statusElement.textContent = `Project '${projectParam}' not found or you don't have access`;
-                    statusElement.className = 'status warning';
+            window.Clerk.load(async function() {
+                try {
+                    const clerk = window.Clerk.clerk = await window.Clerk.init({
+                        publishableKey: CLERK_PUBLISHABLE_KEY
+                    });
+                    
+                    // Check if user is authenticated
+                    if (!clerk.user) {
+                        // Not authenticated, redirect to login
+                        window.location.href = 'login.html';
+                        return;
+                    }
+                    
+                    // Get user information
+                    currentUser = {
+                        id: clerk.user.id,
+                        email: clerk.user.primaryEmailAddress.emailAddress,
+                        name: clerk.user.fullName || clerk.user.primaryEmailAddress.emailAddress
+                    };
+                    
+                    // Check if user is admin (can be set in Clerk user metadata)
+                    isAdmin = clerk.user.publicMetadata.isAdmin || false;
+                    
+                    // Display user info
+                    const headerDiv = document.querySelector('header div');
+                    const userInfoSpan = document.createElement('span');
+                    userInfoSpan.textContent = `Logged in as: ${currentUser.name} `;
+                    userInfoSpan.style.marginRight = '10px';
+                    headerDiv.insertBefore(userInfoSpan, headerDiv.firstChild);
+                    
+                    // Add logout button
+                    const logoutBtn = document.createElement('button');
+                    logoutBtn.textContent = 'Logout';
+                    logoutBtn.className = 'error';
+                    logoutBtn.style.marginLeft = '10px';
+                    logoutBtn.addEventListener('click', () => {
+                        clerk.signOut().then(() => {
+                            window.location.href = 'login.html';
+                        });
+                    });
+                    headerDiv.appendChild(logoutBtn);
+                    
+                    // Load projects
+                    await loadProjects();
+                    
+                    // Check for project in URL
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const projectParam = urlParams.get('project');
+                    
+                    if (projectParam) {
+                        // Set the project select value
+                        projectSelect.value = projectParam;
+                        
+                        // Load the project content if it exists
+                        if (projectSelect.value === projectParam) {
+                            await loadContent(projectParam);
+                        } else {
+                            statusElement.textContent = `Project '${projectParam}' not found or you don't have access`;
+                            statusElement.className = 'status warning';
+                        }
+                    }
+                    
+                    // Set up event listeners
+                    setupEventListeners();
+                } catch (error) {
+                    console.error('Clerk initialization error:', error);
+                    statusElement.textContent = 'Authentication error. Please try logging in again.';
+                    statusElement.className = 'status error';
                 }
-            }
-            
-            // Set up event listeners
-            setupEventListeners();
+            });
         } catch (error) {
             console.error('Authentication error:', error);
             statusElement.textContent = 'Authentication error. Please try logging in again.';
@@ -1261,7 +1284,6 @@
             
             // Enable debug mode automatically on error
             debugMode = true;
-            // debugInfoElement.classList.add('visible');
         }
     }
     

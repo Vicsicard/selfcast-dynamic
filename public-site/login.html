@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SelfCast Dashboard Login</title>
-    <script src="https://cdn.jsdelivr.net/npm/@clerk/clerk-js@latest/dist/clerk.browser.js"></script>
     <style>
         :root {
             --primary-color: #3498db;
@@ -92,26 +91,44 @@
     <script>
         // Initialize Clerk with your publishable key
         // You'll need to replace this with your actual Clerk publishable key
-        const CLERK_PUBLISHABLE_KEY = 'YOUR_CLERK_PUBLISHABLE_KEY';
+        const CLERK_PUBLISHABLE_KEY = 'pk_test_Y2xlcmsuY2xlcmsuZGV2JA'; // Replace with your actual key
         
         document.addEventListener('DOMContentLoaded', async function() {
             try {
-                const clerk = Clerk(CLERK_PUBLISHABLE_KEY);
+                // Initialize Clerk properly
+                window.Clerk = window.Clerk || {};
+                window.Clerk.load = function(callback) {
+                    const script = document.createElement('script');
+                    script.async = true;
+                    script.src = `https://cdn.jsdelivr.net/npm/@clerk/clerk-js@latest/dist/clerk.browser.js`;
+                    script.crossOrigin = 'anonymous';
+                    script.onload = () => {
+                        if (callback) callback();
+                    };
+                    script.onerror = () => {
+                        throw new Error('Failed to load Clerk script');
+                    };
+                    document.body.appendChild(script);
+                };
                 
-                await clerk.load({
+                window.Clerk.load(async function() {
+                    const clerk = window.Clerk.clerk = await window.Clerk.init({
+                        publishableKey: CLERK_PUBLISHABLE_KEY
+                    });
+                    
                     // Mount authentication component
-                    containerSelector: '#clerk-auth',
-                    // Redirect after sign in
-                    afterSignInUrl: '/edit-complete-fixed.html',
-                    // Redirect after sign up (if you allow sign ups)
-                    afterSignUpUrl: '/edit-complete-fixed.html'
+                    clerk.mountSignIn({
+                        elementId: 'clerk-auth',
+                        afterSignInUrl: '/edit-complete-fixed.html',
+                        afterSignUpUrl: '/edit-complete-fixed.html'
+                    });
+                    
+                    // Check if already signed in
+                    if (clerk.user) {
+                        // Already signed in, redirect to editor
+                        window.location.href = '/edit-complete-fixed.html';
+                    }
                 });
-                
-                // Check if already signed in
-                if (clerk.user) {
-                    // Already signed in, redirect to editor
-                    window.location.href = '/edit-complete-fixed.html';
-                }
             } catch (error) {
                 console.error('Error initializing Clerk:', error);
                 document.getElementById('clerk-auth').innerHTML = `

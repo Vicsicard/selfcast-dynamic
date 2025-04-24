@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SelfCast Admin Dashboard</title>
-    <script src="https://cdn.jsdelivr.net/npm/@clerk/clerk-js@latest/dist/clerk.browser.js"></script>
     <style>
         :root {
             --primary-color: #3498db;
@@ -259,7 +258,7 @@
         // Constants
         const SUPABASE_URL = 'https://aqicztygjpmunfljjuto.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxaWN6dHlnanBtdW5mbGpqdXRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3MDU1ODIsImV4cCI6MjA1OTI4MTU4Mn0.5e2hvTckSSbTFLBjQiccrvjoBd6QQDX0X4tccFOc1rs';
-        const CLERK_PUBLISHABLE_KEY = 'YOUR_CLERK_PUBLISHABLE_KEY'; // Replace with your actual Clerk key
+        const CLERK_PUBLISHABLE_KEY = 'pk_test_Y2xlcmsuY2xlcmsuZGV2JA'; // Replace with your actual Clerk key
         
         // DOM Elements
         const statusElement = document.getElementById('status');
@@ -273,45 +272,69 @@
         // Initialize
         document.addEventListener('DOMContentLoaded', async function() {
             try {
-                // Initialize Clerk
-                const clerk = Clerk(CLERK_PUBLISHABLE_KEY);
-                await clerk.load();
+                // Initialize Clerk properly
+                window.Clerk = window.Clerk || {};
+                window.Clerk.load = function(callback) {
+                    const script = document.createElement('script');
+                    script.async = true;
+                    script.src = `https://cdn.jsdelivr.net/npm/@clerk/clerk-js@latest/dist/clerk.browser.js`;
+                    script.crossOrigin = 'anonymous';
+                    script.onload = () => {
+                        if (callback) callback();
+                    };
+                    script.onerror = () => {
+                        throw new Error('Failed to load Clerk script');
+                    };
+                    document.body.appendChild(script);
+                };
                 
-                // Check if user is authenticated
-                if (!clerk.user) {
-                    // Not authenticated, redirect to login
-                    window.location.href = 'login.html';
-                    return;
-                }
-                
-                // Check if user is admin
-                const isAdmin = clerk.user.publicMetadata.isAdmin || false;
-                
-                if (!isAdmin) {
-                    // Not an admin, redirect to editor
-                    statusElement.textContent = 'You do not have admin privileges.';
-                    statusElement.className = 'status error';
-                    setTimeout(() => {
-                        window.location.href = 'edit-complete-fixed.html';
-                    }, 2000);
-                    return;
-                }
-                
-                // Display user info
-                const headerDiv = document.querySelector('header div');
-                const userInfoSpan = document.createElement('span');
-                userInfoSpan.textContent = `Admin: ${clerk.user.fullName || clerk.user.primaryEmailAddress.emailAddress} `;
-                userInfoSpan.style.marginRight = '10px';
-                headerDiv.insertBefore(userInfoSpan, headerDiv.firstChild);
-                
-                // Set up event listeners
-                setupEventListeners(clerk);
-                
-                // Load project assignments
-                await loadAssignments();
-                
-                statusElement.textContent = 'Admin dashboard loaded successfully.';
-                statusElement.className = 'status success';
+                window.Clerk.load(async function() {
+                    try {
+                        const clerk = window.Clerk.clerk = await window.Clerk.init({
+                            publishableKey: CLERK_PUBLISHABLE_KEY
+                        });
+                        
+                        // Check if user is authenticated
+                        if (!clerk.user) {
+                            // Not authenticated, redirect to login
+                            window.location.href = 'login.html';
+                            return;
+                        }
+                        
+                        // Check if user is admin
+                        const isAdmin = clerk.user.publicMetadata.isAdmin || false;
+                        
+                        if (!isAdmin) {
+                            // Not an admin, redirect to editor
+                            statusElement.textContent = 'You do not have admin privileges.';
+                            statusElement.className = 'status error';
+                            setTimeout(() => {
+                                window.location.href = 'edit-complete-fixed.html';
+                            }, 2000);
+                            return;
+                        }
+                        
+                        // Display user info
+                        const headerDiv = document.querySelector('header div');
+                        const userInfoSpan = document.createElement('span');
+                        userInfoSpan.textContent = `Admin: ${clerk.user.fullName || clerk.user.primaryEmailAddress.emailAddress} `;
+                        userInfoSpan.style.marginRight = '10px';
+                        headerDiv.insertBefore(userInfoSpan, headerDiv.firstChild);
+                        
+                        // Set up event listeners
+                        setupEventListeners(clerk);
+                        
+                        // Load project assignments
+                        await loadAssignments();
+                        
+                        statusElement.textContent = 'Admin dashboard loaded successfully.';
+                        statusElement.className = 'status success';
+                    } catch (error) {
+                        console.error('Clerk initialization error:', error);
+                        statusElement.textContent = 'Authentication error. Please try logging in again.';
+                        statusElement.className = 'status error';
+                    }
+                });
             } catch (error) {
                 console.error('Authentication error:', error);
                 statusElement.textContent = 'Authentication error. Please try logging in again.';
