@@ -90,8 +90,7 @@
 
     <script>
         // Initialize Clerk with your publishable key
-        // You'll need to replace this with your actual Clerk publishable key
-        const CLERK_PUBLISHABLE_KEY = 'pk_test_Y2xlcmsuY2xlcmsuZGV2JA'; // Replace with your actual key
+        const CLERK_PUBLISHABLE_KEY = 'pk_test_cHJvbW90ZWQtYnVycm8tNjguY2xlcmsuYWNjb3VudHMuZGV2JA';
         
         document.addEventListener('DOMContentLoaded', async function() {
             try {
@@ -103,22 +102,31 @@
                 
                 script.onload = function() {
                     try {
-                        // Initialize Clerk with the correct method
-                        const clerk = new Clerk(CLERK_PUBLISHABLE_KEY);
-                        
-                        clerk.load({
+                        // Initialize Clerk with the window.Clerk object
+                        window.Clerk.load({
+                            publishableKey: CLERK_PUBLISHABLE_KEY
+                        }).then(clerk => {
                             // Mount authentication component
-                            containerSelector: '#clerk-auth',
-                            // Redirect after sign in
-                            afterSignInUrl: '/edit-complete-fixed.html',
-                            // Redirect after sign up (if you allow sign ups)
-                            afterSignUpUrl: '/edit-complete-fixed.html'
-                        }).then(function() {
+                            clerk.mountSignIn({
+                                elementId: 'clerk-auth',
+                                afterSignInUrl: '/edit-complete-fixed.html',
+                                afterSignUpUrl: '/edit-complete-fixed.html'
+                            });
+                            
                             // Check if already signed in
                             if (clerk.user) {
                                 // Already signed in, redirect to editor
                                 window.location.href = '/edit-complete-fixed.html';
                             }
+                        }).catch(error => {
+                            console.error('Error initializing Clerk:', error);
+                            document.getElementById('clerk-auth').innerHTML = `
+                                <div style="padding: 20px; background-color: #f8d7da; color: #721c24; border-radius: 4px;">
+                                    <p><strong>Authentication Error</strong></p>
+                                    <p>There was a problem loading the authentication system. Please try again later or contact support.</p>
+                                    <p><small>Error: ${error.message}</small></p>
+                                </div>
+                            `;
                         });
                     } catch (error) {
                         console.error('Error initializing Clerk:', error);

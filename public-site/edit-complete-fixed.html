@@ -856,7 +856,7 @@
     // Constants
     const SUPABASE_URL = 'https://aqicztygjpmunfljjuto.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxaWN6dHlnanBtdW5mbGpqdXRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3MDU1ODIsImV4cCI6MjA1OTI4MTU4Mn0.5e2hvTckSSbTFLBjQiccrvjoBd6QQDX0X4tccFOc1rs';
-    const CLERK_PUBLISHABLE_KEY = 'pk_test_Y2xlcmsuY2xlcmsuZGV2JA'; // Replace with your actual Clerk key
+    const CLERK_PUBLISHABLE_KEY = 'pk_test_cHJvbW90ZWQtYnVycm8tNjguY2xlcmsuYWNjb3VudHMuZGV2JA';
     
     // Authentication state
     let currentUser = null;
@@ -888,10 +888,10 @@
             
             script.onload = function() {
                 try {
-                    // Initialize Clerk with the correct method
-                    const clerk = new Clerk(CLERK_PUBLISHABLE_KEY);
-                    
-                    clerk.load().then(function() {
+                    // Initialize Clerk with the window.Clerk object
+                    window.Clerk.load({
+                        publishableKey: CLERK_PUBLISHABLE_KEY
+                    }).then(clerk => {
                         // Check if user is authenticated
                         if (!clerk.user) {
                             // Not authenticated, redirect to login
@@ -950,7 +950,7 @@
                         
                         // Set up event listeners
                         setupEventListeners();
-                    }).catch(function(error) {
+                    }).catch(error => {
                         console.error('Clerk load error:', error);
                         statusElement.textContent = 'Authentication error. Please try logging in again.';
                         statusElement.className = 'status error';
