@@ -95,40 +95,54 @@
         
         document.addEventListener('DOMContentLoaded', async function() {
             try {
-                // Initialize Clerk properly
-                window.Clerk = window.Clerk || {};
-                window.Clerk.load = function(callback) {
-                    const script = document.createElement('script');
-                    script.async = true;
-                    script.src = `https://cdn.jsdelivr.net/npm/@clerk/clerk-js@latest/dist/clerk.browser.js`;
-                    script.crossOrigin = 'anonymous';
-                    script.onload = () => {
-                        if (callback) callback();
-                    };
-                    script.onerror = () => {
-                        throw new Error('Failed to load Clerk script');
-                    };
-                    document.body.appendChild(script);
+                // Load Clerk script directly
+                const script = document.createElement('script');
+                script.async = true;
+                script.src = 'https://cdn.jsdelivr.net/npm/@clerk/clerk-js@latest/dist/clerk.browser.js';
+                script.crossOrigin = 'anonymous';
+                
+                script.onload = function() {
+                    try {
+                        // Initialize Clerk with the correct method
+                        const clerk = new Clerk(CLERK_PUBLISHABLE_KEY);
+                        
+                        clerk.load({
+                            // Mount authentication component
+                            containerSelector: '#clerk-auth',
+                            // Redirect after sign in
+                            afterSignInUrl: '/edit-complete-fixed.html',
+                            // Redirect after sign up (if you allow sign ups)
+                            afterSignUpUrl: '/edit-complete-fixed.html'
+                        }).then(function() {
+                            // Check if already signed in
+                            if (clerk.user) {
+                                // Already signed in, redirect to editor
+                                window.location.href = '/edit-complete-fixed.html';
+                            }
+                        });
+                    } catch (error) {
+                        console.error('Error initializing Clerk:', error);
+                        document.getElementById('clerk-auth').innerHTML = `
+                            <div style="padding: 20px; background-color: #f8d7da; color: #721c24; border-radius: 4px;">
+                                <p><strong>Authentication Error</strong></p>
+                                <p>There was a problem loading the authentication system. Please try again later or contact support.</p>
+                                <p><small>Error: ${error.message}</small></p>
+                            </div>
+                        `;
+                    }
                 };
                 
-                window.Clerk.load(async function() {
-                    const clerk = window.Clerk.clerk = await window.Clerk.init({
-                        publishableKey: CLERK_PUBLISHABLE_KEY
-                    });
-                    
-                    // Mount authentication component
-                    clerk.mountSignIn({
-                        elementId: 'clerk-auth',
-                        afterSignInUrl: '/edit-complete-fixed.html',
-                        afterSignUpUrl: '/edit-complete-fixed.html'
-                    });
-                    
-                    // Check if already signed in
-                    if (clerk.user) {
-                        // Already signed in, redirect to editor
-                        window.location.href = '/edit-complete-fixed.html';
-                    }
-                });
+                script.onerror = function() {
+                    console.error('Failed to load Clerk script');
+                    document.getElementById('clerk-auth').innerHTML = `
+                        <div style="padding: 20px; background-color: #f8d7da; color: #721c24; border-radius: 4px;">
+                            <p><strong>Authentication Error</strong></p>
+                            <p>There was a problem loading the authentication system. Please try again later or contact support.</p>
+                        </div>
+                    `;
+                };
+                
+                document.body.appendChild(script);
             } catch (error) {
                 console.error('Error initializing Clerk:', error);
                 document.getElementById('clerk-auth').innerHTML = `
