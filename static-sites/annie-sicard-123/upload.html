@@ -154,13 +154,12 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script type="module">
-        import SUPABASE_CONFIG from '../config.js';
-
-        // Initialize Supabase client
+    <script src="supabase-config.js"></script>
+    <script>
+        // Initialize Supabase client with centralized config
         const supabase = window.supabase.createClient(
             SUPABASE_CONFIG.url,
-            SUPABASE_CONFIG.publicKey
+            SUPABASE_CONFIG.key
         );
 
         // DOM Elements

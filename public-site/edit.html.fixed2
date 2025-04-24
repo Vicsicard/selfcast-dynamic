@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Site Content Editor</title>
+    <style>
+        /* Keeping the existing styles */
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            background: #f5f5f5;
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            color: #333;
+        }
+        input[type="text"],
+        input[type="email"],
+        input[type="url"],
+        textarea {
+            width: 100%;
+            padding: 0.5rem;
+            margin-bottom: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        textarea {
+            min-height: 100px;
+            font-family: inherit;
+        }
+        .section {
+            background: white;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .section h2 {
+            margin-top: 0;
+            color: #333;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 0.5rem;
+        }
+        button {
+            background: #3399FF;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+        .status {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 4px;
+        }
+        .success { 
+            background: #d4edda;
+            color: #155724;
+        }
+        .error { 
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .debug-info {
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            padding: 1rem;
+            margin-top: 1rem;
+            border-radius: 4px;
+            text-align: left;
+            font-family: monospace;
+            font-size: 12px;
+            max-width: 100%;
+            max-height: 300px;
+            overflow: auto;
+            white-space: pre-wrap;
+        }
+        /* Additional styles would be here */
+    </style>
+</head>
+<body>
+    <div class="section">
+        <h1>Site Content Editor</h1>
+        
+        <form id="contentForm">
+            <!-- Project Selection -->
+            <div class="form-group">
+                <label for="project_id">Project ID:</label>
+                <select name="project_id" id="project_id" required>
+                    <option value="">Loading projects...</option>
+                </select>
+                <button type="button" id="create-project-btn">Create New Project</button>
+                <div id="new-project-form" style="display: none; margin-top: 1rem;">
+                    <input type="text" id="new-project-id" placeholder="Enter new project ID (lowercase, no spaces)">
+                    <button type="button" id="save-new-project-btn">Save</button>
+                    <button type="button" id="cancel-new-project-btn">Cancel</button>
+                </div>
+            </div>
+            
+            <!-- Main form sections would be here -->
+            
+            <div class="form-actions">
+                <button type="submit" id="save-button">Save Changes</button>
+                <button type="button" id="reset-button">Reset Form</button>
+            </div>
+        </form>
+
+        <div id="status" class="status"></div>
+        <div id="debug-info" class="debug-info" style="display: none;"></div>
+        
+        <!-- View Site Button -->
+        <div id="view-site-container" style="margin-top: 2rem; text-align: center; display: none;">
+            <div style="margin-bottom: 1rem;">
+                <p>Your site has been saved! View it at:</p>
+                <a id="site-url" href="#" target="_blank" style="font-weight: bold;"></a>
+            </div>
+            <button id="view-site-button" class="view-site-button">View Your Site</button>
+        </div>
+    </div>
+
+    <script src="fallback-data.js"></script>
+    <script>
+        // Debug mode
+        const urlParams = new URLSearchParams(window.location.search);
+        const debugMode = urlParams.get('debug') === 'true';
+        
+        // Debug logging function
+        function logDebug(message, data) {
+            console.log(message, data);
+            if (debugMode) {
+                const debugInfo = document.getElementById('debug-info');
+                if (debugInfo) {
+                    debugInfo.style.display = 'block';
+                    const timestamp = new Date().toISOString().substring(11, 19);
+                    const formattedMessage = typeof data !== 'undefined' 
+                        ? `[${timestamp}] ${message}: ${JSON.stringify(data, null, 2)}`
+                        : `[${timestamp}] ${message}`;
+                    
+                    debugInfo.innerHTML += formattedMessage + '<br>';
+                    debugInfo.scrollTop = debugInfo.scrollHeight;
+                }
+            }
+        }
+        
+        // Supabase Configuration with fallbacks - FIXED URL
+        const SUPABASE_URL = 'https://aqicztygjpmunfljjuto.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxaWN6dHlnanBtdW5mbGpqdXRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3MDU1ODIsImV4cCI6MjA1OTI4MTU4Mn0.5e2hvTckSSbTFLBjQiccrvjoBd6QQDX0X4tccFOc1rs';
+        let supabase;
+        
+        // Status element for error reporting
+        const statusElement = document.getElementById('status');
+        
+        // Properly load the Supabase script
+        function loadSupabaseScript() {
+            return new Promise((resolve, reject) => {
+                // Check if already loaded
+                if (window.supabase) {
+                    logDebug('Supabase already loaded');
+                    resolve(window.supabase);
+                    return;
+                }
+                
+                logDebug('Loading Supabase script...');
+                const script = document.createElement('script');
+                script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+                script.async = true;
+                
+                script.onload = () => {
+                    logDebug('Supabase script loaded successfully');
+                    resolve(window.supabase);
+                };
+                
+                script.onerror = () => {
+                    const msg = 'Error loading Supabase script';
+                    console.error(msg);
+                    reject(new Error(msg));
+                };
+                
+                document.body.appendChild(script);
+            });
+        }
+        
+        // Initialize Supabase client
+        async function initializeSupabase() {
+            try {
+                logDebug('Initializing Supabase client...');
+                await loadSupabaseScript();
+                
+                // Create Supabase client
+                const { createClient } = supabase;
+                supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                
+                logDebug('Supabase client initialized successfully');
+                
+                // Load projects
+                await loadProjects();
+                
+            } catch (error) {
+                console.error('Error initializing Supabase:', error);
+                statusElement.textContent = 'Error initializing Supabase: ' + error.message;
+                statusElement.className = 'status error';
+            }
+        }
+        
+        // Start initialization when the DOM is ready
+        document.addEventListener('DOMContentLoaded', initializeSupabase);
+        
+        // Load available projects
+        async function loadProjects() {
+            try {
+                logDebug('Starting to load projects...');
+                statusElement.textContent = 'Loading projects...';
+                statusElement.className = 'status info';
+                
+                // Use direct Supabase query instead of API proxy
+                const { data, error } = await supabase
+                    .from('dynamic_content')
+                    .select('project_id')
+                    .order('project_id');
+                
+                if (error) throw error;
+                
+                // Get unique project IDs
+                const projectIds = [...new Set(data.map(item => item.project_id))];
+                
+                logDebug('Projects loaded:', projectIds);
+                
+                // Clear existing options
+                const projectSelect = document.getElementById('project_id');
+                projectSelect.innerHTML = '<option value="">Select Project</option>';
+                
+                // Add options for each project
+                projectIds.forEach(projectId => {
+                    const option = document.createElement('option');
+                    option.value = projectId;
+                    option.textContent = projectId;
+                    projectSelect.appendChild(option);
+                });
+                
+                logDebug('Project dropdown populated with', projectIds.length, 'options');
+                
+                // Check if there's a project_id in the URL
+                const urlProjectId = urlParams.get('project_id');
+                
+                if (urlProjectId && projectIds.includes(urlProjectId)) {
+                    logDebug('Loading project from URL:', urlProjectId);
+                    projectSelect.value = urlProjectId;
+                    loadContent(urlProjectId);
+                }
+                
+                // Update the blog management button
+                if (typeof updateBlogManagementButton === 'function') {
+                    updateBlogManagementButton();
+                }
+                
+                // Show success message
+                statusElement.textContent = `Loaded ${projectIds.length} projects`;
+                statusElement.className = 'status success';
+                
+            } catch (error) {
+                console.error('Error loading projects:', error);
+                statusElement.textContent = 'Error loading projects: ' + error.message;
+                statusElement.className = 'status error';
+            }
+        }
+        
+        // Load content for a specific project
+        async function loadContent(projectId) {
+            try {
+                if (!projectId) return;
+                
+                logDebug('Loading content for project:', projectId);
+                statusElement.textContent = 'Loading content...';
+                statusElement.className = 'status info';
+                
+                // Direct Supabase query
+                const { data, error } = await supabase
+                    .from('dynamic_content')
+                    .select('content_key, content_value')
+                    .eq('project_id', projectId);
+                
+                logDebug('Supabase query result:', { data, error });
+                
+                if (error) throw error;
+                
+                if (!data || data.length === 0) {
+                    statusElement.textContent = `No content found for project: ${projectId}`;
+                    statusElement.className = 'status error';
+                    return;
+                }
+                
+                logDebug(`Loaded ${data.length} content items for project: ${projectId}`);
+                
+                // Populate the form with the data
+                populateForm(data);
+                
+                // Show the view site button
+                document.getElementById('view-site-container').style.display = 'block';
+                document.getElementById('site-url').href = `/?project_id=${projectId}`;
+                document.getElementById('site-url').textContent = `/?project_id=${projectId}`;
+                
+                statusElement.textContent = `Loaded content for project: ${projectId}`;
+                statusElement.className = 'status success';
+                
+            } catch (error) {
+                console.error('Error loading content:', error);
+                statusElement.textContent = 'Error loading content: ' + error.message;
+                statusElement.className = 'status error';
+            }
+        }
+        
+        // Populate form with project data
+        function populateForm(data) {
+            try {
+                logDebug('Populating form with data:', data);
+                
+                // Reset form first
+                document.getElementById('contentForm').reset();
+                
+                // Process each content item
+                data.forEach(item => {
+                    const key = item.content_key;
+                    const value = item.content_value;
+                    
+                    // Find form element with matching name/id
+                    const element = document.getElementById(key) || document.querySelector(`[name="${key}"]`);
+                    
+                    if (element) {
+                        // Set value based on element type
+                        if (element.tagName === 'SELECT') {
+                            element.value = value;
+                        } else if (element.type === 'checkbox') {
+                            element.checked = value === 'true';
+                        } else if (element.type === 'radio') {
+                            const radio = document.querySelector(`[name="${key}"][value="${value}"]`);
+                            if (radio) radio.checked = true;
+                        } else {
+                            element.value = value;
+                        }
+                        
+                        // Trigger change event for elements that need it
+                        if (key === 'style_package') {
+                            const event = new Event('change');
+                            element.dispatchEvent(event);
+                        }
+                    }
+                });
+                
+                logDebug('Form populated successfully');
+                
+            } catch (error) {
+                console.error('Error populating form:', error);
+                statusElement.textContent = 'Error populating form: ' + error.message;
+                statusElement.className = 'status error';
+            }
+        }
+        
+        // Event Listeners
+        const projectSelect = document.getElementById('project_id');
+        projectSelect.addEventListener('change', async function() {
+            const selectedProjectId = this.value;
+            if (selectedProjectId) {
+                await loadContent(selectedProjectId);
+            }
+        });
+        
+        // Form submission
+        document.getElementById('contentForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            
+            try {
+                const projectId = document.getElementById('project_id').value;
+                
+                if (!projectId) {
+                    statusElement.textContent = 'Please select a project';
+                    statusElement.className = 'status error';
+                    return;
+                }
+                
+                statusElement.textContent = 'Saving content...';
+                statusElement.className = 'status info';
+                
+                // Collect form data
+                const formData = new FormData(this);
+                const contentItems = [];
+                
+                for (const [key, value] of formData.entries()) {
+                    if (key !== 'project_id') {
+                        contentItems.push({
+                            content_key: key,
+                            content_value: value
+                        });
+                    }
+                }
+                
+                logDebug('Saving content items:', contentItems);
+                
+                // Save each content item
+                let successCount = 0;
+                let errorCount = 0;
+                
+                for (const item of contentItems) {
+                    try {
+                        // Check if the item already exists
+                        const { data: existingData, error: checkError } = await supabase
+                            .from('dynamic_content')
+                            .select('*')
+                            .eq('project_id', projectId)
+                            .eq('content_key', item.content_key)
+                            .maybeSingle();
+                        
+                        if (checkError) throw checkError;
+                        
+                        let result;
+                        
+                        if (existingData) {
+                            // Update existing record
+                            const { data, error } = await supabase
+                                .from('dynamic_content')
+                                .update({ content_value: item.content_value })
+                                .eq('project_id', projectId)
+                                .eq('content_key', item.content_key);
+                            
+                            if (error) throw error;
+                            successCount++;
+                        } else {
+                            // Insert new record
+                            const { data, error } = await supabase
+                                .from('dynamic_content')
+                                .insert([{ 
+                                    project_id: projectId, 
+                                    content_key: item.content_key, 
+                                    content_value: item.content_value 
+                                }]);
+                            
+                            if (error) throw error;
+                            successCount++;
+                        }
+                    } catch (error) {
+                        console.error('Error saving item:', item, error);
+                        errorCount++;
+                    }
+                }
+                
+                // Show results
+                if (errorCount === 0) {
+                    statusElement.textContent = `Saved ${successCount} content items successfully`;
+                    statusElement.className = 'status success';
+                    
+                    // Show view site button
+                    document.getElementById('view-site-container').style.display = 'block';
+                    document.getElementById('site-url').href = `/?project_id=${projectId}`;
+                    document.getElementById('site-url').textContent = `/?project_id=${projectId}`;
+                } else {
+                    statusElement.textContent = `Saved ${successCount} items, but ${errorCount} items failed`;
+                    statusElement.className = 'status error';
+                }
+                
+            } catch (error) {
+                console.error('Error saving content:', error);
+                statusElement.textContent = 'Error saving content: ' + error.message;
+                statusElement.className = 'status error';
+            }
+        });
+        
+        // View site button
+        document.getElementById('view-site-button').addEventListener('click', function() {
+            const projectId = document.getElementById('project_id').value;
+            if (projectId) {
+                window.open(`/?project_id=${projectId}`, '_blank');
+            }
+        });
+        
+        // Create new project button
+        document.getElementById('create-project-btn').addEventListener('click', function() {
+            document.getElementById('new-project-form').style.display = 'block';
+            this.style.display = 'none';
+        });
+        
+        // Cancel new project button
+        document.getElementById('cancel-new-project-btn').addEventListener('click', function() {
+            document.getElementById('new-project-form').style.display = 'none';
+            document.getElementById('create-project-btn').style.display = 'inline-block';
+        });
+        
+        // Save new project button
+        document.getElementById('save-new-project-btn').addEventListener('click', async function() {
+            const newProjectId = document.getElementById('new-project-id').value.trim();
+            
+            if (!newProjectId) {
+                statusElement.textContent = 'Please enter a project ID';
+                statusElement.className = 'status error';
+                return;
+            }
+            
+            // Format validation - should follow lastname-firstname-YYYYMMDD-HHMM format
+            const projectIdRegex = /^[a-z0-9-]+$/;
+            if (!projectIdRegex.test(newProjectId)) {
+                statusElement.textContent = 'Project ID should only contain lowercase letters, numbers, and hyphens';
+                statusElement.className = 'status error';
+                return;
+            }
+            
+            try {
+                statusElement.textContent = 'Creating new project...';
+                statusElement.className = 'status info';
+                
+                // Create a basic record to establish the project
+                const { data, error } = await supabase
+                    .from('dynamic_content')
+                    .insert([{ 
+                        project_id: newProjectId, 
+                        content_key: 'rendered_title', 
+                        content_value: 'New Site' 
+                    }]);
+                
+                if (error) throw error;
+                
+                // Reload projects
+                await loadProjects();
+                
+                // Select the new project
+                document.getElementById('project_id').value = newProjectId;
+                
+                // Hide the new project form
+                document.getElementById('new-project-form').style.display = 'none';
+                document.getElementById('create-project-btn').style.display = 'inline-block';
+                
+                // Load the new project content (which will be minimal)
+                await loadContent(newProjectId);
+                
+                statusElement.textContent = `Created new project: ${newProjectId}`;
+                statusElement.className = 'status success';
+                
+            } catch (error) {
+                console.error('Error creating project:', error);
+                statusElement.textContent = 'Error creating project: ' + error.message;
+                statusElement.className = 'status error';
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-key="rendered_title"></title>
+    <link rel="stylesheet" href="style.css">
+    <style id="dynamic-theme"></style>
+    <!-- Supabase Client Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Initialize Supabase Client -->
+    <script>
+      // Supabase Configuration (hardcoded to ensure consistency)
+      const SUPABASE_URL = 'https://aqicztygjpmunfljjuto.supabase.co';
+      const SUPABASE_PROJECT_ID = 'aqicztygjpmunfljjuto';
+      const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxaWN6dHlnanBtdW5mbGpqdXRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3MDU1ODIsImV4cCI6MjA1OTI4MTU4Mn0.5e2hvTckSSbTFLBjQiccrvjoBd6QQDX0X4tccFOc1rs';
+      
+      // Initialize Supabase client with hardcoded credentials
+      window.supabase = window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_ANON_KEY
+      );
+    </script>
+    <!-- Site Scripts -->
+    <script src="script.js"></script>
+</head>
+<body>
+    <!-- Site Wrapper -->
+    <div class="site-wrapper">
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="parallax-layer layer-back"></div>
+            <div class="parallax-layer layer-mid"></div>
+            <div class="floating-elements">
+                <div class="float-circle float-1"></div>
+                <div class="float-circle float-2"></div>
+                <div class="float-square float-3"></div>
+                <div class="float-triangle float-4"></div>
+                <div class="float-dot float-5"></div>
+                <div class="float-dot float-6"></div>
+            </div>
+            <div class="hero-content">
+                <div class="hero-text">
+                    <h1 data-key="rendered_title"></h1>
+                    <p data-key="rendered_subtitle"></p>
+                </div>
+                <div class="hero-image">
+                    <div class="profile-image-container">
+                        <img data-key="profile_image_url" src="" alt="Profile" class="profile-image">
+                    </div>
+                </div>
+            </div>
+            <div class="wave-divider">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 100" preserveAspectRatio="none">
+                    <path fill="#ffffff" d="M0,0 C240,95 480,100 720,85 C960,70 1200,40 1440,95 L1440,100 L0,100 Z"></path>
+                </svg>
+            </div>
+        </section>
+
+        <!-- Bio Section -->
+        <section class="bio">
+            <div class="bio-background">
+                <div class="bio-shape shape1"></div>
+                <div class="bio-shape shape2"></div>
+                <div class="bio-shape shape3"></div>
+            </div>
+            <div class="bio-container">
+                <h2 class="section-title">About</h2>
+                <div class="bio-main-content">
+                    <div data-key="rendered_bio_html" class="bio-text"></div>
+                </div>
+                
+                <!-- Bio Cards -->
+                <div class="bio-cards">
+                    <div class="bio-card">
+                        <div class="bio-card-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="none" d="M0 0h24v24H0z"/><path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm0-2a8 8 0 1 0 0-16 8 8 0 0 0 0 16zm-.997-4L6.76 11.757l1.414-1.414 2.829 2.829 5.656-5.657 1.415 1.414L11.003 16z"/></svg>
+                        </div>
+                        <div data-key="rendered_bio_html_card_1" class="bio-card-content"></div>
+                    </div>
+                    <div class="bio-card">
+                        <div class="bio-card-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="none" d="M0 0h24v24H0z"/><path d="M19.606 6.995c-.076-.298-.292-.523-.539-.592C18.63 6.28 16.5 6 12 6s-6.628.28-7.069.403c-.244.068-.46.293-.537.592C4.285 7.419 4 9.196 4 12s.285 4.58.394 5.006c.076.297.292.522.538.59C5.372 17.72 7.5 18 12 18s6.629-.28 7.069-.403c.244-.068.46-.293.537-.592C19.715 16.581 20 14.8 20 12s-.285-4.58-.394-5.005zm1.937-.497C22 8.28 22 12 22 12s0 3.72-.457 5.502c-.254.985-.997 1.76-1.938 2.022C17.896 20 12 20 12 20s-5.893 0-7.605-.476c-.945-.266-1.687-1.04-1.938-2.022C2 15.72 2 12 2 12s0-3.72.457-5.502c.254-.985.997-1.76 1.938-2.022C6.107 4 12 4 12 4s5.896 0 7.605.476c.945.266 1.687 1.04 1.938 2.022zM10 15.5v-7l6 3.5-6 3.5z"/></svg>
+                        </div>
+                        <div data-key="rendered_bio_html_card_2" class="bio-card-content"></div>
+                    </div>
+                    <div class="bio-card">
+                        <div class="bio-card-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="none" d="M0 0h24v24H0z"/><path d="M20 22H4a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1zm-1-2V4H5v16h14zM8 7h8v2H8V7zm0 4h8v2H8v-2zm0 4h8v2H8v-2z"/></svg>
+                        </div>
+                        <div data-key="rendered_bio_html_card_3" class="bio-card-content"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quote Card 1 -->
+        <div class="quote-card">
+            <div class="quote-content">
+                <p class="quote-text" data-key="quote_1"></p>
+            </div>
+        </div>
+
+        <!-- Blog Section Divider -->
+        <div class="section-divider blog-divider">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 100" preserveAspectRatio="none">
+                <path class="divider-fill" d="M0,40 C320,100 420,0 720,50 C1020,100 1200,20 1440,80 L1440,100 L0,100 Z"></path>
+            </svg>
+        </div>
+
+        <!-- Blog Grid -->
+        <section class="blog-grid">
+            <h2>Blog Posts</h2>
+            <div class="grid-2x2">
+                <div class="grid-item blog-card">
+                    <h3 class="blog-title" data-key="blog_post_1_title"></h3>
+                    <p class="excerpt blog-excerpt" data-key="blog_post_1_description"></p>
+                    <button class="action-button" onclick="openModal('blog-1')">Read More</button>
+                </div>
+                <div class="grid-item blog-card">
+                    <h3 class="blog-title" data-key="blog_post_2_title"></h3>
+                    <p class="excerpt blog-excerpt" data-key="blog_post_2_description"></p>
+                    <button class="action-button" onclick="openModal('blog-2')">Read More</button>
+                </div>
+                <div class="grid-item blog-card">
+                    <h3 class="blog-title" data-key="blog_post_3_title"></h3>
+                    <p class="excerpt blog-excerpt" data-key="blog_post_3_description"></p>
+                    <button class="action-button" onclick="openModal('blog-3')">Read More</button>
+                </div>
+                <div class="grid-item blog-card">
+                    <h3 class="blog-title" data-key="blog_post_4_title"></h3>
+                    <p class="excerpt blog-excerpt" data-key="blog_post_4_description"></p>
+                    <button class="action-button" onclick="openModal('blog-4')">Read More</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Blog Post Modals -->
+        <div id="blog-1" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal('blog-1')">&times;</span>
+                <h2 data-key="blog_post_1_title"></h2>
+                <div class="blog-content" data-key="blog_post_1"></div>
+            </div>
+        </div>
+
+        <div id="blog-2" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal('blog-2')">&times;</span>
+                <h2 data-key="blog_post_2_title"></h2>
+                <div class="blog-content" data-key="blog_post_2"></div>
+            </div>
+        </div>
+
+        <div id="blog-3" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal('blog-3')">&times;</span>
+                <h2 data-key="blog_post_3_title"></h2>
+                <div class="blog-content" data-key="blog_post_3"></div>
+            </div>
+        </div>
+
+        <div id="blog-4" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal('blog-4')">&times;</span>
+                <h2 data-key="blog_post_4_title"></h2>
+                <div class="blog-content" data-key="blog_post_4"></div>
+            </div>
+        </div>
+
+        <!-- Quote Card 2 -->
+        <div class="quote-card">
+            <div class="quote-content">
+                <p class="quote-text" data-key="quote_2"></p>
+            </div>
+        </div>
+
+        <!-- Social Media Section Divider -->
+        <div class="section-divider social-divider">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 100" preserveAspectRatio="none">
+                <path class="divider-fill" d="M0,60 C240,20 480,80 720,40 C960,0 1200,60 1440,30 L1440,100 L0,100 Z"></path>
+            </svg>
+        </div>
+
+        <!-- Social Media Posts -->
+        <section class="social-posts">
+            <h2>Latest Updates</h2>
+            <div class="grid-2x2">
+                <div class="grid-item social-card facebook">
+                    <div class="social-card-header">
+                        <div class="social-card-icon">
+                            <svg class="social-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512">
+                                <path fill="currentColor" d="M279.14 288l14.22-92.66h-88.91v-60.13c0-25.35 12.42-50.06 52.24-50.06h40.42V6.26S260.43 0 225.36 0c-73.22 0-121.08 44.38-121.08 124.72v70.62H22.89V288h81.39v224h100.17V288z"/>
+                            </svg>
+                        </div>
+                        <h3 class="social-title" data-key="facebook_title"></h3>
+                    </div>
+                    <p class="excerpt social-excerpt" data-key="facebook_excerpt"></p>
+                    <button class="action-button" onclick="openModal('facebook')">Read More</button>
+                </div>
+                <div class="grid-item social-card twitter">
+                    <div class="social-card-header">
+                        <div class="social-card-icon">
+                            <svg class="social-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+                                <path fill="currentColor" d="M459.37 151.716c.325 4.548.325 9.097.325 13.645 0 138.72-105.583 298.558-298.558 298.558-59.452 0-114.68-17.219-161.137-47.106 8.447.974 16.568 1.299 25.34 1.299 49.055 0 94.213-16.568 130.274-44.832-46.132-.975-84.792-31.188-98.112-72.772 6.498.974 12.995 1.624 19.818 1.624 9.421 0 18.843-1.3 27.614-3.573-48.081-9.747-84.143-51.98-84.143-102.985v-1.299c13.969 7.797 30.214 12.67 47.431 13.319-28.264-18.843-46.781-51.005-46.781-87.391 0-19.492 5.197-37.36 14.294-52.954 51.655 63.675 129.3 105.258 216.365 109.807-1.624-7.797-2.599-15.918-2.599-24.04 0-57.828 46.782-104.934 104.934-104.934 30.213 0 57.502 12.67 76.67 33.137 23.715-4.548 46.456-13.32 66.599-25.34-7.798 24.366-24.366 44.833-46.132 57.827 21.117-2.273 41.584-8.122 60.426-16.243-14.292 20.791-32.161 39.308-52.628 54.253z"/>
+                            </svg>
+                        </div>
+                        <h3 class="social-title" data-key="twitter_title"></h3>
+                    </div>
+                    <p class="excerpt social-excerpt" data-key="twitter_excerpt"></p>
+                    <button class="action-button" onclick="openModal('twitter')">Read More</button>
+                </div>
+                <div class="grid-item social-card instagram">
+                    <div class="social-card-header">
+                        <div class="social-card-icon">
+                            <svg class="social-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
+                                <path fill="currentColor" d="M224.1 141c-63.6 0-114.9 51.3-114.9 114.9s51.3 114.9 114.9 114.9S339 319.5 339 255.9 287.7 141 224.1 141zm0 189.6c-41.1 0-74.7-33.5-74.7-74.7s33.5-74.7 74.7-74.7 74.7 33.5 74.7 74.7-33.6 74.7-74.7 74.7zm146.4-194.3c0 14.9-12 26.8-26.8 26.8-14.9 0-26.8-12-26.8-26.8s12-26.8 26.8-26.8 26.8 12 26.8 26.8zm76.1 27.2c-1.7-35.9-9.9-67.7-36.2-93.9-26.2-26.2-58-34.4-93.9-36.2-37-2.1-147.9-2.1-184.9 0-35.8 1.7-67.6 9.9-93.9 36.1s-34.4 58-36.2 93.9c-2.1 37-2.1 147.9 0 184.9 1.7 35.9 9.9 67.7 36.2 93.9s58 34.4 93.9 36.2c37 2.1 147.9 2.1 184.9 0 35.9-1.7 67.7-9.9 93.9-36.2 26.2-26.2 34.4-58 36.2-93.9 2.1-37 2.1-147.8 0-184.8zM398.8 388c-7.8 19.6-22.9 34.7-42.6 42.6-29.5 11.7-99.5 9-132.1 9s-102.7 2.6-132.1-9c-19.6-7.8-34.7-22.9-42.6-42.6-11.7-29.5-9-99.5-9-132.1s-2.6-102.7 9-132.1c7.8-19.6 22.9-34.7 42.6-42.6 29.5-11.7 99.5-9 132.1-9s102.7-2.6 132.1 9c19.6 7.8 34.7 22.9 42.6 42.6 11.7 29.5 9 99.5 9 132.1s2.7 102.7-9 132.1z"/>
+                            </svg>
+                        </div>
+                        <h3 class="social-title" data-key="instagram_title"></h3>
+                    </div>
+                    <p class="excerpt social-excerpt" data-key="instagram_excerpt"></p>
+                    <button class="action-button" onclick="openModal('instagram')">Read More</button>
+                </div>
+                <div class="grid-item social-card linkedin">
+                    <div class="social-card-header">
+                        <div class="social-card-icon">
+                            <svg class="social-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
+                                <path fill="currentColor" d="M100.28 448H7.4V148.9h92.88zM53.79 108.1C24.09 108.1 0 83.5 0 53.8a53.79 53.79 0 0 1 107.58 0c0 29.7-24.1 54.3-53.79 54.3zM447.9 448h-92.68V302.4c0-34.7-.7-79.2-48.29-79.2-48.29 0-55.69 37.7-55.69 76.7V448h-92.78V148.9h89.08v40.8h1.3c12.4-23.5 42.69-48.3 87.88-48.3 94 0 111.28 61.9 111.28 142.3V448z"/>
+                            </svg>
+                        </div>
+                        <h3 class="social-title" data-key="linkedin_title"></h3>
+                    </div>
+                    <p class="excerpt social-excerpt" data-key="linkedin_excerpt"></p>
+                    <button class="action-button" onclick="openModal('linkedin')">Read More</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quote Card 3 -->
+        <div class="quote-card">
+            <div class="quote-content">
+                <p class="quote-text" data-key="quote_3"></p>
+            </div>
+        </div>
+
+        <!-- Social Media Modals -->
+        <div id="facebook" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal('facebook')">&times;</span>
+                <h2 data-key="facebook_title"></h2>
+                <div class="social-content" data-key="facebook_post"></div>
+            </div>
+        </div>
+
+        <div id="twitter" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal('twitter')">&times;</span>
+                <h2 data-key="twitter_title"></h2>
+                <div class="social-content" data-key="twitter_post"></div>
+            </div>
+        </div>
+
+        <div id="instagram" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal('instagram')">&times;</span>
+                <h2 data-key="instagram_title"></h2>
+                <div class="social-content" data-key="instagram_post"></div>
+            </div>
+        </div>
+
+        <div id="linkedin" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal('linkedin')">&times;</span>
+                <h2 data-key="linkedin_title"></h2>
+                <div class="social-content" data-key="linkedin_post"></div>
+            </div>
+        </div>
+
+        <!-- Connect Section Divider -->
+        <div class="section-divider connect-divider">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 100" preserveAspectRatio="none">
+                <path class="divider-fill" d="M0,40 C240,80 480,20 720,60 C960,100 1200,30 1440,70 L1440,100 L0,100 Z"></path>
+            </svg>
+        </div>
+
+        <!-- Connect Section -->
+        <section class="connect">
+            <div class="floating-icons">
+                <div class="floating-icon facebook-icon"></div>
+                <div class="floating-icon twitter-icon"></div>
+                <div class="floating-icon instagram-icon"></div>
+                <div class="floating-icon linkedin-icon"></div>
+            </div>
+            <div class="connect-card">
+                <h2>Connect with Me</h2>
+                <p class="connect-subtitle">I would love to connect with you on social media!</p>
+                <div class="social-links">
+                    <a data-key="facebook_url" href="#" class="social-button facebook" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+                        <span class="button-text" data-icon="f">f</span>
+                        <span class="sr-only">Facebook</span>
+                    </a>
+                    <a data-key="twitter_url" href="#" class="social-button twitter" target="_blank" rel="noopener noreferrer" aria-label="Twitter">
+                        <span class="button-text" data-icon="t">t</span>
+                        <span class="sr-only">Twitter</span>
+                    </a>
+                    <a data-key="instagram_url" href="#" class="social-button instagram" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+                        <span class="button-text" data-icon="i">i</span>
+                        <span class="sr-only">Instagram</span>
+                    </a>
+                    <a data-key="linkedin_url" href="#" class="social-button linkedin" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+                        <span class="button-text" data-icon="in">in</span>
+                        <span class="sr-only">LinkedIn</span>
+                    </a>
+                    <a data-key="email_address" href="#" class="social-button email" aria-label="Email">
+                        <span class="button-text" data-icon="@">@</span>
+                        <span class="sr-only">Email</span>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer Divider -->
+        <div class="footer-divider"></div>
+
+        <!-- Modal Structure -->
+        <div id="modal" class="modal">
+            <div class="modal-content">
+                <span class="close-button" onclick="closeModal()">&times;</span>
+                <div id="modal-title"></div>
+                <div id="modal-content"></div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer>
+            <p data-key="rendered_footer_slogan"></p>
+            <p class="copyright">&copy; 2025 All rights reserved <span data-key="email_domain"></span> - Built by <a href="https://www.selfcaststudios.com/" target="_blank" rel="noopener noreferrer">Self Cast Studio</a></p>
+        </footer>
+    </div>
+</body>
+</html>

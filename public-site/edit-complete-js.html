@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SelfCast Content Editor (JavaScript)</title>
+    <style>
+        /* This is just a placeholder - styles will be in the combined file */
+        body { font-family: system-ui, sans-serif; padding: 20px; }
+    </style>
+</head>
+<body>
+    <h1>JavaScript for the Complete Editor</h1>
+    <p>This file contains the JavaScript code that will power the content editor.</p>
+    
+    <pre id="js-code">
+// Supabase Configuration
+const SUPABASE_URL = 'https://aqicztygjpmunfljjuto.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxaWN6dHlnanBtdW5mbGpqdXRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3MDU1ODIsImV4cCI6MjA1OTI4MTU4Mn0.5e2hvTckSSbTFLBjQiccrvjoBd6QQDX0X4tccFOc1rs';
+
+// Enable debug mode if URL has debug=true
+window.debugMode = new URLSearchParams(window.location.search).get('debug') === 'true';
+
+// Status element for error reporting
+const statusElement = document.getElementById('status');
+
+// Debug logging function
+function logDebug(message, data) {
+    if (window.debugMode) {
+        const timestamp = new Date().toISOString().substring(11, 19);
+        const formattedMessage = typeof data !== 'undefined' 
+            ? `[${timestamp}] ${message}: ${JSON.stringify(data, null, 2)}`
+            : `[${timestamp}] ${message}`;
+        
+        console.log(message, data);
+        
+        const debugInfo = document.getElementById('debug-info');
+        if (debugInfo) {
+            debugInfo.style.display = 'block';
+            debugInfo.innerHTML += formattedMessage + '<br>';
+            debugInfo.scrollTop = debugInfo.scrollHeight;
+        }
+    } else {
+        console.log(message, data);
+    }
+}
+
+// Load available projects
+async function loadProjects() {
+    try {
+        statusElement.textContent = 'Loading projects...';
+        statusElement.className = 'status info';
+        
+        logDebug('Fetching projects from', `${SUPABASE_URL}/rest/v1/dynamic_content?select=project_id`);
+        
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/dynamic_content?select=project_id`, {
+            method: 'GET',
+            headers: {
+                'apikey': SUPABASE_KEY,
+                'Authorization': `Bearer ${SUPABASE_KEY}`
+            }
+        });
+        
+        logDebug('Projects response status', `${response.status} ${response.statusText}`);
+        
+        if (!response.ok) {
+            throw new Error(`Failed to load projects: ${response.status} ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        logDebug('Projects data received', data.length);
+        
+        // Get unique project IDs
+        const projectIds = [...new Set(data.map(item => item.project_id))];
+        logDebug('Unique project IDs', projectIds);
+        
+        // Clear existing options
+        const projectSelect = document.getElementById('project_id');
+        projectSelect.innerHTML = '<option value="">Select Project</option>';
+        
+        // Add options for each project
+        projectIds.forEach(projectId => {
+            const option = document.createElement('option');
+            option.value = projectId;
+            option.textContent = projectId;
+            projectSelect.appendChild(option);
+        });
+        
+        console.log('Project dropdown populated with', projectIds.length, 'options');
+        
+        // Check if there's a project_id in the URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const projectId = urlParams.get('project_id');
+        
+        if (projectId && projectIds.includes(projectId)) {
+            console.log('Loading project from URL:', projectId);
+            projectSelect.value = projectId;
+            loadContent(projectId);
+        }
+        
+        // Show success message
+        statusElement.textContent = `Loaded ${projectIds.length} projects`;
+        statusElement.className = 'status success';
+        
+        return projectIds;
+    } catch (error) {
+        console.error('Error loading projects:', error);
+        statusElement.textContent = 'Error loading projects: ' + error.message;
+        statusElement.className = 'status error';
+        throw error;
+    }
+}
+
+// Load content for a specific project
+async function loadContent(projectId) {
+    try {
+        if (!projectId) return;
+        
+        statusElement.textContent = 'Loading content...';
+        statusElement.className = 'status info';
+        
+        logDebug('Loading content for project', projectId);
+        
+        // Use the URL format that worked in verification
+        const url = `${SUPABASE_URL}/rest/v1/dynamic_content?select=*&project_id=eq.${encodeURIComponent(projectId)}`;
+        logDebug('Fetching content from', url);
+        
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'apikey': SUPABASE_KEY,
+                'Authorization': `Bearer ${SUPABASE_KEY}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        logDebug('Response status', `${response.status} ${response.statusText}`);
+        
+        if (!response.ok) {
+            throw new Error(`Failed to load content: ${response.status} ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        logDebug('Content data received', data);
+        
+        if (!data || data.length === 0) {
+            throw new Error(`No content found for project: ${projectId}`);
+        }
+        
+        // Populate the form with the data
+        populateForm(data);
+        
+        // Show the view site button
+        document.getElementById('view-site-container').style.display = 'block';
+        document.getElementById('site-url').href = `/?project_id=${projectId}`;
+        document.getElementById('site-url').textContent = `/?project_id=${projectId}`;
+        
+        statusElement.textContent = `Loaded ${data.length} content items for project: ${projectId}`;
+        statusElement.className = 'status success';
+        
+        return data;
+    } catch (error) {
+        console.error('Error loading content:', error);
+        statusElement.textContent = 'Error loading content: ' + error.message;
+        statusElement.className = 'status error';
+        throw error;
+    }
+}
+
+// Populate form with project data
+function populateForm(data) {
+    try {
+        console.log('Populating form with data:', data);
+        
+        // Reset form first
+        document.getElementById('contentForm').reset();
+        
+        // Process each content item
+        data.forEach(item => {
+            const key = item.key;
+            const value = item.value;
+            
+            // Find form element with matching name/id
+            const element = document.getElementById(key) || document.querySelector(`[name="${key}"]`);
+            
+            if (element) {
+                // Set value based on element type
+                if (element.tagName === 'SELECT') {
+                    element.value = value;
+                } else if (element.type === 'checkbox') {
+                    element.checked = value === 'true';
+                } else if (element.type === 'radio') {
+                    const radio = document.querySelector(`[name="${key}"][value="${value}"]`);
+                    if (radio) radio.checked = true;
+                } else {
+                    element.value = value;
+                }
+                
+                // Trigger change event for elements that need it
+                if (key === 'style_package') {
+                    const event = new Event('change');
+                    element.dispatchEvent(event);
+                }
+            } else {
+                logDebug('No form element found for key', key);
+            }
+        });
+        
+        console.log('Form populated successfully');
+        
+    } catch (error) {
+        console.error('Error populating form:', error);
+        statusElement.textContent = 'Error populating form: ' + error.message;
+        statusElement.className = 'status error';
+    }
+}
+
+// Save content for a specific project
+async function saveContent(projectId, contentItems) {
+    try {
+        if (!projectId) {
+            throw new Error('No project ID specified');
+        }
+        
+        if (!contentItems || !Array.isArray(contentItems) || contentItems.length === 0) {
+            throw new Error('No content items to save');
+        }
+        
+        logDebug('Saving content for project', projectId);
+        logDebug('Content items to save', contentItems);
+        
+        const results = [];
+        
+        // Process each content item
+        for (const item of contentItems) {
+            try {
+                // Check if the item already exists
+                const checkUrl = `${SUPABASE_URL}/rest/v1/dynamic_content?project_id=eq.${encodeURIComponent(projectId)}&key=eq.${encodeURIComponent(item.key)}`;
+                logDebug('Checking if item exists', checkUrl);
+                
+                const checkResponse = await fetch(checkUrl, {
+                    method: 'GET',
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!checkResponse.ok) {
+                    throw new Error(`Failed to check item: ${checkResponse.status} ${checkResponse.statusText}`);
+                }
+                
+                const existingData = await checkResponse.json();
+                
+                if (existingData && existingData.length > 0) {
+                    // Update existing record
+                    const updateUrl = `${SUPABASE_URL}/rest/v1/dynamic_content?project_id=eq.${encodeURIComponent(projectId)}&key=eq.${encodeURIComponent(item.key)}`;
+                    logDebug('Updating existing item', updateUrl);
+                    
+                    const updateResponse = await fetch(updateUrl, {
+                        method: 'PATCH',
+                        headers: {
+                            'apikey': SUPABASE_KEY,
+                            'Authorization': `Bearer ${SUPABASE_KEY}`,
+                            'Content-Type': 'application/json',
+                            'Prefer': 'return=minimal'
+                        },
+                        body: JSON.stringify({ value: item.value })
+                    });
+                    
+                    if (!updateResponse.ok) {
+                        throw new Error(`Failed to update item: ${updateResponse.status} ${updateResponse.statusText}`);
+                    }
+                    
+                    results.push({ key: item.key, action: 'updated' });
+                } else {
+                    // Insert new record
+                    const insertUrl = `${SUPABASE_URL}/rest/v1/dynamic_content`;
+                    logDebug('Inserting new item', insertUrl);
+                    
+                    const insertResponse = await fetch(insertUrl, {
+                        method: 'POST',
+                        headers: {
+                            'apikey': SUPABASE_KEY,
+                            'Authorization': `Bearer ${SUPABASE_KEY}`,
+                            'Content-Type': 'application/json',
+                            'Prefer': 'return=minimal'
+                        },
+                        body: JSON.stringify({
+                            project_id: projectId,
+                            key: item.key,
+                            value: item.value
+                        })
+                    });
+                    
+                    if (!insertResponse.ok) {
+                        throw new Error(`Failed to insert item: ${insertResponse.status} ${insertResponse.statusText}`);
+                    }
+                    
+                    results.push({ key: item.key, action: 'inserted' });
+                }
+            } catch (error) {
+                console.error('Error saving item:', item, error);
+                logDebug('Error saving item', { key: item.key, error: error.message });
+                results.push({ key: item.key, action: 'error', error: error.message });
+            }
+        }
+        
+        return results;
+    } catch (error) {
+        console.error('Error saving content:', error);
+        logDebug('Error saving content', error.message);
+        throw error;
+    }
+}
+
+// Create a new project
+async function createProject(projectId, initialContent = {}) {
+    try {
+        if (!projectId) {
+            throw new Error('No project ID specified');
+        }
+        
+        logDebug('Creating new project', projectId);
+        
+        // Create a basic record to establish the project
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/dynamic_content`, {
+            method: 'POST',
+            headers: {
+                'apikey': SUPABASE_KEY,
+                'Authorization': `Bearer ${SUPABASE_KEY}`,
+                'Content-Type': 'application/json',
+                'Prefer': 'return=minimal'
+            },
+            body: JSON.stringify({
+                project_id: projectId,
+                key: 'rendered_title',
+                value: initialContent.title || 'New Site'
+            })
+        });
+        
+        if (!response.ok) {
+            throw new Error(`Failed to create project: ${response.status} ${response.statusText}`);
+        }
+        
+        logDebug('Project created successfully', projectId);
+        
+        return { projectId, success: true };
+    } catch (error) {
+        console.error('Error creating project:', error);
+        logDebug('Error creating project', error.message);
+        throw error;
+    }
+}
+
+// Form submission
+document.getElementById('contentForm').addEventListener('submit', async function(event) {
+    event.preventDefault();
+    
+    try {
+        const projectId = document.getElementById('project_id').value;
+        
+        if (!projectId) {
+            statusElement.textContent = 'Please select a project';
+            statusElement.className = 'status error';
+            return;
+        }
+        
+        statusElement.textContent = 'Saving content...';
+        statusElement.className = 'status info';
+        
+        // Collect form data
+        const formData = new FormData(this);
+        const contentItems = [];
+        
+        for (const [key, value] of formData.entries()) {
+            if (key !== 'project_id') {
+                contentItems.push({
+                    key: key,
+                    value: value
+                });
+            }
+        }
+        
+        console.log('Saving content items:', contentItems);
+        
+        // Save content
+        const results = await saveContent(projectId, contentItems);
+        
+        // Count successes and errors
+        const successCount = results.filter(r => r.action === 'updated' || r.action === 'inserted').length;
+        const errorCount = results.filter(r => r.action === 'error').length;
+        
+        // Show results
+        if (errorCount === 0) {
+            statusElement.textContent = `Saved ${successCount} content items successfully`;
+            statusElement.className = 'status success';
+            
+            // Show view site button
+            document.getElementById('view-site-container').style.display = 'block';
+            document.getElementById('site-url').href = `/?project_id=${projectId}`;
+            document.getElementById('site-url').textContent = `/?project_id=${projectId}`;
+        } else {
+            statusElement.textContent = `Saved ${successCount} items, but ${errorCount} items failed`;
+            statusElement.className = 'status error';
+        }
+        
+    } catch (error) {
+        console.error('Error saving content:', error);
+        statusElement.textContent = 'Error saving content: ' + error.message;
+        statusElement.className = 'status error';
+    }
+});
+
+// Save all content button
+document.getElementById('save-all-btn').addEventListener('click', function() {
+    document.getElementById('contentForm').dispatchEvent(new Event('submit'));
+});
+
+// Show new project form
+function showNewProjectForm() {
+    document.getElementById('new-project-form').style.display = 'block';
+    document.getElementById('create-project-btn').style.display = 'none';
+}
+
+// Hide new project form
+function hideNewProjectForm() {
+    document.getElementById('new-project-form').style.display = 'none';
+    document.getElementById('create-project-btn').style.display = 'inline-block';
+}
+
+// Save new project button
+document.getElementById('save-new-project-btn').addEventListener('click', async function() {
+    const newProjectId = document.getElementById('new-project-id').value.trim();
+    
+    if (!newProjectId) {
+        statusElement.textContent = 'Please enter a project ID';
+        statusElement.className = 'status error';
+        return;
+    }
+    
+    // Format validation - should follow lastname-firstname-YYYYMMDD-HHMM format
+    const projectIdRegex = /^[a-z0-9-]+$/;
+    if (!projectIdRegex.test(newProjectId)) {
+        statusElement.textContent = 'Project ID should only contain lowercase letters, numbers, and hyphens';
+        statusElement.className = 'status error';
+        return;
+    }
+    
+    try {
+        statusElement.textContent = 'Creating new project...';
+        statusElement.className = 'status info';
+        
+        // Create new project
+        await createProject(newProjectId);
+        
+        // Reload projects
+        await loadProjects();
+        
+        // Select the new project
+        document.getElementById('project_id').value = newProjectId;
+        
+        // Hide the new project form
+        document.getElementById('new-project-form').style.display = 'none';
+        document.getElementById('create-project-btn').style.display = 'inline-block';
+        
+        // Load the new project content (which will be minimal)
+        await loadContent(newProjectId);
+        
+        statusElement.textContent = `Created new project: ${newProjectId}`;
+        statusElement.className = 'status success';
+        
+    } catch (error) {
+        console.error('Error creating project:', error);
+        statusElement.textContent = 'Error creating project: ' + error.message;
+        statusElement.className = 'status error';
+    }
+});
+
+// View site button
+document.getElementById('view-site-button').addEventListener('click', function() {
+    const projectId = document.getElementById('project_id').value;
+    if (projectId) {
+        window.open(`/?project_id=${projectId}`, '_blank');
+    }
+});
+
+// Tab switching functionality
+document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', function() {
+        // Remove active class from all tabs and tab contents
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        
+        // Add active class to clicked tab
+        this.classList.add('active');
+        
+        // Show corresponding tab content
+        const tabId = this.getAttribute('data-tab');
+        document.getElementById(tabId).classList.add('active');
+    });
+});
+
+// Toggle section collapse/expand
+function toggleSection(button) {
+    const section = button.closest('.section');
+    const content = section.querySelector('.section-content');
+    
+    if (content.style.display === 'none') {
+        content.style.display = 'block';
+        button.textContent = '−';
+    } else {
+        content.style.display = 'none';
+        button.textContent = '+';
+    }
+}
+
+// Initialize when the DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    // Add debug info element if debug mode is enabled
+    if (window.debugMode && !document.getElementById('debug-info')) {
+        const debugInfo = document.createElement('div');
+        debugInfo.id = 'debug-info';
+        debugInfo.style.fontFamily = 'monospace';
+        debugInfo.style.fontSize = '12px';
+        debugInfo.style.whiteSpace = 'pre-wrap';
+        debugInfo.style.wordBreak = 'break-all';
+        debugInfo.style.marginTop = '1rem';
+        debugInfo.style.padding = '1rem';
+        debugInfo.style.background = '#f8f9fa';
+        debugInfo.style.border = '1px solid #ddd';
+        debugInfo.style.borderRadius = '4px';
+        debugInfo.style.display = 'block';
+        document.querySelector('.container').appendChild(debugInfo);
+    }
+    
+    // Set up collapse toggle buttons
+    document.querySelectorAll('.collapse-toggle').forEach(button => {
+        button.addEventListener('click', function() {
+            toggleSection(this);
+        });
+    });
+    
+    // Load projects
+    loadProjects();
+});
+    </pre>
+</body>
+</html>

@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Content Editor Patch</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            background: #f5f5f5;
+        }
+        .section {
+            background: white;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            margin-top: 0;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 4px;
+            overflow: auto;
+            max-height: 300px;
+            white-space: pre-wrap;
+        }
+        .code-block {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            margin-bottom: 1rem;
+        }
+        .instructions {
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background: #e3f2fd;
+            border-radius: 4px;
+        }
+        button {
+            background: #3399FF;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-right: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <div class="section">
+        <h1>Content Editor Patch</h1>
+        <p>This page provides the necessary code changes to fix the Supabase connection issues in the main content editor.</p>
+        
+        <div class="instructions">
+            <h2>Instructions</h2>
+            <ol>
+                <li>Copy the <code>supabase-connection.js</code> file to the public-site directory</li>
+                <li>Add the script tag to load this file in the edit.html file</li>
+                <li>Replace the Supabase initialization and project loading code with the new version</li>
+                <li>Update the content loading and saving functions to use the new connection module</li>
+            </ol>
+        </div>
+        
+        <h2>1. Add Script Tag</h2>
+        <p>Add this script tag to the edit.html file, just before the closing &lt;/head&gt; tag:</p>
+        <div class="code-block">&lt;script src="supabase-connection.js"&gt;&lt;/script&gt;</div>
+        
+        <h2>2. Replace Supabase Configuration</h2>
+        <p>Replace the existing Supabase configuration (around line 750) with this:</p>
+        <div class="code-block">// Supabase Configuration with fallbacks - FIXED URL
+const SUPABASE_URL = 'https://aqicztygjpmunfljjuto.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxaWN6dHlnanBtdW5mbGpqdXRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3MDU1ODIsImV4cCI6MjA1OTI4MTU4Mn0.5e2hvTckSSbTFLBjQiccrvjoBd6QQDX0X4tccFOc1rs';
+
+// Enable debug mode if URL has debug=true
+window.debugMode = new URLSearchParams(window.location.search).get('debug') === 'true';
+
+// Status element for error reporting
+const statusElement = document.getElementById('status');
+
+// Add debug info element if it doesn't exist
+if (window.debugMode && !document.getElementById('debug-info')) {
+    const debugInfo = document.createElement('div');
+    debugInfo.id = 'debug-info';
+    debugInfo.style.fontFamily = 'monospace';
+    debugInfo.style.fontSize = '12px';
+    debugInfo.style.whiteSpace = 'pre-wrap';
+    debugInfo.style.wordBreak = 'break-all';
+    debugInfo.style.marginTop = '1rem';
+    debugInfo.style.padding = '1rem';
+    debugInfo.style.background = '#f8f9fa';
+    debugInfo.style.border = '1px solid #ddd';
+    debugInfo.style.borderRadius = '4px';
+    debugInfo.style.display = 'block';
+    document.querySelector('.section').appendChild(debugInfo);
+}</div>
+        
+        <h2>3. Replace Project Loading Function</h2>
+        <p>Replace the existing loadProjects function with this:</p>
+        <div class="code-block">// Load available projects
+async function loadProjects() {
+    try {
+        statusElement.textContent = 'Loading projects...';
+        statusElement.className = 'status info';
+        
+        // Use the SupabaseConnection module to load projects
+        const projectIds = await window.SupabaseConnection.loadProjects();
+        
+        // Clear existing options
+        const projectSelect = document.getElementById('project_id');
+        projectSelect.innerHTML = '&lt;option value=""&gt;Select Project&lt;/option&gt;';
+        
+        // Add options for each project
+        projectIds.forEach(projectId => {
+            const option = document.createElement('option');
+            option.value = projectId;
+            option.textContent = projectId;
+            projectSelect.appendChild(option);
+        });
+        
+        console.log('Project dropdown populated with', projectIds.length, 'options');
+        
+        // Check if there's a project_id in the URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const projectId = urlParams.get('project_id');
+        
+        if (projectId && projectIds.includes(projectId)) {
+            console.log('Loading project from URL:', projectId);
+            projectSelect.value = projectId;
+            loadContent(projectId);
+        }
+        
+        // Update the blog management button
+        if (typeof updateBlogManagementButton === 'function') {
+            updateBlogManagementButton();
+        }
+        
+        // Show success message
+        statusElement.textContent = `Loaded ${projectIds.length} projects`;
+        statusElement.className = 'status success';
+        
+    } catch (error) {
+        console.error('Error loading projects:', error);
+        statusElement.textContent = 'Error loading projects: ' + error.message;
+        statusElement.className = 'status error';
+    }
+}</div>
+        
+        <h2>4. Replace Content Loading Function</h2>
+        <p>Replace the existing loadContent function with this:</p>
+        <div class="code-block">// Load content for a specific project
+async function loadContent(projectId) {
+    try {
+        if (!projectId) return;
+        
+        statusElement.textContent = 'Loading content...';
+        statusElement.className = 'status info';
+        
+        // Use the SupabaseConnection module to load content
+        const data = await window.SupabaseConnection.loadContent(projectId);
+        
+        // Populate the form with the data
+        populateForm(data);
+        
+        // Show the view site button
+        document.getElementById('view-site-container').style.display = 'block';
+        document.getElementById('site-url').href = `/?project_id=${projectId}`;
+        document.getElementById('site-url').textContent = `/?project_id=${projectId}`;
+        
+        statusElement.textContent = `Loaded ${data.length} content items for project: ${projectId}`;
+        statusElement.className = 'status success';
+        
+    } catch (error) {
+        console.error('Error loading content:', error);
+        statusElement.textContent = 'Error loading content: ' + error.message;
+        statusElement.className = 'status error';
+    }
+}</div>
+        
+        <h2>5. Update Form Population Function</h2>
+        <p>Replace the existing populateForm function with this:</p>
+        <div class="code-block">// Populate form with project data
+function populateForm(data) {
+    try {
+        console.log('Populating form with data:', data);
+        
+        // Reset form first
+        document.getElementById('contentForm').reset();
+        
+        // Process each content item
+        data.forEach(item => {
+            const key = item.key;
+            const value = item.value;
+            
+            // Find form element with matching name/id
+            const element = document.getElementById(key) || document.querySelector(`[name="${key}"]`);
+            
+            if (element) {
+                // Set value based on element type
+                if (element.tagName === 'SELECT') {
+                    element.value = value;
+                } else if (element.type === 'checkbox') {
+                    element.checked = value === 'true';
+                } else if (element.type === 'radio') {
+                    const radio = document.querySelector(`[name="${key}"][value="${value}"]`);
+                    if (radio) radio.checked = true;
+                } else {
+                    element.value = value;
+                }
+                
+                // Trigger change event for elements that need it
+                if (key === 'style_package') {
+                    const event = new Event('change');
+                    element.dispatchEvent(event);
+                }
+            }
+        });
+        
+        console.log('Form populated successfully');
+        
+    } catch (error) {
+        console.error('Error populating form:', error);
+        statusElement.textContent = 'Error populating form: ' + error.message;
+        statusElement.className = 'status error';
+    }
+}</div>
+        
+        <h2>6. Update Form Submission Handler</h2>
+        <p>Replace the form submission handler with this:</p>
+        <div class="code-block">// Form submission
+document.getElementById('contentForm').addEventListener('submit', async function(event) {
+    event.preventDefault();
+    
+    try {
+        const projectId = document.getElementById('project_id').value;
+        
+        if (!projectId) {
+            statusElement.textContent = 'Please select a project';
+            statusElement.className = 'status error';
+            return;
+        }
+        
+        statusElement.textContent = 'Saving content...';
+        statusElement.className = 'status info';
+        
+        // Collect form data
+        const formData = new FormData(this);
+        const contentItems = [];
+        
+        for (const [key, value] of formData.entries()) {
+            if (key !== 'project_id') {
+                contentItems.push({
+                    key: key,
+                    value: value
+                });
+            }
+        }
+        
+        console.log('Saving content items:', contentItems);
+        
+        // Use the SupabaseConnection module to save content
+        const results = await window.SupabaseConnection.saveContent(projectId, contentItems);
+        
+        // Count successes and errors
+        const successCount = results.filter(r => r.action === 'updated' || r.action === 'inserted').length;
+        const errorCount = results.filter(r => r.action === 'error').length;
+        
+        // Show results
+        if (errorCount === 0) {
+            statusElement.textContent = `Saved ${successCount} content items successfully`;
+            statusElement.className = 'status success';
+            
+            // Show view site button
+            document.getElementById('view-site-container').style.display = 'block';
+            document.getElementById('site-url').href = `/?project_id=${projectId}`;
+            document.getElementById('site-url').textContent = `/?project_id=${projectId}`;
+        } else {
+            statusElement.textContent = `Saved ${successCount} items, but ${errorCount} items failed`;
+            statusElement.className = 'status error';
+        }
+        
+    } catch (error) {
+        console.error('Error saving content:', error);
+        statusElement.textContent = 'Error saving content: ' + error.message;
+        statusElement.className = 'status error';
+    }
+});</div>
+        
+        <h2>7. Update Create Project Button Handler</h2>
+        <p>Replace the create project button handler with this:</p>
+        <div class="code-block">// Save new project button
+document.getElementById('save-new-project-btn').addEventListener('click', async function() {
+    const newProjectId = document.getElementById('new-project-id').value.trim();
+    
+    if (!newProjectId) {
+        statusElement.textContent = 'Please enter a project ID';
+        statusElement.className = 'status error';
+        return;
+    }
+    
+    // Format validation - should follow lastname-firstname-YYYYMMDD-HHMM format
+    const projectIdRegex = /^[a-z0-9-]+$/;
+    if (!projectIdRegex.test(newProjectId)) {
+        statusElement.textContent = 'Project ID should only contain lowercase letters, numbers, and hyphens';
+        statusElement.className = 'status error';
+        return;
+    }
+    
+    try {
+        statusElement.textContent = 'Creating new project...';
+        statusElement.className = 'status info';
+        
+        // Use the SupabaseConnection module to create a new project
+        await window.SupabaseConnection.createProject(newProjectId);
+        
+        // Reload projects
+        await loadProjects();
+        
+        // Select the new project
+        document.getElementById('project_id').value = newProjectId;
+        
+        // Hide the new project form
+        document.getElementById('new-project-form').style.display = 'none';
+        document.getElementById('create-project-btn').style.display = 'inline-block';
+        
+        // Load the new project content (which will be minimal)
+        await loadContent(newProjectId);
+        
+        statusElement.textContent = `Created new project: ${newProjectId}`;
+        statusElement.className = 'status success';
+        
+    } catch (error) {
+        console.error('Error creating project:', error);
+        statusElement.textContent = 'Error creating project: ' + error.message;
+        statusElement.className = 'status error';
+    }
+});</div>
+        
+        <h2>8. Update View Site Button Handler</h2>
+        <p>Replace the view site button handler with this:</p>
+        <div class="code-block">// View site button
+document.getElementById('view-site-button').addEventListener('click', function() {
+    const projectId = document.getElementById('project_id').value;
+    if (projectId) {
+        window.open(`/?project_id=${projectId}`, '_blank');
+    }
+});</div>
+        
+        <h2>Implementation Steps</h2>
+        <p>Follow these steps to implement the fix:</p>
+        <ol>
+            <li>Make sure you've copied the <code>supabase-connection.js</code> file to the public-site directory</li>
+            <li>Open the edit.html file in a text editor</li>
+            <li>Add the script tag to load the supabase-connection.js file</li>
+            <li>Replace the existing Supabase configuration and functions with the ones provided above</li>
+            <li>Save the file and test the editor</li>
+        </ol>
+        
+        <p>If you prefer, you can also use the simplified editor (<code>simple-editor-complete.html</code>) instead of patching the main editor.</p>
+    </div>
+</body>
+</html>

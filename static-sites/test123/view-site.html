@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redirecting to Your Site</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            background: #f5f5f5;
+        }
+        .card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 1.5rem;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        .status {
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1rem 0;
+        }
+        .info {
+            background: #e3f2fd;
+            color: #0d47a1;
+        }
+        .error {
+            background: #ffebee;
+            color: #c62828;
+        }
+        .success {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        pre {
+            background: #f5f5f5;
+            padding: 1rem;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(0,0,0,0.1);
+            border-radius: 50%;
+            border-top-color: #3399FF;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>Redirecting to Your Site</h1>
+        <div id="status" class="status info">
+            <div class="loading"></div>
+            <span>Checking project information...</span>
+        </div>
+        <div id="details"></div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async function() {
+            const statusElement = document.getElementById('status');
+            const detailsElement = document.getElementById('details');
+            
+            try {
+                // Get the project_id from the URL
+                const urlParams = new URLSearchParams(window.location.search);
+                const projectId = urlParams.get('project_id');
+                
+                if (!projectId) {
+                    throw new Error('No project ID specified. Please provide a project_id parameter.');
+                }
+                
+                // Log the project ID for debugging
+                console.log('Project ID:', projectId);
+                statusElement.innerHTML = `<div class="loading"></div><span>Loading project: ${projectId}...</span>`;
+                
+                // Initialize Supabase client
+                let supabaseUrl, supabaseKey;
+                
+                // Check if we're on Vercel (environment variables will be available)
+                if (window.location.hostname.includes('vercel.app')) {
+                    // On Vercel, we can use process.env variables injected at build time
+                    // These will be replaced with actual values during the build process
+                    supabaseUrl = 'https://aqicztygjpmunfljjuto.supabase.co';
+                    supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxaWN6dHlnanBtdW5mbGpqdXRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3MDU1ODIsImV4cCI6MjA1OTI4MTU4Mn0.5e2hvTckSSbTFLBjQiccrvjoBd6QQDX0X4tccFOc1rs';
+                } else {
+                    // Locally, we'll use the config.js file
+                    try {
+                        supabaseUrl = SUPABASE_URL;
+                        supabaseKey = SUPABASE_KEY;
+                    } catch (e) {
+                        // Fallback to hardcoded values if config.js is not available
+                        supabaseUrl = 'https://aqicztygjpmunfljjuto.supabase.co';
+                        supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxaWN6dHlnanBtdW5mbGpqdXRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3MDU1ODIsImV4cCI6MjA1OTI4MTU4Mn0.5e2hvTckSSbTFLBjQiccrvjoBd6QQDX0X4tccFOc1rs';
+                    }
+                }
+                
+                console.log('Using Supabase URL:', supabaseUrl);
+                
+                // Create the Supabase client
+                const { createClient } = supabase;
+                const supabaseClient = createClient(supabaseUrl, supabaseKey);
+                
+                // Check if the project exists in Supabase
+                const { data, error } = await supabaseClient
+                    .from('dynamic_content')
+                    .select('project_id')
+                    .eq('project_id', projectId)
+                    .limit(1);
+                
+                if (error) {
+                    throw new Error('Error checking project: ' + error.message);
+                }
+                
+                if (!data || data.length === 0) {
+                    throw new Error(`Project "${projectId}" not found. Please check the project ID and try again.`);
+                }
+                
+                // Determine the appropriate URL based on the environment
+                let siteUrl;
+                
+                // Check if we're on Vercel
+                if (window.location.hostname.includes('vercel.app')) {
+                    // On Vercel, we'll use the index.html in the public directory
+                    siteUrl = `${window.location.origin}/index.html?project_id=${projectId}`;
+                } else {
+                    // Locally, we'll use the static site
+                    siteUrl = `${window.location.origin}/static-sites/${projectId}/index.html`;
+                }
+                
+                console.log('Redirecting to:', siteUrl);
+                statusElement.innerHTML = `<div class="loading"></div><span>Redirecting to site...</span>`;
+                
+                // Redirect to the site
+                window.location.href = siteUrl;
+                
+            } catch (error) {
+                console.error('Error:', error);
+                statusElement.className = 'status error';
+                statusElement.textContent = error.message;
+                
+                // Add more details for debugging
+                detailsElement.innerHTML = `
+                    <h2>Debug Information</h2>
+                    <p>If you're seeing this error, please check the following:</p>
+                    <ul>
+                        <li>Make sure the project ID is correct</li>
+                        <li>Verify that the project exists in the Supabase database</li>
+                        <li>Check the browser console for more detailed error messages</li>
+                    </ul>
+                    <pre>Error: ${error.stack || error.message}</pre>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>

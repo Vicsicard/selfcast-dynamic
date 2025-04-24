@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supabase Debug</title>
+    <style>
+        body { font-family: monospace; padding: 20px; }
+        .log { margin: 10px 0; padding: 10px; background: #f5f5f5; border-left: 4px solid #333; }
+        .error { border-color: red; background: #ffebee; }
+        .success { border-color: green; background: #e8f5e9; }
+        button { padding: 10px; margin: 5px; }
+        #results { margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Supabase Connection Diagnostic</h1>
+    <p>This page will help diagnose connection issues with Supabase.</p>
+    
+    <div>
+        <button id="test1">Test 1: Load Supabase Script</button>
+        <button id="test2">Test 2: Initialize Client</button>
+        <button id="test3">Test 3: Simple Query</button>
+        <button id="test4">Test 4: List Projects</button>
+    </div>
+    
+    <div id="results"></div>
+    
+    <script>
+        const results = document.getElementById('results');
+        
+        function log(message, isError = false, isSuccess = false) {
+            const logEl = document.createElement('div');
+            logEl.className = `log ${isError ? 'error' : ''} ${isSuccess ? 'success' : ''}`;
+            logEl.textContent = message;
+            results.appendChild(logEl);
+            console.log(message);
+        }
+        
+        // Test 1: Load Supabase Script
+        document.getElementById('test1').addEventListener('click', function() {
+            log('Test 1: Loading Supabase script...');
+            
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+            script.onload = function() {
+                log('Supabase script loaded successfully!', false, true);
+                log(`window.supabase exists: ${!!window.supabase}`, false, !!window.supabase);
+            };
+            script.onerror = function() {
+                log('Error loading Supabase script!', true);
+            };
+            document.body.appendChild(script);
+        });
+        
+        // Test 2: Initialize Client
+        document.getElementById('test2').addEventListener('click', function() {
+            log('Test 2: Initializing Supabase client...');
+            
+            if (!window.supabase) {
+                log('Error: window.supabase is not available. Run Test 1 first.', true);
+                return;
+            }
+            
+            try {
+                const SUPABASE_URL = 'https://aqicztygjpmunfljjjuto.supabase.co';
+                const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxaWN6dHlnanBtdW5mbGpqdXRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3MDU1ODIsImV4cCI6MjA1OTI4MTU4Mn0.5e2hvTckSSbTFLBjQiccrvjoBd6QQDX0X4tccFOc1rs';
+                
+                window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                log('Supabase client initialized successfully!', false, true);
+                log(`Client object: ${typeof window.supabaseClient}`, false, true);
+            } catch (error) {
+                log(`Error initializing Supabase client: ${error.message}`, true);
+                console.error(error);
+            }
+        });
+        
+        // Test 3: Simple Query
+        document.getElementById('test3').addEventListener('click', async function() {
+            log('Test 3: Running simple query...');
+            
+            if (!window.supabaseClient) {
+                log('Error: Supabase client not initialized. Run Test 2 first.', true);
+                return;
+            }
+            
+            try {
+                const { data, error } = await window.supabaseClient
+                    .from('dynamic_content')
+                    .select('*')
+                    .limit(1);
+                
+                if (error) {
+                    log(`Query error: ${error.message}`, true);
+                    console.error(error);
+                    return;
+                }
+                
+                log(`Query successful! Received ${data.length} rows.`, false, true);
+                log(`First row: ${JSON.stringify(data[0])}`, false, true);
+            } catch (error) {
+                log(`Exception during query: ${error.message}`, true);
+                console.error(error);
+            }
+        });
+        
+        // Test 4: List Projects
+        document.getElementById('test4').addEventListener('click', async function() {
+            log('Test 4: Listing all projects...');
+            
+            if (!window.supabaseClient) {
+                log('Error: Supabase client not initialized. Run Test 2 first.', true);
+                return;
+            }
+            
+            try {
+                const { data, error } = await window.supabaseClient
+                    .from('dynamic_content')
+                    .select('project_id')
+                    .order('project_id');
+                
+                if (error) {
+                    log(`Query error: ${error.message}`, true);
+                    console.error(error);
+                    return;
+                }
+                
+                // Get unique project IDs
+                const projectIds = [...new Set(data.map(item => item.project_id))];
+                
+                log(`Found ${projectIds.length} unique projects!`, false, true);
+                log(`Projects: ${projectIds.join(', ')}`, false, true);
+            } catch (error) {
+                log(`Exception during query: ${error.message}`, true);
+                console.error(error);
+            }
+        });
+    </script>
+</body>
+</html>

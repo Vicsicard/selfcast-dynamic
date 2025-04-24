@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SelfCast Content Editor (Part 3)</title>
+    <style>
+        /* This is just a placeholder - styles will be in the combined file */
+        body { font-family: system-ui, sans-serif; padding: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Part 3: Quotes, Contact, and Miscellaneous Sections</h1>
+    <p>This file contains the HTML structure for the Quotes, Contact & Footer, and Miscellaneous tabs of the content editor.</p>
+    
+    <!-- Quotes Tab -->
+    <div id="quotes-content">
+        <div class="section">
+            <div class="section-header">
+                <h2>Quotes</h2>
+                <button type="button" class="collapse-toggle">−</button>
+            </div>
+            <div class="section-content">
+                <div class="form-group">
+                    <label for="quote_1">Quote 1:</label>
+                    <textarea id="quote_1" name="quote_1" rows="4"></textarea>
+                    <p class="help-text">Use line breaks to separate multiple quotes or parts of the quote.</p>
+                </div>
+                
+                <div class="form-group">
+                    <label for="quote_2">Quote 2:</label>
+                    <textarea id="quote_2" name="quote_2" rows="4"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="quote_3">Quote 3:</label>
+                    <textarea id="quote_3" name="quote_3" rows="4"></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Contact & Footer Tab -->
+    <div id="contact-content">
+        <!-- Contact Information Section -->
+        <div class="section">
+            <div class="section-header">
+                <h2>Contact Information</h2>
+                <button type="button" class="collapse-toggle">−</button>
+            </div>
+            <div class="section-content">
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="email_address">Email Address:</label>
+                            <input type="email" id="email_address" name="email_address">
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="rendered_email">Rendered Email:</label>
+                            <input type="email" id="rendered_email" name="rendered_email">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="onboarding_phone">Phone Number:</label>
+                    <input type="tel" id="onboarding_phone" name="onboarding_phone">
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer Section -->
+        <div class="section">
+            <div class="section-header">
+                <h2>Footer</h2>
+                <button type="button" class="collapse-toggle">−</button>
+            </div>
+            <div class="section-content">
+                <div class="form-group">
+                    <label for="rendered_footer_slogan">Footer Slogan:</label>
+                    <textarea id="rendered_footer_slogan" name="rendered_footer_slogan" rows="3"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="current_year">Current Year:</label>
+                    <input type="text" id="current_year" name="current_year">
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Miscellaneous Tab -->
+    <div id="misc-content">
+        <!-- Onboarding Information Section -->
+        <div class="section">
+            <div class="section-header">
+                <h2>Onboarding Information</h2>
+                <button type="button" class="collapse-toggle">−</button>
+            </div>
+            <div class="section-content">
+                <div class="form-group">
+                    <label for="content_goals">Content Goals:</label>
+                    <textarea id="content_goals" name="content_goals" rows="4"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="success_definition">Success Definition:</label>
+                    <textarea id="success_definition" name="success_definition" rows="4"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="workshop_themes_challenges">Workshop Themes & Challenges:</label>
+                    <textarea id="workshop_themes_challenges" name="workshop_themes_challenges" rows="4"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="onboarding_created_at">Onboarding Created At:</label>
+                    <input type="datetime-local" id="onboarding_created_at" name="onboarding_created_at">
+                </div>
+            </div>
+        </div>
+        
+        <!-- Other Fields Section -->
+        <div class="section">
+            <div class="section-header">
+                <h2>Other Fields</h2>
+                <button type="button" class="collapse-toggle">−</button>
+            </div>
+            <div class="section-content">
+                <div class="form-group">
+                    <label for="test_key">Test Key:</label>
+                    <input type="text" id="test_key" name="test_key">
+                </div>
+                
+                <!-- Placeholder for any additional fields that might be added in the future -->
+                <div id="additional-fields"></div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

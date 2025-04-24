@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Site Content Editor (v1 Client)</title>
+    <!-- Load Supabase v1 client directly -->
+    <script src="https://unpkg.com/@supabase/supabase-js@1.35.7"></script>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            background: #f5f5f5;
+        }
+        .section {
+            background: white;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            margin-top: 0;
+        }
+        .status {
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1rem 0;
+        }
+        .success { 
+            background: #d4edda;
+            color: #155724;
+        }
+        .error { 
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .info {
+            background: #e3f2fd;
+            color: #0d47a1;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 4px;
+            overflow: auto;
+            max-height: 300px;
+        }
+        button {
+            background: #3399FF;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-top: 1rem;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+        select {
+            padding: 0.5rem;
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="section">
+        <h1>Content Editor (v1 Client)</h1>
+        <p>This version uses Supabase v1 client library which may have different connection handling.</p>
+        
+        <div>
+            <label for="project-select">Select Project:</label>
+            <select id="project-select">
+                <option value="">Loading projects...</option>
+            </select>
+        </div>
+        
+        <button id="load-button">Load Selected Project</button>
+        
+        <div id="status" class="status info">Ready to load projects</div>
+        
+        <h2>Project Content</h2>
+        <pre id="content-display"></pre>
+    </div>
+
+    <script>
+        // Initialize Supabase client
+        const SUPABASE_URL = 'https://aqicztygjpmunfljjuto.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxaWN6dHlnanBtdW5mbGpqdXRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3MDU1ODIsImV4cCI6MjA1OTI4MTU4Mn0.5e2hvTckSSbTFLBjQiccrvjoBd6QQDX0X4tccFOc1rs';
+        
+        // Elements
+        const statusElement = document.getElementById('status');
+        const projectSelect = document.getElementById('project-select');
+        const contentDisplay = document.getElementById('content-display');
+        const loadButton = document.getElementById('load-button');
+        
+        // Create Supabase client
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        
+        // Load projects
+        async function loadProjects() {
+            try {
+                statusElement.textContent = 'Loading projects...';
+                statusElement.className = 'status info';
+                
+                const { data, error } = await supabase
+                    .from('dynamic_content')
+                    .select('project_id')
+                    .order('project_id');
+                
+                if (error) throw error;
+                
+                // Get unique project IDs
+                const projectIds = [...new Set(data.map(item => item.project_id))];
+                
+                // Clear existing options
+                projectSelect.innerHTML = '<option value="">Select a project</option>';
+                
+                // Add options for each project
+                projectIds.forEach(projectId => {
+                    const option = document.createElement('option');
+                    option.value = projectId;
+                    option.textContent = projectId;
+                    projectSelect.appendChild(option);
+                });
+                
+                statusElement.textContent = `Loaded ${projectIds.length} projects`;
+                statusElement.className = 'status success';
+                
+            } catch (error) {
+                console.error('Error loading projects:', error);
+                statusElement.textContent = 'Error loading projects: ' + error.message;
+                statusElement.className = 'status error';
+            }
+        }
+        
+        // Load content for a project
+        async function loadContent(projectId) {
+            try {
+                if (!projectId) {
+                    statusElement.textContent = 'Please select a project';
+                    statusElement.className = 'status error';
+                    return;
+                }
+                
+                statusElement.textContent = `Loading content for project: ${projectId}...`;
+                statusElement.className = 'status info';
+                contentDisplay.textContent = '';
+                
+                const { data, error } = await supabase
+                    .from('dynamic_content')
+                    .select('*')
+                    .eq('project_id', projectId);
+                
+                if (error) throw error;
+                
+                if (!data || data.length === 0) {
+                    statusElement.textContent = `No content found for project: ${projectId}`;
+                    statusElement.className = 'status error';
+                    return;
+                }
+                
+                // Display content
+                contentDisplay.textContent = JSON.stringify(data, null, 2);
+                
+                statusElement.textContent = `Loaded ${data.length} content items for project: ${projectId}`;
+                statusElement.className = 'status success';
+                
+            } catch (error) {
+                console.error('Error loading content:', error);
+                statusElement.textContent = 'Error loading content: ' + error.message;
+                statusElement.className = 'status error';
+            }
+        }
+        
+        // Event listeners
+        loadButton.addEventListener('click', function() {
+            const selectedProject = projectSelect.value;
+            loadContent(selectedProject);
+        });
+        
+        // Load projects on page load
+        document.addEventListener('DOMContentLoaded', loadProjects);
+    </script>
+</body>
+</html>

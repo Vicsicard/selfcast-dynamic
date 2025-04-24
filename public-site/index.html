@@ -3,342 +3,1850 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title data-key="rendered_title"></title>
-    <link rel="stylesheet" href="style.css">
-    <style id="dynamic-theme"></style>
-    <!-- Supabase Client Library -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- Initialize Supabase Client -->
-    <script>
-      // Supabase Configuration (hardcoded to ensure consistency)
-      const SUPABASE_URL = 'https://aqicztygjpmunfljjuto.supabase.co';
-      const SUPABASE_PROJECT_ID = 'aqicztygjpmunfljjuto';
-      const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxaWN6dHlnanBtdW5mbGpqdXRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3MDU1ODIsImV4cCI6MjA1OTI4MTU4Mn0.5e2hvTckSSbTFLBjQiccrvjoBd6QQDX0X4tccFOc1rs';
-      
-      // Initialize Supabase client with hardcoded credentials
-      window.supabase = window.supabase.createClient(
-        SUPABASE_URL,
-        SUPABASE_ANON_KEY
-      );
-    </script>
-    <!-- Site Scripts -->
-    <script src="script.js"></script>
+    <title>Site Content Editor</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            background: #f5f5f5;
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            color: #333;
+        }
+        input[type="text"],
+        input[type="email"],
+        input[type="url"],
+        textarea {
+            width: 100%;
+            padding: 0.5rem;
+            margin-bottom: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        textarea {
+            min-height: 100px;
+            font-family: inherit;
+        }
+        .color-input {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .color-input input[type="color"] {
+            width: 50px;
+            height: 50px;
+            padding: 0;
+            border: none;
+        }
+        .section {
+            background: white;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .section h2 {
+            margin-top: 0;
+            color: #333;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 0.5rem;
+        }
+        button {
+            background: #3399FF;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+        .status {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 4px;
+        }
+        .success { 
+            background: #d4edda;
+            color: #155724;
+        }
+        .error { 
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .profile-upload {
+            margin-top: 1rem;
+        }
+        .image-preview {
+            margin: 0.5rem 0;
+            background: #f8f9fa;
+            padding: 0.5rem;
+            border-radius: 4px;
+        }
+        .image-preview img {
+            max-width: 150px;
+            max-height: 150px;
+            display: block;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: #eee;
+            margin-top: 0.5rem;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        .progress-bar div {
+            height: 100%;
+            background: #3399FF;
+            width: 0;
+            transition: width 0.3s ease;
+        }
+        .style-preview {
+            margin-top: 1rem;
+        }
+        .color-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 1rem;
+        }
+        .color-sample {
+            padding: 1rem;
+            border-radius: 4px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+        .color-sample span {
+            font-size: 0.75rem;
+        }
+        .primary-color {
+            background: #3498db;
+        }
+        .secondary-color {
+            background: #f1c40f;
+        }
+        .accent-color {
+            background: #e74c3c;
+        }
+        .text-color {
+            background: #333;
+        }
+        .background-color {
+            background: #f9f9f9;
+        }
+        .font-preview {
+            margin-top: 1rem;
+        }
+        .preview-heading {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        .preview-body {
+            font-size: 1rem;
+        }
+        .social-section {
+            margin-bottom: 2rem;
+        }
+        .post-preview {
+            margin-top: 1rem;
+            padding: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .upload-media-btn {
+            margin-top: 1rem;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            background: #3399FF;
+            color: white;
+        }
+        .upload-media-btn:hover {
+            background: #2980b9;
+        }
+        .character-count {
+            font-size: 0.75rem;
+            color: #666;
+        }
+        .blog-section {
+            margin-bottom: 2rem;
+        }
+        .action-button {
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 0.5rem;
+        }
+        .action-button:hover {
+            background-color: #5a6268;
+        }
+        .form-actions {
+            margin-top: 2rem;
+            text-align: center;
+        }
+        .form-actions button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 0.75rem 2rem;
+            font-size: 1.1rem;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .form-actions button:hover {
+            background-color: #0069d9;
+        }
+        .help-text {
+            font-size: 0.75rem;
+            color: #666;
+            margin-top: 0.25rem;
+        }
+        .style-package-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .style-button {
+            flex: 1;
+            padding: 15px;
+            border: 3px solid transparent;
+            border-radius: 8px;
+            background: #fff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .style-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        .style-button.active {
+            border-color: #333;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            transform: translateY(-3px);
+        }
+        .style-button span {
+            position: relative;
+            z-index: 2;
+            font-weight: bold;
+        }
+        .style-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.85;
+            z-index: 1;
+        }
+        .standard-style::before {
+            background: #3498db;
+        }
+        .standard-style span {
+            color: white;
+        }
+        .dark-style::before {
+            background: #2c3e50;
+        }
+        .dark-style span {
+            color: white;
+        }
+        .light-style::before {
+            background: #f1c40f;
+        }
+        .light-style span {
+            color: #333;
+        }
+        .green-style::before {
+            background: #28a745;
+        }
+        .green-style span {
+            color: white;
+        }
+        .red-style::before {
+            background: #dc3545;
+        }
+        .red-style span {
+            color: white;
+        }
+        /* View Site Button */
+        .view-site-button {
+            background: linear-gradient(135deg, #4a90e2, #5637d7);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(86, 55, 215, 0.3);
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .view-site-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(86, 55, 215, 0.4);
+            background: linear-gradient(135deg, #5a9ff2, #6647e7);
+        }
+
+        .view-site-button:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 8px rgba(86, 55, 215, 0.4);
+        }
+
+        .view-site-button::after {
+            content: "→";
+            margin-left: 8px;
+            font-size: 18px;
+            transition: transform 0.2s ease;
+        }
+
+        .view-site-button:hover::after {
+            transform: translateX(4px);
+        }
+        
+        /* Success Message Styles */
+        .success-message {
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        .checkmark {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: inline-block;
+            stroke-width: 2;
+            stroke-linecap: round;
+            margin: 0 auto;
+        }
+        .checkmark-circle {
+            stroke-dasharray: 166;
+            stroke-dashoffset: 166;
+            stroke-width: 2;
+            stroke-miterlimit: 10;
+            stroke: #155724;
+            fill: none;
+            animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+        }
+        .checkmark-check {
+            transform-origin: 50% 50%;
+            stroke-dasharray: 48;
+            stroke-dashoffset: 48;
+            animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards;
+            stroke: #155724;
+            fill: none;
+        }
+        @keyframes stroke {
+            100% {
+                stroke-dashoffset: 0;
+            }
+        }
+    </style>
 </head>
 <body>
-    <!-- Site Wrapper -->
-    <div class="site-wrapper">
-        <!-- Hero Section -->
-        <section class="hero">
-            <div class="parallax-layer layer-back"></div>
-            <div class="parallax-layer layer-mid"></div>
-            <div class="floating-elements">
-                <div class="float-circle float-1"></div>
-                <div class="float-circle float-2"></div>
-                <div class="float-square float-3"></div>
-                <div class="float-triangle float-4"></div>
-                <div class="float-dot float-5"></div>
-                <div class="float-dot float-6"></div>
-            </div>
-            <div class="hero-content">
-                <div class="hero-text">
-                    <h1 data-key="rendered_title"></h1>
-                    <p data-key="rendered_subtitle"></p>
+    <div class="section">
+        <h1>Site Content Editor</h1>
+        
+        <form id="contentForm">
+            <!-- Project Selection -->
+            <div class="form-group">
+                <label for="project_id">Project ID:</label>
+                <select name="project_id" id="project_id" required>
+                    <option value="">Select Project</option>
+                    <option value="new">+ Create New Project</option>
+                </select>
+                <div id="new-project-form" style="display: none; margin-top: 1rem;">
+                    <input type="text" id="new-project-id" placeholder="Enter new project ID (e.g., client-name)" 
+                           pattern="[a-z0-9-]+" title="Only lowercase letters, numbers, and hyphens allowed">
+                    <button type="button" onclick="createNewProject()" style="background: #28a745;">Create Project</button>
                 </div>
-                <div class="hero-image">
-                    <div class="profile-image-container">
-                        <img data-key="profile_image_url" src="" alt="Profile" class="profile-image">
+            </div>
+
+            <!-- Basic Information -->
+            <div class="section">
+                <h2>Basic Information</h2>
+                <div class="form-group">
+                    <label for="client_name">Name:</label>
+                    <input type="text" name="client_name" id="client_name" required>
+                    
+                    <div class="profile-upload">
+                        <label>Profile Image URL:</label>
+                        <div class="image-preview">
+                            <img id="profile-preview" src="" alt="" style="display: none;">
+                        </div>
+                        <div class="form-group" style="margin-top: 0.5rem;">
+                            <label for="profile_image_url">Profile Image URL:</label>
+                            <input type="url" name="profile_image_url" id="profile_image_url" placeholder="https://example.com/image.jpg">
+                            <small>Enter direct image URL or use file upload below</small>
+                        </div>
+                        <p style="margin: 0.5rem 0;">-- OR --</p>
+                        <label>Upload Image File:</label>
+                        <input type="file" id="profile-upload" accept="image/*">
+                        <div class="progress-bar"><div></div></div>
                     </div>
                 </div>
+                <div class="form-group">
+                    <label for="rendered_title">Page Title:</label>
+                    <input type="text" name="rendered_title" id="rendered_title" required>
+                </div>
+                <div class="form-group">
+                    <label for="rendered_subtitle">Subtitle/Tagline:</label>
+                    <input type="text" name="rendered_subtitle" id="rendered_subtitle">
+                </div>
             </div>
-            <div class="wave-divider">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 100" preserveAspectRatio="none">
-                    <path fill="#ffffff" d="M0,0 C240,95 480,100 720,85 C960,70 1200,40 1440,95 L1440,100 L0,100 Z"></path>
-                </svg>
-            </div>
-        </section>
 
-        <!-- Bio Section -->
-        <section class="bio">
-            <div class="bio-background">
-                <div class="bio-shape shape1"></div>
-                <div class="bio-shape shape2"></div>
-                <div class="bio-shape shape3"></div>
+            <!-- Bio Content -->
+            <div class="section">
+                <h2>Bio Content</h2>
+                <div class="form-group">
+                    <label for="rendered_bio_html">Bio:</label>
+                    <textarea name="rendered_bio_html" id="rendered_bio_html" rows="6" placeholder="Enter your bio..."></textarea>
+                </div>
+
+                <!-- Bio Cards -->
+                <div class="form-group">
+                    <label for="rendered_bio_html_card_1">Bio Card 1 (Mind):</label>
+                    <textarea name="rendered_bio_html_card_1" id="rendered_bio_html_card_1" rows="4" placeholder="Enter content for Mind card..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="rendered_bio_html_card_2">Bio Card 2 (Body):</label>
+                    <textarea name="rendered_bio_html_card_2" id="rendered_bio_html_card_2" rows="4" placeholder="Enter content for Body card..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="rendered_bio_html_card_3">Bio Card 3 (Soul):</label>
+                    <textarea name="rendered_bio_html_card_3" id="rendered_bio_html_card_3" rows="4" placeholder="Enter content for Soul card..."></textarea>
+                </div>
             </div>
-            <div class="bio-container">
-                <h2 class="section-title">About</h2>
-                <div class="bio-main-content">
-                    <div data-key="rendered_bio_html" class="bio-text"></div>
+
+            <!-- Quote Cards -->
+            <div class="section">
+                <h2>Inspirational Quotes</h2>
+                <div class="form-group">
+                    <label for="quote_1">Quote 1 (After Bio):</label>
+                    <textarea name="quote_1" id="quote_1" placeholder="Enter an inspirational quote..." maxlength="200"></textarea>
+                    <p class="help-text">This quote will appear between the Bio and Blog sections.</p>
+                </div>
+                <div class="form-group">
+                    <label for="quote_2">Quote 2 (After Blog):</label>
+                    <textarea name="quote_2" id="quote_2" placeholder="Enter an inspirational quote..." maxlength="200"></textarea>
+                    <p class="help-text">This quote will appear between the Blog and Social Media sections.</p>
+                </div>
+                <div class="form-group">
+                    <label for="quote_3">Quote 3 (After Social Media):</label>
+                    <textarea name="quote_3" id="quote_3" placeholder="Enter an inspirational quote..." maxlength="200"></textarea>
+                    <p class="help-text">This quote will appear between the Social Media and Connect sections.</p>
+                </div>
+            </div>
+
+            <!-- Brand & Style -->
+            <div class="section">
+                <h2>Brand & Style</h2>
+                <div class="form-group">
+                    <label>Style Package:</label>
+                    <div class="style-package-selector">
+                        <button type="button" class="style-button standard-style active" data-style="standard-professional" onclick="applyStylePreset('standard-professional')">
+                            <span>Blue</span>
+                        </button>
+                        <button type="button" class="style-button dark-style" data-style="dark-professional" onclick="applyStylePreset('dark-professional')">
+                            <span>Black</span>
+                        </button>
+                        <button type="button" class="style-button light-style" data-style="light-professional" onclick="applyStylePreset('light-professional')">
+                            <span>Gold</span>
+                        </button>
+                        <button type="button" class="style-button green-style" data-style="green-professional" onclick="applyStylePreset('green-professional')">
+                            <span>Green</span>
+                        </button>
+                        <button type="button" class="style-button red-style" data-style="red-professional" onclick="applyStylePreset('red-professional')">
+                            <span>Red</span>
+                        </button>
+                    </div>
+                    <input type="hidden" name="style_package" id="style_package" value="standard-professional">
+                </div>
+
+                <!-- Font Selection -->
+                <div class="form-group">
+                    <label for="heading_font_select">Heading Font:</label>
+                    <select id="heading_font_select" onchange="updateFont('heading')">
+                        <option value="Montserrat">Montserrat</option>
+                        <option value="Raleway">Raleway</option>
+                        <option value="Playfair Display">Playfair Display</option>
+                        <option value="Roboto Slab">Roboto Slab</option>
+                        <option value="Merriweather">Merriweather</option>
+                        <option value="Poppins">Poppins</option>
+                        <option value="Oswald">Oswald</option>
+                        <option value="Lora">Lora</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="body_font_select">Body Font:</label>
+                    <select id="body_font_select" onchange="updateFont('body')">
+                        <option value="Open Sans">Open Sans</option>
+                        <option value="Roboto">Roboto</option>
+                        <option value="Lato">Lato</option>
+                        <option value="Source Sans Pro">Source Sans Pro</option>
+                        <option value="Nunito">Nunito</option>
+                        <option value="Work Sans">Work Sans</option>
+                        <option value="PT Sans">PT Sans</option>
+                        <option value="Mulish">Mulish</option>
+                    </select>
+                </div>
+
+                <!-- Hidden inputs to store the actual values -->
+                <input type="hidden" name="primary_color" id="primary_color">
+                <input type="hidden" name="secondary_color" id="secondary_color">
+                <input type="hidden" name="accent_color" id="accent_color">
+                <input type="hidden" name="text_color" id="text_color">
+                <input type="hidden" name="background_color" id="background_color">
+                <input type="hidden" name="heading_font" id="heading_font">
+                <input type="hidden" name="body_font" id="body_font">
+            </div>
+
+            <!-- Blog Posts -->
+            <div class="section">
+                <h2>Blog Posts</h2>
+                
+                <!-- Blog Post 1 -->
+                <div class="blog-section">
+                    <h3>Blog Post 1</h3>
+                    <div class="form-group">
+                        <label for="blog_post_1_title">Title:</label>
+                        <input type="text" name="blog_post_1_title" id="blog_post_1_title" placeholder="Blog Post Title">
+                    </div>
+                    <div class="form-group">
+                        <label for="blog_post_1_description">Description (will be shown as preview):</label>
+                        <textarea name="blog_post_1_description" id="blog_post_1_description" placeholder="A brief description of your blog post (150-200 characters recommended)" maxlength="300"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="blog_post_1">Full Content:</label>
+                        <textarea name="blog_post_1" id="blog_post_1" placeholder="Your full blog post content here..."></textarea>
+                    </div>
                 </div>
                 
-                <!-- Bio Cards - Restructured for better alignment -->
-                <div class="bio-cards-container">
-                    <div class="bio-cards-row">
-                        <div class="bio-card">
-                            <div class="bio-card-icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="none" d="M0 0h24v24H0z"/><path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm0-2a8 8 0 1 0 0-16 8 8 0 0 0 0 16zm-.997-4L6.76 11.757l1.414-1.414 2.829 2.829 5.656-5.657 1.415 1.414L11.003 16z"/></svg>
-                            </div>
-                            <div data-key="rendered_bio_html_card_1" class="bio-card-content"></div>
-                        </div>
-                        <div class="bio-card">
-                            <div class="bio-card-icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="none" d="M0 0h24v24H0z"/><path d="M19.606 6.995c-.076-.298-.292-.523-.539-.592C18.63 6.28 16.5 6 12 6s-6.628.28-7.069.403c-.244.068-.46.293-.537.592C4.285 7.419 4 9.196 4 12s.285 4.58.394 5.006c.076.297.292.522.538.59C5.372 17.72 7.5 18 12 18s6.629-.28 7.069-.403c.244-.068.46-.293.537-.592C19.715 16.581 20 14.8 20 12s-.285-4.58-.394-5.005zm1.937-.497C22 8.28 22 12 22 12s0 3.72-.457 5.502c-.254.985-.997 1.76-1.938 2.022C17.896 20 12 20 12 20s-5.893 0-7.605-.476c-.945-.266-1.687-1.04-1.938-2.022C2 15.72 2 12 2 12s0-3.72.457-5.502c.254-.985.997-1.76 1.938-2.022C6.107 4 12 4 12 4s5.896 0 7.605.476c.945.266 1.687 1.04 1.938 2.022zM10 15.5v-7l6 3.5-6 3.5z"/></svg>
-                            </div>
-                            <div data-key="rendered_bio_html_card_2" class="bio-card-content"></div>
-                        </div>
-                        <div class="bio-card">
-                            <div class="bio-card-icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="none" d="M0 0h24v24H0z"/><path d="M20 22H4a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1zm-1-2V4H5v16h14zM8 7h8v2H8V7zm0 4h8v2H8v-2zm0 4h8v2H8v-2z"/></svg>
-                            </div>
-                            <div data-key="rendered_bio_html_card_3" class="bio-card-content"></div>
-                        </div>
+                <!-- Blog Post 2 -->
+                <div class="blog-section">
+                    <h3>Blog Post 2</h3>
+                    <div class="form-group">
+                        <label for="blog_post_2_title">Title:</label>
+                        <input type="text" name="blog_post_2_title" id="blog_post_2_title" placeholder="Blog Post Title">
+                    </div>
+                    <div class="form-group">
+                        <label for="blog_post_2_description">Description (will be shown as preview):</label>
+                        <textarea name="blog_post_2_description" id="blog_post_2_description" placeholder="A brief description of your blog post (150-200 characters recommended)" maxlength="300"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="blog_post_2">Full Content:</label>
+                        <textarea name="blog_post_2" id="blog_post_2" placeholder="Your full blog post content here..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Blog Post 3 -->
+                <div class="blog-section">
+                    <h3>Blog Post 3</h3>
+                    <div class="form-group">
+                        <label for="blog_post_3_title">Title:</label>
+                        <input type="text" name="blog_post_3_title" id="blog_post_3_title" placeholder="Blog Post Title">
+                    </div>
+                    <div class="form-group">
+                        <label for="blog_post_3_description">Description (will be shown as preview):</label>
+                        <textarea name="blog_post_3_description" id="blog_post_3_description" placeholder="A brief description of your blog post (150-200 characters recommended)" maxlength="300"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="blog_post_3">Full Content:</label>
+                        <textarea name="blog_post_3" id="blog_post_3" placeholder="Your full blog post content here..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Blog Post 4 -->
+                <div class="blog-section">
+                    <h3>Blog Post 4</h3>
+                    <div class="form-group">
+                        <label for="blog_post_4_title">Title:</label>
+                        <input type="text" name="blog_post_4_title" id="blog_post_4_title" placeholder="Blog Post Title">
+                    </div>
+                    <div class="form-group">
+                        <label for="blog_post_4_description">Description (will be shown as preview):</label>
+                        <textarea name="blog_post_4_description" id="blog_post_4_description" placeholder="A brief description of your blog post (150-200 characters recommended)" maxlength="300"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="blog_post_4">Full Content:</label>
+                        <textarea name="blog_post_4" id="blog_post_4" placeholder="Your full blog post content here..."></textarea>
                     </div>
                 </div>
             </div>
-        </section>
 
-        <!-- Quote Card 1 -->
-        <div class="quote-card">
-            <div class="quote-content">
-                <p class="quote-text" data-key="quote_1"></p>
-            </div>
-        </div>
-
-        <!-- Blog Section Divider -->
-        <div class="section-divider blog-divider">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 100" preserveAspectRatio="none">
-                <path class="divider-fill" d="M0,40 C320,100 420,0 720,50 C1020,100 1200,20 1440,80 L1440,100 L0,100 Z"></path>
-            </svg>
-        </div>
-
-        <!-- Blog Grid -->
-        <section class="blog-grid">
-            <h2>Blog Posts</h2>
-            <div class="grid-2x2">
-                <div class="grid-item blog-card">
-                    <h3 class="blog-title" data-key="blog_post_1_title"></h3>
-                    <p class="excerpt blog-excerpt" data-key="blog_post_1_description"></p>
-                    <button class="action-button" onclick="openModal('blog-1')">Read More</button>
-                </div>
-                <div class="grid-item blog-card">
-                    <h3 class="blog-title" data-key="blog_post_2_title"></h3>
-                    <p class="excerpt blog-excerpt" data-key="blog_post_2_description"></p>
-                    <button class="action-button" onclick="openModal('blog-2')">Read More</button>
-                </div>
-                <div class="grid-item blog-card">
-                    <h3 class="blog-title" data-key="blog_post_3_title"></h3>
-                    <p class="excerpt blog-excerpt" data-key="blog_post_3_description"></p>
-                    <button class="action-button" onclick="openModal('blog-3')">Read More</button>
-                </div>
-                <div class="grid-item blog-card">
-                    <h3 class="blog-title" data-key="blog_post_4_title"></h3>
-                    <p class="excerpt blog-excerpt" data-key="blog_post_4_description"></p>
-                    <button class="action-button" onclick="openModal('blog-4')">Read More</button>
+            <!-- Contact Information -->
+            <div class="section">
+                <h2>Contact Information</h2>
+                <div class="form-group">
+                    <label for="email_address">Email Address:</label>
+                    <input type="email" name="email_address" id="email_address" placeholder="example@email.com">
+                    <p class="help-text">This email will be used for the contact button in the Connect section.</p>
                 </div>
             </div>
-        </section>
 
-        <!-- Blog Post Modals -->
-        <div id="blog-1" class="modal">
-            <div class="modal-content">
-                <span class="close" onclick="closeModal('blog-1')">&times;</span>
-                <h2 data-key="blog_post_1_title"></h2>
-                <div class="blog-content" data-key="blog_post_1"></div>
-            </div>
-        </div>
-
-        <div id="blog-2" class="modal">
-            <div class="modal-content">
-                <span class="close" onclick="closeModal('blog-2')">&times;</span>
-                <h2 data-key="blog_post_2_title"></h2>
-                <div class="blog-content" data-key="blog_post_2"></div>
-            </div>
-        </div>
-
-        <div id="blog-3" class="modal">
-            <div class="modal-content">
-                <span class="close" onclick="closeModal('blog-3')">&times;</span>
-                <h2 data-key="blog_post_3_title"></h2>
-                <div class="blog-content" data-key="blog_post_3"></div>
-            </div>
-        </div>
-
-        <div id="blog-4" class="modal">
-            <div class="modal-content">
-                <span class="close" onclick="closeModal('blog-4')">&times;</span>
-                <h2 data-key="blog_post_4_title"></h2>
-                <div class="blog-content" data-key="blog_post_4"></div>
-            </div>
-        </div>
-
-        <!-- Quote Card 2 -->
-        <div class="quote-card">
-            <div class="quote-content">
-                <p class="quote-text" data-key="quote_2"></p>
-            </div>
-        </div>
-
-        <!-- Social Media Section Divider -->
-        <div class="section-divider social-divider">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 100" preserveAspectRatio="none">
-                <path class="divider-fill" d="M0,60 C240,20 480,80 720,40 C960,0 1200,60 1440,30 L1440,100 L0,100 Z"></path>
-            </svg>
-        </div>
-
-        <!-- Social Media Posts -->
-        <section class="social-posts">
-            <h2>Latest Updates</h2>
-            <div class="grid-2x2">
-                <div class="grid-item social-card facebook">
-                    <div class="social-card-header">
-                        <div class="social-card-icon">
-                            <svg class="social-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512">
-                                <path fill="currentColor" d="M279.14 288l14.22-92.66h-88.91v-60.13c0-25.35 12.42-50.06 52.24-50.06h40.42V6.26S260.43 0 225.36 0c-73.22 0-121.08 44.38-121.08 124.72v70.62H22.89V288h81.39v224h100.17V288z"/>
-                            </svg>
-                        </div>
-                        <h3 class="social-title" data-key="facebook_title"></h3>
+            <!-- Social Media Feed -->
+            <div class="section">
+                <h2>Social Media Feed</h2>
+                
+                <!-- Facebook -->
+                <div class="social-section">
+                    <h3>Facebook</h3>
+                    <div class="form-group">
+                        <label for="facebook_url">Profile URL:</label>
+                        <input type="url" name="facebook_url" id="facebook_url" placeholder="https://facebook.com/username">
                     </div>
-                    <p class="excerpt social-excerpt" data-key="facebook_excerpt"></p>
-                    <button class="action-button" onclick="openModal('facebook')">Read More</button>
-                </div>
-                <div class="grid-item social-card twitter">
-                    <div class="social-card-header">
-                        <div class="social-card-icon">
-                            <svg class="social-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-                                <path fill="currentColor" d="M459.37 151.716c.325 4.548.325 9.097.325 13.645 0 138.72-105.583 298.558-298.558 298.558-59.452 0-114.68-17.219-161.137-47.106 8.447.974 16.568 1.299 25.34 1.299 49.055 0 94.213-16.568 130.274-44.832-46.132-.975-84.792-31.188-98.112-72.772 6.498.974 12.995 1.624 19.818 1.624 9.421 0 18.843-1.3 27.614-3.573-48.081-9.747-84.143-51.98-84.143-102.985v-1.299c13.969 7.797 30.214 12.67 47.431 13.319-28.264-18.843-46.781-51.005-46.781-87.391 0-19.492 5.197-37.36 14.294-52.954 51.655 63.675 129.3 105.258 216.365 109.807-1.624-7.797-2.599-15.918-2.599-24.04 0-57.828 46.782-104.934 104.934-104.934 30.213 0 57.502 12.67 76.67 33.137 23.715-4.548 46.456-13.32 66.599-25.34-7.798 24.366-24.366 44.833-46.132 57.827 21.117-2.273 41.584-8.122 60.426-16.243-14.292 20.791-32.161 39.308-52.628 54.253z"/>
-                            </svg>
-                        </div>
-                        <h3 class="social-title" data-key="twitter_title"></h3>
+                    <div class="form-group">
+                        <label for="facebook_title">Title:</label>
+                        <input type="text" name="facebook_title" id="facebook_title" placeholder="Facebook" value="Facebook">
+                        <p class="help-text">This will appear as the title of your Facebook card and post.</p>
                     </div>
-                    <p class="excerpt social-excerpt" data-key="twitter_excerpt"></p>
-                    <button class="action-button" onclick="openModal('twitter')">Read More</button>
-                </div>
-                <div class="grid-item social-card instagram">
-                    <div class="social-card-header">
-                        <div class="social-card-icon">
-                            <svg class="social-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
-                                <path fill="currentColor" d="M224.1 141c-63.6 0-114.9 51.3-114.9 114.9s51.3 114.9 114.9 114.9S339 319.5 339 255.9 287.7 141 224.1 141zm0 189.6c-41.1 0-74.7-33.5-74.7-74.7s33.5-74.7 74.7-74.7 74.7 33.5 74.7 74.7-33.6 74.7-74.7 74.7zm146.4-194.3c0 14.9-12 26.8-26.8 26.8-14.9 0-26.8-12-26.8-26.8s12-26.8 26.8-26.8 26.8 12 26.8 26.8zm76.1 27.2c-1.7-35.9-9.9-67.7-36.2-93.9-26.2-26.2-58-34.4-93.9-36.2-37-2.1-147.9-2.1-184.9 0-35.8 1.7-67.6 9.9-93.9 36.1s-34.4 58-36.2 93.9c-2.1 37-2.1 147.9 0 184.9 1.7 35.9 9.9 67.7 36.2 93.9s58 34.4 93.9 36.2c37 2.1 147.9 2.1 184.9 0 35.9-1.7 67.7-9.9 93.9-36.2 26.2-26.2 34.4-58 36.2-93.9 2.1-37 2.1-147.8 0-184.8zM398.8 388c-7.8 19.6-22.9 34.7-42.6 42.6-29.5 11.7-99.5 9-132.1 9s-102.7 2.6-132.1-9c-19.6-7.8-34.7-22.9-42.6-42.6-11.7-29.5-9-99.5-9-132.1s-2.6-102.7 9-132.1c7.8-19.6 22.9-34.7 42.6-42.6 29.5-11.7 99.5-9 132.1-9s102.7-2.6 132.1 9c19.6 7.8 34.7 22.9 42.6 42.6 11.7 29.5 9 99.5 9 132.1s2.7 102.7-9 132.1z"/>
-                            </svg>
-                        </div>
-                        <h3 class="social-title" data-key="instagram_title"></h3>
+                    <div class="form-group">
+                        <label for="facebook_post">Facebook Post: <span class="character-count">0/1000 characters</span></label>
+                        <textarea name="facebook_post" id="facebook_post" placeholder="Your Facebook post content here..." maxlength="1000"></textarea>
+                        <p class="help-text">This content will be displayed in your social media feed section. The first 150 characters will be shown as a preview.</p>
                     </div>
-                    <p class="excerpt social-excerpt" data-key="instagram_excerpt"></p>
-                    <button class="action-button" onclick="openModal('instagram')">Read More</button>
                 </div>
-                <div class="grid-item social-card linkedin">
-                    <div class="social-card-header">
-                        <div class="social-card-icon">
-                            <svg class="social-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
-                                <path fill="currentColor" d="M100.28 448H7.4V148.9h92.88zM53.79 108.1C24.09 108.1 0 83.5 0 53.8a53.79 53.79 0 0 1 107.58 0c0 29.7-24.1 54.3-53.79 54.3zM447.9 448h-92.68V302.4c0-34.7-.7-79.2-48.29-79.2-48.29 0-55.69 37.7-55.69 76.7V448h-92.78V148.9h89.08v40.8h1.3c12.4-23.5 42.69-48.3 87.88-48.3 94 0 111.28 61.9 111.28 142.3V448z"/>
-                            </svg>
-                        </div>
-                        <h3 class="social-title" data-key="linkedin_title"></h3>
+
+                <!-- Twitter -->
+                <div class="social-section">
+                    <h3>Twitter</h3>
+                    <div class="form-group">
+                        <label for="twitter_url">Profile URL:</label>
+                        <input type="url" name="twitter_url" id="twitter_url" placeholder="https://twitter.com/username">
                     </div>
-                    <p class="excerpt social-excerpt" data-key="linkedin_excerpt"></p>
-                    <button class="action-button" onclick="openModal('linkedin')">Read More</button>
+                    <div class="form-group">
+                        <label for="twitter_title">Title:</label>
+                        <input type="text" name="twitter_title" id="twitter_title" placeholder="Twitter" value="Twitter">
+                        <p class="help-text">This will appear as the title of your Twitter card and post.</p>
+                    </div>
+                    <div class="form-group">
+                        <label for="twitter_post">Twitter Post: <span class="character-count">0/1000 characters</span></label>
+                        <textarea name="twitter_post" id="twitter_post" placeholder="Your Twitter post content here..." maxlength="1000"></textarea>
+                        <p class="help-text">This content will be displayed in your social media feed section. The first 150 characters will be shown as a preview.</p>
+                    </div>
+                </div>
+
+                <!-- Instagram -->
+                <div class="social-section">
+                    <h3>Instagram</h3>
+                    <div class="form-group">
+                        <label for="instagram_url">Profile URL:</label>
+                        <input type="url" name="instagram_url" id="instagram_url" placeholder="https://instagram.com/username">
+                    </div>
+                    <div class="form-group">
+                        <label for="instagram_title">Title:</label>
+                        <input type="text" name="instagram_title" id="instagram_title" placeholder="Instagram" value="Instagram">
+                        <p class="help-text">This will appear as the title of your Instagram card and post.</p>
+                    </div>
+                    <div class="form-group">
+                        <label for="instagram_post">Instagram Post: <span class="character-count">0/1000 characters</span></label>
+                        <textarea name="instagram_post" id="instagram_post" placeholder="Your Instagram post content here..." maxlength="1000"></textarea>
+                        <p class="help-text">This content will be displayed in your social media feed section. The first 150 characters will be shown as a preview.</p>
+                    </div>
+                </div>
+
+                <!-- LinkedIn -->
+                <div class="social-section">
+                    <h3>LinkedIn</h3>
+                    <div class="form-group">
+                        <label for="linkedin_url">Profile URL:</label>
+                        <input type="url" name="linkedin_url" id="linkedin_url" placeholder="https://linkedin.com/in/username">
+                    </div>
+                    <div class="form-group">
+                        <label for="linkedin_title">Title:</label>
+                        <input type="text" name="linkedin_title" id="linkedin_title" placeholder="LinkedIn" value="LinkedIn">
+                        <p class="help-text">This will appear as the title of your LinkedIn card and post.</p>
+                    </div>
+                    <div class="form-group">
+                        <label for="linkedin_post">LinkedIn Post: <span class="character-count">0/1000 characters</span></label>
+                        <textarea name="linkedin_post" id="linkedin_post" placeholder="Your LinkedIn post content here..." maxlength="1000"></textarea>
+                        <p class="help-text">This content will be displayed in your social media feed section. The first 150 characters will be shown as a preview.</p>
+                    </div>
                 </div>
             </div>
-        </section>
 
-        <!-- Quote Card 3 -->
-        <div class="quote-card">
-            <div class="quote-content">
-                <p class="quote-text" data-key="quote_3"></p>
+            <!-- Footer -->
+            <div class="section">
+                <h2>Footer</h2>
+                <div class="form-group">
+                    <label for="rendered_footer_slogan">Footer Slogan:</label>
+                    <input type="text" name="rendered_footer_slogan" id="rendered_footer_slogan">
+                </div>
+                <input type="hidden" name="current_year" id="current_year" value="2025">
             </div>
-        </div>
 
-        <!-- Social Media Modals -->
-        <div id="facebook" class="modal">
-            <div class="modal-content">
-                <span class="close" onclick="closeModal('facebook')">&times;</span>
-                <h2 data-key="facebook_title"></h2>
-                <div class="social-content" data-key="facebook_post"></div>
-            </div>
-        </div>
-
-        <div id="twitter" class="modal">
-            <div class="modal-content">
-                <span class="close" onclick="closeModal('twitter')">&times;</span>
-                <h2 data-key="twitter_title"></h2>
-                <div class="social-content" data-key="twitter_post"></div>
-            </div>
-        </div>
-
-        <div id="instagram" class="modal">
-            <div class="modal-content">
-                <span class="close" onclick="closeModal('instagram')">&times;</span>
-                <h2 data-key="instagram_title"></h2>
-                <div class="social-content" data-key="instagram_post"></div>
-            </div>
-        </div>
-
-        <div id="linkedin" class="modal">
-            <div class="modal-content">
-                <span class="close" onclick="closeModal('linkedin')">&times;</span>
-                <h2 data-key="linkedin_title"></h2>
-                <div class="social-content" data-key="linkedin_post"></div>
-            </div>
-        </div>
-
-        <!-- Connect Section Divider -->
-        <div class="section-divider connect-divider">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 100" preserveAspectRatio="none">
-                <path class="divider-fill" d="M0,40 C240,80 480,20 720,60 C960,100 1200,30 1440,70 L1440,100 L0,100 Z"></path>
-            </svg>
-        </div>
-
-        <!-- Connect Section -->
-        <section class="connect">
-            <div class="floating-icons">
-                <div class="floating-icon facebook-icon"></div>
-                <div class="floating-icon twitter-icon"></div>
-                <div class="floating-icon instagram-icon"></div>
-                <div class="floating-icon linkedin-icon"></div>
-            </div>
-            <div class="connect-card">
-                <h2>Connect with Me</h2>
-                <p class="connect-subtitle">I would love to connect with you on social media!</p>
-                <div class="social-links">
-                    <a data-key="facebook_url" href="#" class="social-button facebook" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
-                        <span class="button-text" data-icon="f">f</span>
-                        <span class="sr-only">Facebook</span>
-                    </a>
-                    <a data-key="twitter_url" href="#" class="social-button twitter" target="_blank" rel="noopener noreferrer" aria-label="Twitter">
-                        <span class="button-text" data-icon="t">t</span>
-                        <span class="sr-only">Twitter</span>
-                    </a>
-                    <a data-key="instagram_url" href="#" class="social-button instagram" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
-                        <span class="button-text" data-icon="i">i</span>
-                        <span class="sr-only">Instagram</span>
-                    </a>
-                    <a data-key="linkedin_url" href="#" class="social-button linkedin" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
-                        <span class="button-text" data-icon="in">in</span>
-                        <span class="sr-only">LinkedIn</span>
-                    </a>
-                    <a data-key="email_address" href="#" class="social-button email" aria-label="Email">
-                        <span class="button-text" data-icon="@">@</span>
-                        <span class="sr-only">Email</span>
-                    </a>
+            <!-- Import/Export -->
+            <div class="section">
+                <h2>Import/Export</h2>
+                <div class="form-group">
+                    <label for="csv-upload">Import Content from CSV:</label>
+                    <input type="file" id="csv-upload" accept=".csv">
+                    <p><small>Upload a CSV file with project_id, key, value columns to quickly import content</small></p>
+                    <button type="button" id="import-csv-btn" class="action-button">Import CSV</button>
+                    <div id="import-status" class="status" style="display: none;"></div>
+                </div>
+                <div class="form-group">
+                    <button type="button" id="download-template-btn" class="action-button">Download CSV Template</button>
+                    <p><small>Download a template CSV file with all available fields</small></p>
                 </div>
             </div>
-        </section>
 
-        <!-- Footer Divider -->
-        <div class="footer-divider"></div>
-
-        <!-- Modal Structure -->
-        <div id="modal" class="modal">
-            <div class="modal-content">
-                <span class="close-button" onclick="closeModal()">&times;</span>
-                <div id="modal-title"></div>
-                <div id="modal-content"></div>
+            <div class="form-actions">
+                <button type="submit">Save Changes</button>
             </div>
-        </div>
+        </form>
 
-        <!-- Footer -->
-        <footer>
-            <p data-key="rendered_footer_slogan"></p>
-            <p class="copyright">&copy; 2025 All rights reserved <span data-key="email_domain"></span> - Built by <a href="https://www.selfcaststudios.com/" target="_blank" rel="noopener noreferrer">Self Cast Studio</a></p>
-        </footer>
+        <div id="status" class="status"></div>
+        
+        <!-- View Site Button (hidden by default) -->
+        <div id="view-site-container" style="display: none; margin-top: 20px; text-align: center;">
+            <div class="success-message">
+                <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+                    <circle class="checkmark-circle" cx="26" cy="26" r="25" fill="none"/>
+                    <path class="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+                </svg>
+                <p>Your site has been successfully updated!</p>
+            </div>
+            <button id="view-site-button" class="view-site-button">View Your Site</button>
+        </div>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script>
+        // Supabase Configuration with fallbacks
+        let SUPABASE_URL, SUPABASE_ANON_KEY, supabase;
+        
+        // Try to use the configuration from config.js
+        if (window.SUPABASE_CONFIG) {
+            console.log('Using Supabase config from config.js');
+            SUPABASE_URL = window.SUPABASE_CONFIG.url;
+            SUPABASE_ANON_KEY = window.SUPABASE_CONFIG.key;
+        } else {
+            // Fallback to hardcoded values
+            console.log('Using hardcoded Supabase config');
+            SUPABASE_URL = 'https://aqicztygjpmunfljjjuto.supabase.co';
+            SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxaWN6dHlnanBtdW5mbGpqdXRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3MDU1ODIsImV4cCI6MjA1OTI4MTU4Mn0.5e2hvTckSSbTFLBjQiccrvjoBd6QQDX0X4tccFOc1rs';
+        }
+        
+        // Clean up URL if needed (remove markdown formatting if present)
+        if (SUPABASE_URL.includes('](')) {
+            SUPABASE_URL = SUPABASE_URL.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '$2');
+        }
+        
+        console.log('Connecting to Supabase URL:', SUPABASE_URL);
+        
+        // Initialize Supabase client
+        try {
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            console.log('Supabase client initialized');
+        } catch (error) {
+            console.error('Error initializing Supabase client:', error);
+            document.getElementById('status').textContent = 'Error initializing database connection: ' + error.message;
+            document.getElementById('status').className = 'status error';
+        }
+        
+        // Add connection check
+        async function checkConnection() {
+            try {
+                const { data, error } = await supabase
+                    .from('dynamic_content')
+                    .select('project_id')
+                    .limit(1);
+                
+                if (error) throw error;
+                
+                console.log('Supabase connected successfully');
+                status.textContent = 'Connected to database';
+                status.className = 'status success';
+            } catch (error) {
+                console.error('Supabase connection error:', error);
+                status.textContent = 'Database connection error: ' + error.message;
+                status.className = 'status error';
+            }
+        }
+
+        // Load available projects
+        async function loadProjects() {
+            try {
+                console.log('Loading projects...');
+                
+                // Clear existing options except the first two (Select Project and Create New)
+                while (projectSelect.options.length > 2) {
+                    projectSelect.remove(2);
+                }
+                
+                console.log('Cleared existing options, current count:', projectSelect.options.length);
+
+                // Add option group for existing projects
+                const existingGroup = document.createElement('optgroup');
+                existingGroup.label = 'Existing Projects';
+                projectSelect.appendChild(existingGroup);
+                
+                console.log('Added option group for existing projects');
+
+                // Fetch all unique project IDs
+                const { data, error } = await supabase
+                    .from('dynamic_content')
+                    .select('project_id')
+                    .order('project_id', { ascending: true })
+                    .limit(100);
+                
+                console.log('Supabase query result:', { data, error });
+
+                if (error) throw error;
+                
+                if (!data || data.length === 0) {
+                    console.log('No projects found in database');
+                    const option = document.createElement('option');
+                    option.value = 'adam-hyp-1';
+                    option.textContent = 'adam-hyp-1 (Default)';
+                    existingGroup.appendChild(option);
+                    
+                    const option2 = document.createElement('option');
+                    option2.value = 'annie-sicard-123';
+                    option2.textContent = 'annie-sicard-123';
+                    existingGroup.appendChild(option2);
+                    return;
+                }
+
+                // Get unique project IDs
+                const projectIds = [...new Set(data.map(item => item.project_id))];
+                console.log('Unique project IDs:', projectIds);
+                
+                // Add each project to the dropdown
+                projectIds.forEach(projectId => {
+                    // Skip empty or special values
+                    if (!projectId || projectId === 'new' || projectId === 'default-project') {
+                        console.log('Skipping special project ID:', projectId);
+                        return;
+                    }
+                    
+                    const option = document.createElement('option');
+                    option.value = projectId;
+                    option.textContent = projectId;
+                    existingGroup.appendChild(option);
+                    console.log('Added project to dropdown:', projectId);
+                });
+
+                console.log(`Loaded ${projectIds.length} projects`);
+                
+                // Log the final state of the dropdown
+                console.log('Final dropdown options:', Array.from(projectSelect.options).map(opt => opt.value));
+                
+                // Ensure important projects are always available
+                const importantProjects = ['adam-hyp-1', 'annie-sicard-123'];
+                importantProjects.forEach(projectId => {
+                    if (!projectIds.includes(projectId)) {
+                        const option = document.createElement('option');
+                        option.value = projectId;
+                        option.textContent = projectId === 'adam-hyp-1' ? 'adam-hyp-1 (Default)' : projectId;
+                        existingGroup.appendChild(option);
+                        console.log(`Added important project: ${projectId}`);
+                    }
+                });
+                
+            } catch (error) {
+                console.error('Error loading projects:', error);
+                status.textContent = 'Error loading projects: ' + error.message;
+                status.className = 'status error';
+                
+                // Add fallback projects in case of error
+                const existingGroup = projectSelect.querySelector('optgroup') || 
+                    (() => {
+                        const group = document.createElement('optgroup');
+                        group.label = 'Existing Projects';
+                        projectSelect.appendChild(group);
+                        return group;
+                    })();
+                
+                const fallbackProjects = [
+                    { value: 'adam-hyp-1', text: 'adam-hyp-1 (Fallback)' },
+                    { value: 'annie-sicard-123', text: 'annie-sicard-123 (Fallback)' }
+                ];
+                
+                fallbackProjects.forEach(project => {
+                    const option = document.createElement('option');
+                    option.value = project.value;
+                    option.textContent = project.text;
+                    existingGroup.appendChild(option);
+                });
+                
+                console.log('Added fallback projects due to error');
+            }
+        }
+
+        // Populate form with project data
+        function populateForm(data) {
+            // Reset form
+            form.reset();
+            
+            // Set the project ID
+            projectSelect.value = data[0]?.project_id || '';
+            
+            // Hide profile preview initially
+            profilePreview.style.display = 'none';
+            
+            // Process each data item
+            data.forEach(item => {
+                const element = document.getElementById(item.key);
+                if (element) {
+                    // Handle profile image specially
+                    if (item.key === 'profile_image_url' && item.value) {
+                        profilePreview.src = item.value;
+                        profilePreview.style.display = 'block';
+                        profileImageUrl.value = item.value;
+                    } else {
+                        element.value = item.value;
+                    }
+                }
+            });
+            
+            // If style_package is set, apply the preset
+            const stylePackage = data.find(item => item.key === 'style_package');
+            if (stylePackage) {
+                document.getElementById('style_package').value = stylePackage.value;
+                applyStylePreset(stylePackage.value);
+            }
+        }
+        
+        // Load Google Fonts
+        function loadFont(fontName) {
+            if (!fontName) return;
+            
+            const link = document.createElement('link');
+            link.href = `https://fonts.googleapis.com/css2?family=${fontName.replace(/\s+/g, '+')}:wght@400;700&display=swap`;
+            link.rel = 'stylesheet';
+            document.head.appendChild(link);
+        }
+        
+        // Apply style preset
+        function applyStylePreset(presetName) {
+            const preset = presetName || document.getElementById('style_package').value;
+            
+            // Update the hidden input with the selected style
+            document.getElementById('style_package').value = preset;
+            
+            // Add active class to the selected button
+            document.querySelectorAll('.style-button').forEach(button => {
+                if (button.getAttribute('data-style') === preset) {
+                    button.classList.add('active');
+                } else {
+                    button.classList.remove('active');
+                }
+            });
+            
+            // Apply default values based on preset selection
+            // This ensures themes work even if database presets don't exist yet
+            if (preset === 'green-professional') {
+                // Apply green theme defaults directly
+                document.getElementById('primary_color').value = '#28a745';
+                document.getElementById('secondary_color').value = '#20c997';
+                document.getElementById('accent_color').value = '#17a2b8';
+                document.getElementById('text_color').value = '#212529';
+                document.getElementById('background_color').value = '#f8f9fa';
+                document.getElementById('heading_font').value = 'Montserrat';
+                document.getElementById('body_font').value = 'Open Sans';
+                
+                // Update font selectors
+                document.getElementById('heading_font_select').value = 'Montserrat';
+                document.getElementById('body_font_select').value = 'Open Sans';
+                
+                // Load fonts
+                loadFont('Montserrat');
+                loadFont('Open Sans');
+                
+                return; // Skip database lookup
+            } 
+            else if (preset === 'dark-professional') {
+                // Apply black theme defaults with a sleek, modern palette
+                document.getElementById('primary_color').value = '#121212'; // Near-black primary
+                document.getElementById('secondary_color').value = '#333333'; // Dark gray secondary
+                document.getElementById('accent_color').value = '#757575'; // Medium gray accent
+                document.getElementById('text_color').value = '#ffffff'; // Pure white text for maximum contrast
+                document.getElementById('background_color').value = '#000000'; // Pure black background
+                document.getElementById('heading_font').value = 'Playfair Display'; // Elegant serif font
+                document.getElementById('body_font').value = 'Source Sans Pro'; // Clean sans-serif
+                
+                // Update font selectors
+                document.getElementById('heading_font_select').value = 'Playfair Display';
+                document.getElementById('body_font_select').value = 'Source Sans Pro';
+                
+                // Load fonts
+                loadFont('Playfair Display');
+                loadFont('Source Sans Pro');
+                
+                return; // Skip database lookup
+            }
+            else if (preset === 'light-professional') {
+                // Apply gold theme defaults with a luxurious, warm palette
+                document.getElementById('primary_color').value = '#d4af37'; // Classic gold
+                document.getElementById('secondary_color').value = '#f9a825'; // Amber gold
+                document.getElementById('accent_color').value = '#795548'; // Rich brown accent
+                document.getElementById('text_color').value = '#3e2723'; // Deep brown text
+                document.getElementById('background_color').value = '#fffdf7'; // Cream background
+                document.getElementById('heading_font').value = 'Merriweather'; // Elegant serif
+                document.getElementById('body_font').value = 'Nunito'; // Rounded, friendly sans-serif
+                
+                // Update font selectors
+                document.getElementById('heading_font_select').value = 'Merriweather';
+                document.getElementById('body_font_select').value = 'Nunito';
+                
+                // Load fonts
+                loadFont('Merriweather');
+                loadFont('Nunito');
+                
+                return; // Skip database lookup
+            }
+            else if (preset === 'red-professional') {
+                // Apply red theme defaults directly
+                document.getElementById('primary_color').value = '#dc3545';
+                document.getElementById('secondary_color').value = '#fd7e14';
+                document.getElementById('accent_color').value = '#6f42c1';
+                document.getElementById('text_color').value = '#212529';
+                document.getElementById('background_color').value = '#fff5f5';
+                document.getElementById('heading_font').value = 'Raleway';
+                document.getElementById('body_font').value = 'Roboto';
+                
+                // Update font selectors
+                document.getElementById('heading_font_select').value = 'Raleway';
+                document.getElementById('body_font_select').value = 'Roboto';
+                
+                // Load fonts
+                loadFont('Raleway');
+                loadFont('Roboto');
+                
+                return; // Skip database lookup
+            }
+            
+            try {
+                // Map old preset names to new ones if needed (for backward compatibility)
+                let lookupPreset = preset;
+                if (preset === 'standard-professional') lookupPreset = 'his-preset';
+                else if (preset === 'dark-professional') lookupPreset = 'her-preset';
+                else if (preset === 'light-professional') lookupPreset = 'standard-preset';
+                else if (preset === 'green-professional') lookupPreset = 'green-preset';
+                else if (preset === 'red-professional') lookupPreset = 'red-preset';
+                else lookupPreset = preset;
+                
+                // Fetch preset data from Supabase
+                supabase
+                    .from('dynamic_content')
+                    .select('key, value')
+                    .eq('project_id', lookupPreset)
+                    .then(({ data, error }) => {
+                        if (error) {
+                            console.error('Error applying style preset:', error);
+                            status.textContent = 'Error applying style preset: ' + error.message;
+                            status.className = 'status error';
+                            return;
+                        }
+                        
+                        // Update hidden inputs and font selectors
+                        data.forEach(({ key, value }) => {
+                            const element = document.getElementById(key);
+                            if (element) {
+                                element.value = value;
+                            }
+
+                            if (key === 'heading_font') {
+                                document.getElementById('heading_font_select').value = value;
+                            } else if (key === 'body_font') {
+                                document.getElementById('body_font_select').value = value;
+                            }
+                        });
+                    });
+            } catch (error) {
+                console.error('Error applying style preset:', error);
+                status.textContent = 'Error applying style preset: ' + error.message;
+                status.className = 'status error';
+            }
+        }
+        
+        // Update font
+        function updateFont(type) {
+            const fontSelect = type === 'heading' ? document.getElementById('heading_font_select') : document.getElementById('body_font_select');
+            const fontInput = type === 'heading' ? document.getElementById('heading_font') : document.getElementById('body_font');
+            fontInput.value = fontSelect.value;
+            loadFont(fontSelect.value);
+        }
+
+        // Helper function to calculate color brightness
+        function getBrightness(color) {
+            const hex = color.replace('#', '');
+            const r = parseInt(hex.substr(0, 2), 16);
+            const g = parseInt(hex.substr(2, 2), 16);
+            const b = parseInt(hex.substr(4, 2), 16);
+            return (r * 299 + g * 587 + b * 114) / 1000;
+        }
+
+        // DOM Elements
+        const form = document.getElementById('contentForm');
+        const status = document.getElementById('status');
+        const projectSelect = document.getElementById('project_id');
+        const profileUpload = document.getElementById('profile-upload');
+        const profilePreview = document.getElementById('profile-preview');
+        const profileImageUrl = document.getElementById('profile_image_url');
+        const progressBar = document.querySelector('.progress-bar div');
+
+        // Check connection on load
+        checkConnection();
+        
+        // Load available projects on initialization
+        loadProjects();
+
+        // Handle profile image URL input
+        profileImageUrl.addEventListener('input', (e) => {
+            const url = e.target.value.trim();
+            if (url) {
+                profilePreview.src = url;
+                profilePreview.style.display = 'block';
+            } else {
+                profilePreview.style.display = 'none';
+            }
+        });
+
+        // Handle profile image upload
+        profileUpload.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const projectId = projectSelect.value;
+            if (!projectId) {
+                status.textContent = 'Please select a project first';
+                status.className = 'status error';
+                return;
+            }
+
+            try {
+                const timestamp = new Date().getTime();
+                const filePath = `${projectId}/profile-${timestamp}-${file.name}`;
+
+                const { data, error } = await supabase.storage
+                    .from('images')
+                    .upload(filePath, file, {
+                        onUploadProgress: (progress) => {
+                            const percent = (progress.loaded / progress.total) * 100;
+                            progressBar.style.width = percent + '%';
+                        }
+                    });
+
+                if (error) throw error;
+
+                const { data: { publicUrl } } = supabase.storage
+                    .from('images')
+                    .getPublicUrl(filePath);
+
+                profilePreview.src = publicUrl;
+                profilePreview.style.display = 'block';
+                profileImageUrl.value = publicUrl;
+
+                setTimeout(() => {
+                    progressBar.style.width = '0';
+                }, 1000);
+
+            } catch (error) {
+                status.textContent = `Error uploading profile image: ${error.message}`;
+                status.className = 'status error';
+            }
+        });
+
+        // Create new project
+        window.createNewProject = async function() {
+            const newProjectInput = document.getElementById('new-project-id');
+            const newProjectId = newProjectInput.value.trim();
+            
+            if (!newProjectId) {
+                status.textContent = 'Please enter a project ID';
+                status.className = 'status error';
+                return;
+            }
+
+            if (!/^[a-z0-9-]+$/.test(newProjectId)) {
+                status.textContent = 'Project ID can only contain lowercase letters, numbers, and hyphens';
+                status.className = 'status error';
+                return;
+            }
+
+            try {
+                const { data, error } = await supabase
+                    .from('dynamic_content')
+                    .select('project_id')
+                    .eq('project_id', newProjectId)
+                    .limit(1);
+
+                if (error) throw error;
+                
+                if (data.length > 0) {
+                    status.textContent = 'Project ID already exists';
+                    status.className = 'status error';
+                    return;
+                }
+
+                // Initialize the project with basic fields
+                const { error: insertError } = await supabase
+                    .from('dynamic_content')
+                    .insert([
+                        {
+                            project_id: newProjectId,
+                            key: 'client_name',
+                            value: newProjectId.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+                        },
+                        {
+                            project_id: newProjectId,
+                            key: 'current_year',
+                            value: new Date().getFullYear().toString()
+                        },
+                        {
+                            project_id: newProjectId,
+                            key: 'style_package',
+                            value: 'standard-professional'
+                        }
+                    ]);
+
+                if (insertError) throw insertError;
+
+                const option = document.createElement('option');
+                option.value = newProjectId;
+                option.textContent = newProjectId;
+                projectSelect.add(option);
+                projectSelect.value = newProjectId;
+
+                document.getElementById('new-project-form').style.display = 'none';
+                
+                status.textContent = 'New project created successfully';
+                status.className = 'status success';
+
+                loadContent();
+            } catch (error) {
+                status.textContent = 'Error creating project: ' + error.message;
+                status.className = 'status error';
+            }
+        };
+
+        // Load content
+        async function loadContent() {
+            const projectId = projectSelect.value;
+            if (!projectId || projectId === 'new') return;
+
+            try {
+                status.textContent = 'Loading project content...';
+                status.className = 'status info';
+                
+                // Fetch content for the selected project
+                const { data, error } = await supabase
+                    .from('dynamic_content')
+                    .select('*')
+                    .eq('project_id', projectId);
+                
+                console.log('Supabase query result:', { data, error });
+
+                if (error) throw error;
+                
+                // Reset form first
+                form.reset();
+                
+                // Populate form with project data
+                populateForm(data);
+                
+                status.textContent = `Loaded project: ${projectId}`;
+                status.className = 'status success';
+                
+                // Show the view site button for existing projects
+                document.getElementById('view-site-container').style.display = 'block';
+                
+                // Set up the view site button with the current project ID
+                const viewSiteButton = document.getElementById('view-site-button');
+                viewSiteButton.onclick = function() {
+                    const siteUrl = window.location.origin + '/index.html?project_id=' + projectId;
+                    window.open(siteUrl, '_blank');
+                };
+                
+            } catch (error) {
+                console.error('Error loading project:', error);
+                status.textContent = 'Error loading project: ' + error.message;
+                status.className = 'status error';
+            }
+        }
+
+        // Initial load
+        loadContent();
+
+        // Handle character counts
+        const textareas = document.querySelectorAll('textarea[id$="_post"], textarea[id$="_short"]');
+        textareas.forEach(textarea => {
+            textarea.addEventListener('input', function() {
+                const count = this.value.length;
+                const countDisplay = this.nextElementSibling;
+                countDisplay.textContent = count + ' characters';
+                
+                // Optional: Add warning colors for platform limits
+                if (this.id === 'twitter_post' && count > 280) {
+                    countDisplay.style.color = '#dc3545';
+                } else if (count > 2000) { // General limit for other platforms
+                    countDisplay.style.color = '#dc3545';
+                } else {
+                    countDisplay.style.color = '#666';
+                }
+            });
+        });
+
+        // Save content
+        async function saveContent(event) {
+            event.preventDefault();
+            
+            const projectId = projectSelect.value;
+            if (!projectId || projectId === 'new') {
+                status.textContent = 'Please select or create a project first';
+                status.className = 'status error';
+                return;
+            }
+
+            try {
+                // Gather all form data
+                const formData = new FormData(form);
+                let updates = [];
+                
+                // Use a Set to track keys we've already added to prevent duplicates
+                const processedKeys = new Set();
+
+                // Process blog posts
+                for (let i = 1; i <= 4; i++) {
+                    const title = document.getElementById(`blog_post_${i}_title`).value;
+                    const description = document.getElementById(`blog_post_${i}_description`).value;
+                    const post = document.getElementById(`blog_post_${i}`).value;
+                    
+                    // Only save if any content is provided
+                    if (title || description || post) {
+                        const titleKey = `blog_post_${i}_title`;
+                        const descKey = `blog_post_${i}_description`;
+                        const postKey = `blog_post_${i}`;
+                        
+                        if (!processedKeys.has(titleKey)) {
+                            updates.push({
+                                project_id: projectId,
+                                key: titleKey,
+                                value: title
+                            });
+                            processedKeys.add(titleKey);
+                        }
+                        
+                        if (!processedKeys.has(descKey)) {
+                            updates.push({
+                                project_id: projectId,
+                                key: descKey,
+                                value: description
+                            });
+                            processedKeys.add(descKey);
+                        }
+                        
+                        if (!processedKeys.has(postKey)) {
+                            updates.push({
+                                project_id: projectId,
+                                key: postKey,
+                                value: post
+                            });
+                            processedKeys.add(postKey);
+                        }
+                    }
+                }
+
+                // Process social media fields
+                const socialPlatforms = ['facebook', 'twitter', 'instagram', 'linkedin'];
+                for (const platform of socialPlatforms) {
+                    const url = document.getElementById(`${platform}_url`).value;
+                    const post = document.getElementById(`${platform}_post`).value;
+                    
+                    // Only save if either URL or post is provided
+                    if (url || post) {
+                        const urlKey = `${platform}_url`;
+                        const postKey = `${platform}_post`;
+                        
+                        if (!processedKeys.has(urlKey)) {
+                            updates.push({
+                                project_id: projectId,
+                                key: urlKey,
+                                value: url
+                            });
+                            processedKeys.add(urlKey);
+                        }
+                        
+                        if (!processedKeys.has(postKey)) {
+                            updates.push({
+                                project_id: projectId,
+                                key: postKey,
+                                value: post
+                            });
+                            processedKeys.add(postKey);
+                        }
+                    }
+                }
+
+                // Process basic information fields
+                const basicFields = [
+                    'rendered_title',
+                    'rendered_subtitle',
+                    'rendered_bio_html',
+                    'rendered_footer_slogan',
+                    'profile_image_url',
+                    'quote_1',
+                    'quote_2',
+                    'quote_3',
+                    'rendered_bio_html_card_1',
+                    'rendered_bio_html_card_2',
+                    'rendered_bio_html_card_3',
+                    'email_address',
+                    'style_package'
+                ];
+                
+                for (const field of basicFields) {
+                    const element = document.getElementById(field);
+                    if (element && element.value && !processedKeys.has(field)) {
+                        updates.push({
+                            project_id: projectId,
+                            key: field,
+                            value: element.value
+                        });
+                        processedKeys.add(field);
+                    }
+                }
+
+                // Add remaining form fields
+                for (const [key, value] of formData.entries()) {
+                    // Skip fields we've already processed
+                    if (key === 'project_id' || 
+                        processedKeys.has(key) ||
+                        key.endsWith('_url') || 
+                        key.endsWith('_post') || 
+                        key.endsWith('_title') || 
+                        key.endsWith('_description') ||
+                        key.endsWith('_short') ||
+                        basicFields.includes(key)) continue;
+                    
+                    updates.push({
+                        project_id: projectId,
+                        key: key,
+                        value: value
+                    });
+                    processedKeys.add(key);
+                }
+
+                // Insert or update all values
+                const { error } = await supabase
+                    .from('dynamic_content')
+                    .upsert(updates, {
+                        onConflict: 'project_id,key'
+                    });
+
+                if (error) throw error;
+
+                status.textContent = 'Content saved successfully';
+                status.className = 'status success';
+
+                // Update character counts
+                const textareas = document.querySelectorAll('textarea[id$="_post"], textarea[id$="_short"]');
+                textareas.forEach(textarea => {
+                    const count = textarea.value.length;
+                    const countDisplay = textarea.nextElementSibling;
+                    if (countDisplay && countDisplay.classList.contains('character-count')) {
+                        countDisplay.textContent = count + ' characters';
+                    }
+                });
+
+                // Show view site button
+                document.getElementById('view-site-container').style.display = 'block';
+                
+                // Update the view site button with the correct project ID
+                const viewSiteButton = document.getElementById('view-site-button');
+                const currentProjectId = document.getElementById('project_id').value;
+                
+                // Set up the click handler for the view site button
+                viewSiteButton.onclick = function() {
+                    // Construct the URL for viewing the site
+                    const siteUrl = window.location.origin + '/index.html?project_id=' + currentProjectId;
+                    
+                    // Open the site in a new tab/window
+                    window.open(siteUrl, '_blank');
+                };
+
+            } catch (error) {
+                status.textContent = 'Error saving content: ' + error.message;
+                status.className = 'status error';
+            }
+        }
+
+        // Attach form submit handler
+        form.addEventListener('submit', saveContent);
+
+        // Set current year
+        document.getElementById('current_year').value = new Date().getFullYear();
+
+        // Add style for action buttons
+        document.head.insertAdjacentHTML('beforeend', `
+            <style>
+                .action-button {
+                    background-color: #6c757d;
+                    color: white;
+                    border: none;
+                    padding: 0.5rem 1rem;
+                    border-radius: 4px;
+                    cursor: pointer;
+                    margin-top: 0.5rem;
+                }
+                .action-button:hover {
+                    background-color: #5a6268;
+                }
+                .form-actions {
+                    margin-top: 2rem;
+                    text-align: center;
+                }
+                .form-actions button {
+                    background-color: #007bff;
+                    color: white;
+                    border: none;
+                    padding: 0.75rem 2rem;
+                    font-size: 1.1rem;
+                    border-radius: 4px;
+                    cursor: pointer;
+                }
+                .form-actions button:hover {
+                    background-color: #0069d9;
+                }
+            </style>
+        `);
+
+        // Initialize the style buttons with the correct fonts
+        function initializeStyleButtons() {
+            // Set the fonts for the style buttons
+            const standardButton = document.querySelector('.standard-style');
+            const darkButton = document.querySelector('.dark-style');
+            const lightButton = document.querySelector('.light-style');
+            
+            // Load the fonts
+            loadFont('Montserrat');  // Standard Professional
+            loadFont('Raleway');     // Dark Professional
+            loadFont('Roboto');      // Light Professional
+            
+            // Apply the fonts to the buttons
+            if (standardButton) standardButton.style.fontFamily = "'Montserrat', sans-serif";
+            if (darkButton) darkButton.style.fontFamily = "'Raleway', sans-serif";
+            if (lightButton) lightButton.style.fontFamily = "'Roboto', sans-serif";
+            
+            // Mark the default style as active
+            const defaultStyle = document.querySelector('.style-button[data-style="standard-professional"]');
+            if (defaultStyle) defaultStyle.classList.add('active');
+        }
+
+        initializeStyleButtons();
+
+        // Event Listeners
+        projectSelect.addEventListener('change', async function() {
+            const selectedProject = this.value;
+            
+            // Hide view site button initially
+            document.getElementById('view-site-container').style.display = 'none';
+            
+            // Reset form if "Select Project" is chosen
+            if (selectedProject === '') {
+                form.reset();
+                return;
+            }
+            
+            // Handle "Create New Project" option
+            if (selectedProject === 'new') {
+                document.getElementById('new-project-form').style.display = 'block';
+                return;
+            }
+            
+            try {
+                status.textContent = 'Loading project content...';
+                status.className = 'status info';
+                
+                // Fetch content for the selected project
+                const { data, error } = await supabase
+                    .from('dynamic_content')
+                    .select('*')
+                    .eq('project_id', selectedProject);
+                
+                console.log('Supabase query result:', { data, error });
+
+                if (error) throw error;
+                
+                // Reset form first
+                form.reset();
+                
+                // Populate form with project data
+                populateForm(data);
+                
+                status.textContent = `Loaded project: ${selectedProject}`;
+                status.className = 'status success';
+                
+                // Show the view site button for existing projects
+                document.getElementById('view-site-container').style.display = 'block';
+                
+                // Set up the view site button with the current project ID
+                const viewSiteButton = document.getElementById('view-site-button');
+                viewSiteButton.onclick = function() {
+                    const siteUrl = window.location.origin + '/index.html?project_id=' + selectedProject;
+                    window.open(siteUrl, '_blank');
+                };
+                
+            } catch (error) {
+                console.error('Error loading project:', error);
+                status.textContent = 'Error loading project: ' + error.message;
+                status.className = 'status error';
+            }
+        });
+
+        // CSV Import/Export functionality
+        const csvUpload = document.getElementById('csv-upload');
+        const importCsvBtn = document.getElementById('import-csv-btn');
+        const downloadTemplateBtn = document.getElementById('download-template-btn');
+        const importStatus = document.getElementById('import-status');
+
+        // Parse CSV function
+        function parseCSV(text) {
+            // Simple CSV parser
+            const lines = text.split('\n');
+            const result = [];
+            const headers = lines[0].split(',');
+            
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line) continue; // Skip empty lines
+                
+                const values = line.split(',');
+                const entry = {};
+                
+                // Handle quoted values with commas inside
+                let j = 0;
+                let currentValue = '';
+                let insideQuotes = false;
+                
+                for (let k = 0; k < values.length; k++) {
+                    let value = values[k];
+                    
+                    // Check for opening quote
+                    if (!insideQuotes && value.startsWith('"')) {
+                        insideQuotes = true;
+                        value = value.substring(1);
+                    }
+                    
+                    // Check for closing quote
+                    if (insideQuotes && value.endsWith('"')) {
+                        insideQuotes = false;
+                        value = value.substring(0, value.length - 1);
+                        currentValue += value;
+                        
+                        // We've completed a quoted value
+                        if (j < headers.length) {
+                            entry[headers[j].trim()] = currentValue.trim();
+                            j++;
+                        }
+                        
+                        currentValue = '';
+                        continue;
+                    }
+                    
+                    // Add to current value
+                    if (insideQuotes) {
+                        currentValue += value + ',';
+                    } else {
+                        // Regular unquoted value
+                        if (j < headers.length) {
+                            entry[headers[j].trim()] = value.trim();
+                            j++;
+                        }
+                    }
+                }
+                
+                result.push(entry);
+            }
+            
+            return result;
+        }
+
+        // Import CSV button click handler
+        importCsvBtn.addEventListener('click', async () => {
+            const file = csvUpload.files[0];
+            if (!file) {
+                importStatus.textContent = 'Please select a CSV file first';
+                importStatus.className = 'status error';
+                importStatus.style.display = 'block';
+                return;
+            }
+
+            try {
+                const text = await file.text();
+                const data = parseCSV(text);
+                
+                if (!data.length) throw new Error('No data found in CSV');
+                
+                // Validate required columns
+                if (!data[0].project_id || !data[0].key || !data[0].value === undefined) {
+                    throw new Error('CSV must contain project_id, key, and value columns');
+                }
+                
+                importStatus.textContent = `Processing ${data.length} entries...`;
+                importStatus.className = 'status';
+                importStatus.style.display = 'block';
+                
+                // Group entries by project
+                const projects = {};
+                data.forEach(entry => {
+                    if (!projects[entry.project_id]) {
+                        projects[entry.project_id] = [];
+                    }
+                    projects[entry.project_id].push({
+                        project_id: entry.project_id,
+                        key: entry.key,
+                        value: entry.value
+                    });
+                });
+                
+                // Get current project
+                const selectedProjectId = projectSelect.value;
+                let targetProjectId = selectedProjectId;
+                
+                // If there's only one project in the CSV and none selected, use that
+                const projectIds = Object.keys(projects);
+                if (projectIds.length === 1 && (!selectedProjectId || selectedProjectId === 'new')) {
+                    targetProjectId = projectIds[0];
+                    
+                    // Check if project exists
+                    const { data: existingProjects } = await supabase
+                        .from('dynamic_content')
+                        .select('project_id')
+                        .eq('project_id', targetProjectId)
+                        .limit(1);
+                    
+                    if (!existingProjects.length) {
+                        // Create the project
+                        const { error } = await supabase
+                            .from('dynamic_content')
+                            .insert({ project_id: targetProjectId, key: 'project_created', value: new Date().toISOString() });
+                        
+                        if (error) throw error;
+                        
+                        // Update project select dropdown
+                        const option = document.createElement('option');
+                        option.value = targetProjectId;
+                        option.textContent = targetProjectId;
+                        projectSelect.appendChild(option);
+                        projectSelect.value = targetProjectId;
+                    }
+                }
+                
+                if (!targetProjectId || targetProjectId === 'new') {
+                    throw new Error('Please select a project first or upload CSV with a single project');
+                }
+                
+                // Import data for the target project
+                const updates = projects[targetProjectId] || [];
+                if (!updates.length) {
+                    throw new Error(`No data found for project ${targetProjectId} in CSV`);
+                }
+                
+                // Upsert all values
+                const { error } = await supabase
+                    .from('dynamic_content')
+                    .upsert(updates, {
+                        onConflict: 'project_id,key'
+                    });
+                
+                if (error) throw error;
+                
+                importStatus.textContent = `Successfully imported ${updates.length} entries for project ${targetProjectId}`;
+                importStatus.className = 'status success';
+                
+                // Reload content for the current project
+                loadContent();
+                
+            } catch (error) {
+                importStatus.textContent = 'Error importing CSV: ' + error.message;
+                importStatus.className = 'status error';
+            }
+        });
+
+        // Download CSV template button click handler
+        downloadTemplateBtn.addEventListener('click', () => {
+            const templateContent = `project_id,key,value
+example-project,client_name,Client Name
+example-project,profile_image_url,https://example.com/image.jpg
+example-project,rendered_title,Site Title
+example-project,rendered_subtitle,Site Subtitle
+example-project,rendered_bio_html,Bio content
+example-project,style_package,standard-professional
+example-project,primary_color,#4a6fa5
+example-project,secondary_color,#6c8eb4
+example-project,accent_color,#f9a03f
+example-project,text_color,#333333
+example-project,background_color,#f9f9f9
+example-project,heading_font,Montserrat
+example-project,body_font,Open Sans
+example-project,quote_1,Quote 1 content
+example-project,quote_2,Quote 2 content
+example-project,quote_3,Quote 3 content
+example-project,blog_post_1_title,First Blog Post Title
+example-project,blog_post_1_description,Short description of first blog post
+example-project,blog_post_1,Full content of first blog post
+example-project,blog_post_2_title,Second Blog Post Title
+example-project,blog_post_2_description,Short description of second blog post
+example-project,blog_post_2,Full content of second blog post
+example-project,blog_post_3_title,Third Blog Post Title
+example-project,blog_post_3_description,Short description of third blog post
+example-project,blog_post_3,Full content of third blog post
+example-project,blog_post_4_title,Fourth Blog Post Title
+example-project,blog_post_4_description,Short description of fourth blog post
+example-project,blog_post_4,Full content of fourth blog post
+example-project,facebook_url,https://facebook.com/username
+example-project,facebook_post,Facebook post content
+example-project,twitter_url,https://twitter.com/username
+example-project,twitter_post,Twitter post content
+example-project,instagram_url,https://instagram.com/username
+example-project,instagram_post,Instagram post content
+example-project,linkedin_url,https://linkedin.com/in/username
+example-project,linkedin_post,LinkedIn post content
+example-project,rendered_footer_slogan,Footer slogan content
+example-project,current_year,2025
+example-project,email_address,example@email.com`;
+            
+            // Create a download link
+            const element = document.createElement('a');
+            element.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURIComponent(templateContent));
+            element.setAttribute('download', 'selfcast-content-template.csv');
+            element.style.display = 'none';
+            document.body.appendChild(element);
+            element.click();
+            document.body.removeChild(element);
+        });
+    </script>
 </body>
 </html>

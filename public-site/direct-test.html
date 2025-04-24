@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Direct Supabase Test</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            margin-top: 0;
+        }
+        .status {
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1rem 0;
+        }
+        .success { 
+            background: #d4edda;
+            color: #155724;
+        }
+        .error { 
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .info {
+            background: #e3f2fd;
+            color: #0d47a1;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 4px;
+            overflow: auto;
+            max-height: 300px;
+        }
+        button {
+            background: #3399FF;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Direct Supabase Test</h1>
+        <p>This page tests direct fetch requests to Supabase without using the Supabase client library.</p>
+        
+        <button id="test-button">Run Test</button>
+        
+        <div id="status" class="status info">Ready to test</div>
+        
+        <h2>Results</h2>
+        <pre id="results"></pre>
+    </div>
+
+    <script>
+        document.getElementById('test-button').addEventListener('click', async function() {
+            const statusElement = document.getElementById('status');
+            const resultsElement = document.getElementById('results');
+            
+            statusElement.textContent = 'Testing Supabase connection...';
+            statusElement.className = 'status info';
+            resultsElement.textContent = '';
+            
+            // Supabase credentials
+            const SUPABASE_URL = 'https://aqicztygjpmunfljjuto.supabase.co';
+            const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxaWN6dHlnanBtdW5mbGpqdXRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3MDU1ODIsImV4cCI6MjA1OTI4MTU4Mn0.5e2hvTckSSbTFLBjQiccrvjoBd6QQDX0X4tccFOc1rs';
+            
+            try {
+                // Test 1: Simple ping to Supabase
+                statusElement.textContent = 'Testing basic connectivity...';
+                const pingResponse = await fetch(`${SUPABASE_URL}/rest/v1/`, {
+                    method: 'GET',
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`
+                    }
+                });
+                
+                resultsElement.textContent += `Ping test: ${pingResponse.status} ${pingResponse.statusText}\n\n`;
+                
+                // Test 2: Get project list
+                statusElement.textContent = 'Testing project list retrieval...';
+                const projectsResponse = await fetch(`${SUPABASE_URL}/rest/v1/dynamic_content?select=project_id`, {
+                    method: 'GET',
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`
+                    }
+                });
+                
+                if (projectsResponse.ok) {
+                    const projectsData = await projectsResponse.json();
+                    const uniqueProjects = [...new Set(projectsData.map(item => item.project_id))];
+                    
+                    resultsElement.textContent += `Projects test: Found ${uniqueProjects.length} unique projects\n`;
+                    resultsElement.textContent += `First 5 projects: ${JSON.stringify(uniqueProjects.slice(0, 5))}\n\n`;
+                    
+                    // Test 3: Get content for first project
+                    if (uniqueProjects.length > 0) {
+                        const testProject = uniqueProjects[0];
+                        statusElement.textContent = `Testing content retrieval for project: ${testProject}...`;
+                        
+                        const contentResponse = await fetch(`${SUPABASE_URL}/rest/v1/dynamic_content?project_id=eq.${encodeURIComponent(testProject)}&select=content_key,content_value`, {
+                            method: 'GET',
+                            headers: {
+                                'apikey': SUPABASE_KEY,
+                                'Authorization': `Bearer ${SUPABASE_KEY}`
+                            }
+                        });
+                        
+                        if (contentResponse.ok) {
+                            const contentData = await contentResponse.json();
+                            resultsElement.textContent += `Content test for ${testProject}: Found ${contentData.length} content items\n`;
+                            resultsElement.textContent += `First 3 content items: ${JSON.stringify(contentData.slice(0, 3))}\n\n`;
+                            
+                            statusElement.textContent = 'All tests completed successfully!';
+                            statusElement.className = 'status success';
+                        } else {
+                            throw new Error(`Content retrieval failed with status: ${contentResponse.status} ${contentResponse.statusText}`);
+                        }
+                    }
+                } else {
+                    throw new Error(`Project list retrieval failed with status: ${projectsResponse.status} ${projectsResponse.statusText}`);
+                }
+                
+            } catch (error) {
+                console.error('Test failed:', error);
+                statusElement.textContent = 'Test failed: ' + error.message;
+                statusElement.className = 'status error';
+                resultsElement.textContent += `\nError details: ${error.stack || error}`;
+            }
+        });
+    </script>
+</body>
+</html>

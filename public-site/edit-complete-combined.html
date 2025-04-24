@@ -1,0 +1,1634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SelfCast Content Editor (Complete)</title>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2c3e50;
+            --accent-color: #e74c3c;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --error-color: #e74c3c;
+            --info-color: #3498db;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+            --border-color: #dee2e6;
+            --border-radius: 4px;
+            --box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: var(--box-shadow);
+        }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border-color);
+        }
+        
+        h1, h2, h3, h4 {
+            color: var(--secondary-color);
+            margin-top: 0;
+        }
+        
+        h1 {
+            font-size: 1.8rem;
+        }
+        
+        h2 {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+        }
+        
+        h3 {
+            font-size: 1.2rem;
+            margin-top: 1rem;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: var(--box-shadow);
+            border-top: 3px solid var(--primary-color);
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            cursor: pointer;
+        }
+        
+        .section-header h2 {
+            margin: 0;
+        }
+        
+        .section-content {
+            display: block;
+        }
+        
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            margin: 0 -10px 15px;
+        }
+        
+        .form-col {
+            flex: 1;
+            padding: 0 10px;
+            min-width: 200px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            font-family: inherit;
+            font-size: 14px;
+        }
+        
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        input[type="color"] {
+            height: 40px;
+            padding: 2px;
+        }
+        
+        input[type="checkbox"] {
+            width: auto;
+            margin-right: 5px;
+        }
+        
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+        }
+        
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+            transition: background-color 0.2s;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        button.secondary {
+            background-color: var(--secondary-color);
+        }
+        
+        button.secondary:hover {
+            background-color: #1a252f;
+        }
+        
+        button.success {
+            background-color: var(--success-color);
+        }
+        
+        button.success:hover {
+            background-color: #27ae60;
+        }
+        
+        button.warning {
+            background-color: var(--warning-color);
+        }
+        
+        button.warning:hover {
+            background-color: #e67e22;
+        }
+        
+        button.error {
+            background-color: var(--error-color);
+        }
+        
+        button.error:hover {
+            background-color: #c0392b;
+        }
+        
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: var(--border-radius);
+        }
+        
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        .warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            border-bottom: none;
+            border-radius: 4px 4px 0 0;
+            margin-right: 5px;
+            background-color: #f8f9fa;
+        }
+        
+        .tab.active {
+            background-color: white;
+            border-color: var(--border-color);
+            border-bottom-color: white;
+            margin-bottom: -1px;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        #debug-info {
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            word-break: break-all;
+            margin-top: 20px;
+            padding: 10px;
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            display: none;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        #view-site-container {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f0f7ff;
+            border-radius: 4px;
+            border: 1px solid #cce5ff;
+            display: none;
+        }
+        
+        #view-site-container a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+        
+        #view-site-container a:hover {
+            text-decoration: underline;
+        }
+        
+        .collapse-toggle {
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .help-text {
+            font-size: 0.85rem;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 0.25em 0.4em;
+            font-size: 75%;
+            font-weight: 700;
+            line-height: 1;
+            text-align: center;
+            white-space: nowrap;
+            vertical-align: baseline;
+            border-radius: 0.25rem;
+            margin-left: 5px;
+        }
+        
+        .badge-primary {
+            color: #fff;
+            background-color: var(--primary-color);
+        }
+        
+        .badge-secondary {
+            color: #fff;
+            background-color: var(--secondary-color);
+        }
+        
+        .badge-success {
+            color: #fff;
+            background-color: var(--success-color);
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .form-col {
+                flex: 100%;
+            }
+            
+            .form-row {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>SelfCast Content Editor</h1>
+            <div>
+                <button id="save-all-btn" class="success">Save All Content</button>
+            </div>
+        </header>
+        
+        <div id="status" class="status info">Ready to load projects</div>
+        
+        <!-- Project Selection Section -->
+        <div class="section">
+            <div class="section-header">
+                <h2>Project Selection</h2>
+            </div>
+            <div class="section-content">
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="project_id">Select Project:</label>
+                            <select id="project_id" onchange="loadContent(this.value)">
+                                <option value="">Select Project</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-col" style="display: flex; align-items: flex-end;">
+                        <button id="create-project-btn" onclick="showNewProjectForm()">Create New Project</button>
+                    </div>
+                </div>
+                
+                <div id="new-project-form" style="display: none;">
+                    <h3>Create New Project</h3>
+                    <div class="form-row">
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="new-project-id">Project ID:</label>
+                                <input type="text" id="new-project-id" placeholder="lastname-firstname-YYYYMMDD-HHMM">
+                                <p class="help-text">Format: lastname-firstname-YYYYMMDD-HHMM (e.g., smith-john-20250423-1530)</p>
+                            </div>
+                        </div>
+                        <div class="form-col" style="display: flex; align-items: flex-end;">
+                            <button id="save-new-project-btn">Save New Project</button>
+                            <button onclick="hideNewProjectForm()" class="secondary">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="view-site-container" style="display: none;">
+                    <h3>View Site</h3>
+                    <p>Your site is available at: <a id="site-url" href="#" target="_blank"></a></p>
+                    <button id="view-site-button">Open Site</button>
+                </div>
+            </div>
+        </div>
+        
+        <form id="contentForm">
+            <!-- Tabs Navigation -->
+            <div class="tabs">
+                <div class="tab active" data-tab="main-content">Main Content</div>
+                <div class="tab" data-tab="blog-posts">Blog Posts</div>
+                <div class="tab" data-tab="social-media">Social Media</div>
+                <div class="tab" data-tab="styling">Styling</div>
+                <div class="tab" data-tab="quotes">Quotes</div>
+                <div class="tab" data-tab="contact">Contact & Footer</div>
+                <div class="tab" data-tab="misc">Miscellaneous</div>
+            </div>
+            
+            <!-- Main Content Tab -->
+            <div class="tab-content active" id="main-content">
+                <!-- Basic Info Section -->
+                <div class="section">
+                    <div class="section-header">
+                        <h2>Basic Information</h2>
+                        <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
+                    </div>
+                    <div class="section-content">
+                        <div class="form-row">
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label for="rendered_title">Site Title:</label>
+                                    <input type="text" id="rendered_title" name="rendered_title">
+                                </div>
+                            </div>
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label for="rendered_subtitle">Subtitle:</label>
+                                    <input type="text" id="rendered_subtitle" name="rendered_subtitle">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label for="full_name">Full Name:</label>
+                                    <input type="text" id="full_name" name="full_name">
+                                </div>
+                            </div>
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label for="client_name">Client Name:</label>
+                                    <input type="text" id="client_name" name="client_name">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="professional_title">Professional Title:</label>
+                            <input type="text" id="professional_title" name="professional_title">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="profile_image_url">Profile Image URL:</label>
+                            <input type="url" id="profile_image_url" name="profile_image_url">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Bio Section -->
+                <div class="section">
+                    <div class="section-header">
+                        <h2>Bio</h2>
+                        <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
+                    </div>
+                    <div class="section-content">
+                        <div class="form-group">
+                            <label for="rendered_bio_html">Main Bio:</label>
+                            <textarea id="rendered_bio_html" name="rendered_bio_html" rows="10"></textarea>
+                            <p class="help-text">This is the main biography that appears on the site. Use line breaks for paragraphs.</p>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label for="rendered_bio_html_card_1">Bio Card 1:</label>
+                                    <input type="text" id="rendered_bio_html_card_1" name="rendered_bio_html_card_1">
+                                </div>
+                            </div>
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label for="rendered_bio_html_card_2">Bio Card 2:</label>
+                                    <input type="text" id="rendered_bio_html_card_2" name="rendered_bio_html_card_2">
+                                </div>
+                            </div>
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label for="rendered_bio_html_card_3">Bio Card 3:</label>
+                                    <input type="text" id="rendered_bio_html_card_3" name="rendered_bio_html_card_3">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Blog Posts Tab -->
+            <div class="tab-content" id="blog-posts">
+                <!-- Blog Post 1 Section -->
+                <div class="section">
+                    <div class="section-header">
+                        <h2>Blog Post 1</h2>
+                        <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
+                    </div>
+                    <div class="section-content">
+                        <div class="form-row">
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label for="blog_1_title">Title:</label>
+                                    <input type="text" id="blog_1_title" name="blog_1_title">
+                                </div>
+                            </div>
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label for="blog_1_date">Date:</label>
+                                    <input type="date" id="blog_1_date" name="blog_1_date">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="blog_1_short">Short Description:</label>
+                            <input type="text" id="blog_1_short" name="blog_1_short">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="blog_1_excerpt">Excerpt:</label>
+                            <textarea id="blog_1_excerpt" name="blog_1_excerpt" rows="3"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="blog_1_post">Full Post:</label>
+                            <textarea id="blog_1_post" name="blog_1_post" rows="10"></textarea>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="blog_1_featured" name="blog_1_featured" value="true">
+                                        Featured
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="blog_1_active" name="blog_1_active" value="true">
+                                        Active
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="blog_post_1_title">Alternative Title:</label>
+                            <input type="text" id="blog_post_1_title" name="blog_post_1_title">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="blog_post_1_description">Alternative Description:</label>
+                            <textarea id="blog_post_1_description" name="blog_post_1_description" rows="3"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="blog_post_1">Alternative Content:</label>
+                            <textarea id="blog_post_1" name="blog_post_1" rows="10"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="rendered_blog_post_1">Rendered Blog Post:</label>
+                            <textarea id="rendered_blog_post_1" name="rendered_blog_post_1" rows="10"></textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Blog Post 2 Section -->
+                <div class="section">
+                    <div class="section-header">
+                        <h2>Blog Post 2</h2>
+                        <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
+                    </div>
+                    <div class="section-content">
+                        <div class="form-row">
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label for="blog_2_title">Title:</label>
+                                    <input type="text" id="blog_2_title" name="blog_2_title">
+                                </div>
+                            </div>
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label for="blog_2_date">Date:</label>
+                                    <input type="date" id="blog_2_date" name="blog_2_date">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="blog_2_short">Short Description:</label>
+                            <input type="text" id="blog_2_short" name="blog_2_short">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="blog_2_excerpt">Excerpt:</label>
+                            <textarea id="blog_2_excerpt" name="blog_2_excerpt" rows="3"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="blog_2_post">Full Post:</label>
+                            <textarea id="blog_2_post" name="blog_2_post" rows="10"></textarea>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="blog_2_featured" name="blog_2_featured" value="true">
+                                        Featured
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="blog_2_active" name="blog_2_active" value="true">
+                                        Active
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="blog_post_2_title">Alternative Title:</label>
+                            <input type="text" id="blog_post_2_title" name="blog_post_2_title">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="blog_post_2_description">Alternative Description:</label>
+                            <textarea id="blog_post_2_description" name="blog_post_2_description" rows="3"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="blog_post_2">Alternative Content:</label>
+                            <textarea id="blog_post_2" name="blog_post_2" rows="10"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="rendered_blog_post_2">Rendered Blog Post:</label>
+                            <textarea id="rendered_blog_post_2" name="rendered_blog_post_2" rows="10"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+        
+        <div id="debug-info"></div>
+    </div>
+
+    <script>
+        // This is just Part 1 of the editor - JavaScript will be added in Part 2
+    </script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SelfCast Content Editor (Part 2)</title>
+    <style>
+        /* This is just a placeholder - styles will be in the combined file */
+        body { font-family: system-ui, sans-serif; padding: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Part 2: Social Media and Styling Sections</h1>
+    <p>This file contains the HTML structure for the Social Media and Styling tabs of the content editor.</p>
+    
+    <!-- Social Media Tab -->
+    <div id="social-media-content">
+        <!-- Facebook Section -->
+        <div class="section">
+            <div class="section-header">
+                <h2>Facebook</h2>
+                <button type="button" class="collapse-toggle">−</button>
+            </div>
+            <div class="section-content">
+                <div class="form-group">
+                    <label for="facebook_url">Facebook URL:</label>
+                    <input type="url" id="facebook_url" name="facebook_url">
+                </div>
+                
+                <div class="form-group">
+                    <label for="facebook_title">Title:</label>
+                    <input type="text" id="facebook_title" name="facebook_title">
+                </div>
+                
+                <div class="form-group">
+                    <label for="facebook_short">Short Description:</label>
+                    <input type="text" id="facebook_short" name="facebook_short">
+                </div>
+                
+                <div class="form-group">
+                    <label for="facebook_excerpt">Excerpt:</label>
+                    <textarea id="facebook_excerpt" name="facebook_excerpt" rows="3"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="facebook_post">Post Content:</label>
+                    <textarea id="facebook_post" name="facebook_post" rows="6"></textarea>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Twitter Section -->
+        <div class="section">
+            <div class="section-header">
+                <h2>Twitter</h2>
+                <button type="button" class="collapse-toggle">−</button>
+            </div>
+            <div class="section-content">
+                <div class="form-group">
+                    <label for="twitter_url">Twitter URL:</label>
+                    <input type="url" id="twitter_url" name="twitter_url">
+                </div>
+                
+                <div class="form-group">
+                    <label for="twitter_title">Title:</label>
+                    <input type="text" id="twitter_title" name="twitter_title">
+                </div>
+                
+                <div class="form-group">
+                    <label for="twitter_short">Short Description:</label>
+                    <input type="text" id="twitter_short" name="twitter_short">
+                </div>
+                
+                <div class="form-group">
+                    <label for="twitter_excerpt">Excerpt:</label>
+                    <textarea id="twitter_excerpt" name="twitter_excerpt" rows="3"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="twitter_post">Post Content:</label>
+                    <textarea id="twitter_post" name="twitter_post" rows="6"></textarea>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Instagram Section -->
+        <div class="section">
+            <div class="section-header">
+                <h2>Instagram</h2>
+                <button type="button" class="collapse-toggle">−</button>
+            </div>
+            <div class="section-content">
+                <div class="form-group">
+                    <label for="instagram_url">Instagram URL:</label>
+                    <input type="url" id="instagram_url" name="instagram_url">
+                </div>
+                
+                <div class="form-group">
+                    <label for="instagram_title">Title:</label>
+                    <input type="text" id="instagram_title" name="instagram_title">
+                </div>
+                
+                <div class="form-group">
+                    <label for="instagram_short">Short Description:</label>
+                    <input type="text" id="instagram_short" name="instagram_short">
+                </div>
+                
+                <div class="form-group">
+                    <label for="instagram_excerpt">Excerpt:</label>
+                    <textarea id="instagram_excerpt" name="instagram_excerpt" rows="3"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="instagram_post">Post Content:</label>
+                    <textarea id="instagram_post" name="instagram_post" rows="6"></textarea>
+                </div>
+            </div>
+        </div>
+        
+        <!-- LinkedIn Section -->
+        <div class="section">
+            <div class="section-header">
+                <h2>LinkedIn</h2>
+                <button type="button" class="collapse-toggle">−</button>
+            </div>
+            <div class="section-content">
+                <div class="form-group">
+                    <label for="linkedin_url">LinkedIn URL:</label>
+                    <input type="url" id="linkedin_url" name="linkedin_url">
+                </div>
+                
+                <div class="form-group">
+                    <label for="linkedin_title">Title:</label>
+                    <input type="text" id="linkedin_title" name="linkedin_title">
+                </div>
+                
+                <div class="form-group">
+                    <label for="linkedin_short">Short Description:</label>
+                    <input type="text" id="linkedin_short" name="linkedin_short">
+                </div>
+                
+                <div class="form-group">
+                    <label for="linkedin_post">Post Content:</label>
+                    <textarea id="linkedin_post" name="linkedin_post" rows="6"></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Styling Tab -->
+    <div id="styling-content">
+        <!-- Colors Section -->
+        <div class="section">
+            <div class="section-header">
+                <h2>Colors</h2>
+                <button type="button" class="collapse-toggle">−</button>
+            </div>
+            <div class="section-content">
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="primary_color">Primary Color:</label>
+                            <input type="color" id="primary_color" name="primary_color" value="#3498db">
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="secondary_color">Secondary Color:</label>
+                            <input type="color" id="secondary_color" name="secondary_color" value="#2c3e50">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="accent_color">Accent Color:</label>
+                            <input type="color" id="accent_color" name="accent_color" value="#e74c3c">
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="text_color">Text Color:</label>
+                            <input type="color" id="text_color" name="text_color" value="#333333">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="background_color">Background Color:</label>
+                    <input type="color" id="background_color" name="background_color" value="#f8f9fa">
+                </div>
+            </div>
+        </div>
+        
+        <!-- Fonts Section -->
+        <div class="section">
+            <div class="section-header">
+                <h2>Fonts</h2>
+                <button type="button" class="collapse-toggle">−</button>
+            </div>
+            <div class="section-content">
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="heading_font">Heading Font:</label>
+                            <select id="heading_font" name="heading_font">
+                                <option value="system-ui, sans-serif">System Default</option>
+                                <option value="'Roboto', sans-serif">Roboto</option>
+                                <option value="'Open Sans', sans-serif">Open Sans</option>
+                                <option value="'Montserrat', sans-serif">Montserrat</option>
+                                <option value="'Lato', sans-serif">Lato</option>
+                                <option value="'Playfair Display', serif">Playfair Display</option>
+                                <option value="'Merriweather', serif">Merriweather</option>
+                                <option value="'Source Sans Pro', sans-serif">Source Sans Pro</option>
+                                <option value="'Poppins', sans-serif">Poppins</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="body_font">Body Font:</label>
+                            <select id="body_font" name="body_font">
+                                <option value="system-ui, sans-serif">System Default</option>
+                                <option value="'Roboto', sans-serif">Roboto</option>
+                                <option value="'Open Sans', sans-serif">Open Sans</option>
+                                <option value="'Montserrat', sans-serif">Montserrat</option>
+                                <option value="'Lato', sans-serif">Lato</option>
+                                <option value="'Source Sans Pro', sans-serif">Source Sans Pro</option>
+                                <option value="'Nunito', sans-serif">Nunito</option>
+                                <option value="'Raleway', sans-serif">Raleway</option>
+                                <option value="'PT Sans', sans-serif">PT Sans</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Style Package Section -->
+        <div class="section">
+            <div class="section-header">
+                <h2>Style Package</h2>
+                <button type="button" class="collapse-toggle">−</button>
+            </div>
+            <div class="section-content">
+                <div class="form-group">
+                    <label for="style_package">Style Package:</label>
+                    <select id="style_package" name="style_package">
+                        <option value="">Select a Style Package</option>
+                        <option value="default">Default</option>
+                        <option value="modern-minimal">Modern Minimal</option>
+                        <option value="bold-creative">Bold Creative</option>
+                        <option value="elegant-serif">Elegant Serif</option>
+                        <option value="corporate-professional">Corporate Professional</option>
+                        <option value="warm-friendly">Warm & Friendly</option>
+                        <option value="tech-focused">Tech Focused</option>
+                        <option value="nature-inspired">Nature Inspired</option>
+                        <option value="vintage-retro">Vintage Retro</option>
+                        <option value="dark-mode">Dark Mode</option>
+                        <option value="light-mode">Light Mode</option>
+                        <option value="green-professional">Green Professional</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SelfCast Content Editor (Part 3)</title>
+    <style>
+        /* This is just a placeholder - styles will be in the combined file */
+        body { font-family: system-ui, sans-serif; padding: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Part 3: Quotes, Contact, and Miscellaneous Sections</h1>
+    <p>This file contains the HTML structure for the Quotes, Contact & Footer, and Miscellaneous tabs of the content editor.</p>
+    
+    <!-- Quotes Tab -->
+    <div id="quotes-content">
+        <div class="section">
+            <div class="section-header">
+                <h2>Quotes</h2>
+                <button type="button" class="collapse-toggle">−</button>
+            </div>
+            <div class="section-content">
+                <div class="form-group">
+                    <label for="quote_1">Quote 1:</label>
+                    <textarea id="quote_1" name="quote_1" rows="4"></textarea>
+                    <p class="help-text">Use line breaks to separate multiple quotes or parts of the quote.</p>
+                </div>
+                
+                <div class="form-group">
+                    <label for="quote_2">Quote 2:</label>
+                    <textarea id="quote_2" name="quote_2" rows="4"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="quote_3">Quote 3:</label>
+                    <textarea id="quote_3" name="quote_3" rows="4"></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Contact & Footer Tab -->
+    <div id="contact-content">
+        <!-- Contact Information Section -->
+        <div class="section">
+            <div class="section-header">
+                <h2>Contact Information</h2>
+                <button type="button" class="collapse-toggle">−</button>
+            </div>
+            <div class="section-content">
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="email_address">Email Address:</label>
+                            <input type="email" id="email_address" name="email_address">
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="rendered_email">Rendered Email:</label>
+                            <input type="email" id="rendered_email" name="rendered_email">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="onboarding_phone">Phone Number:</label>
+                    <input type="tel" id="onboarding_phone" name="onboarding_phone">
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer Section -->
+        <div class="section">
+            <div class="section-header">
+                <h2>Footer</h2>
+                <button type="button" class="collapse-toggle">−</button>
+            </div>
+            <div class="section-content">
+                <div class="form-group">
+                    <label for="rendered_footer_slogan">Footer Slogan:</label>
+                    <textarea id="rendered_footer_slogan" name="rendered_footer_slogan" rows="3"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="current_year">Current Year:</label>
+                    <input type="text" id="current_year" name="current_year">
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Miscellaneous Tab -->
+    <div id="misc-content">
+        <!-- Onboarding Information Section -->
+        <div class="section">
+            <div class="section-header">
+                <h2>Onboarding Information</h2>
+                <button type="button" class="collapse-toggle">−</button>
+            </div>
+            <div class="section-content">
+                <div class="form-group">
+                    <label for="content_goals">Content Goals:</label>
+                    <textarea id="content_goals" name="content_goals" rows="4"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="success_definition">Success Definition:</label>
+                    <textarea id="success_definition" name="success_definition" rows="4"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="workshop_themes_challenges">Workshop Themes & Challenges:</label>
+                    <textarea id="workshop_themes_challenges" name="workshop_themes_challenges" rows="4"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="onboarding_created_at">Onboarding Created At:</label>
+                    <input type="datetime-local" id="onboarding_created_at" name="onboarding_created_at">
+                </div>
+            </div>
+        </div>
+        
+        <!-- Other Fields Section -->
+        <div class="section">
+            <div class="section-header">
+                <h2>Other Fields</h2>
+                <button type="button" class="collapse-toggle">−</button>
+            </div>
+            <div class="section-content">
+                <div class="form-group">
+                    <label for="test_key">Test Key:</label>
+                    <input type="text" id="test_key" name="test_key">
+                </div>
+                
+                <!-- Placeholder for any additional fields that might be added in the future -->
+                <div id="additional-fields"></div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SelfCast Content Editor (JavaScript)</title>
+    <style>
+        /* This is just a placeholder - styles will be in the combined file */
+        body { font-family: system-ui, sans-serif; padding: 20px; }
+    </style>
+</head>
+<body>
+    <h1>JavaScript for the Complete Editor</h1>
+    <p>This file contains the JavaScript code that will power the content editor.</p>
+    
+    <pre id="js-code">
+// Supabase Configuration
+const SUPABASE_URL = 'https://aqicztygjpmunfljjuto.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxaWN6dHlnanBtdW5mbGpqdXRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3MDU1ODIsImV4cCI6MjA1OTI4MTU4Mn0.5e2hvTckSSbTFLBjQiccrvjoBd6QQDX0X4tccFOc1rs';
+
+// Enable debug mode if URL has debug=true
+window.debugMode = new URLSearchParams(window.location.search).get('debug') === 'true';
+
+// Status element for error reporting
+const statusElement = document.getElementById('status');
+
+// Debug logging function
+function logDebug(message, data) {
+    if (window.debugMode) {
+        const timestamp = new Date().toISOString().substring(11, 19);
+        const formattedMessage = typeof data !== 'undefined' 
+            ? `[${timestamp}] ${message}: ${JSON.stringify(data, null, 2)}`
+            : `[${timestamp}] ${message}`;
+        
+        console.log(message, data);
+        
+        const debugInfo = document.getElementById('debug-info');
+        if (debugInfo) {
+            debugInfo.style.display = 'block';
+            debugInfo.innerHTML += formattedMessage + '<br>';
+            debugInfo.scrollTop = debugInfo.scrollHeight;
+        }
+    } else {
+        console.log(message, data);
+    }
+}
+
+// Load available projects
+async function loadProjects() {
+    try {
+        statusElement.textContent = 'Loading projects...';
+        statusElement.className = 'status info';
+        
+        logDebug('Fetching projects from', `${SUPABASE_URL}/rest/v1/dynamic_content?select=project_id`);
+        
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/dynamic_content?select=project_id`, {
+            method: 'GET',
+            headers: {
+                'apikey': SUPABASE_KEY,
+                'Authorization': `Bearer ${SUPABASE_KEY}`
+            }
+        });
+        
+        logDebug('Projects response status', `${response.status} ${response.statusText}`);
+        
+        if (!response.ok) {
+            throw new Error(`Failed to load projects: ${response.status} ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        logDebug('Projects data received', data.length);
+        
+        // Get unique project IDs
+        const projectIds = [...new Set(data.map(item => item.project_id))];
+        logDebug('Unique project IDs', projectIds);
+        
+        // Clear existing options
+        const projectSelect = document.getElementById('project_id');
+        projectSelect.innerHTML = '<option value="">Select Project</option>';
+        
+        // Add options for each project
+        projectIds.forEach(projectId => {
+            const option = document.createElement('option');
+            option.value = projectId;
+            option.textContent = projectId;
+            projectSelect.appendChild(option);
+        });
+        
+        console.log('Project dropdown populated with', projectIds.length, 'options');
+        
+        // Check if there's a project_id in the URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const projectId = urlParams.get('project_id');
+        
+        if (projectId && projectIds.includes(projectId)) {
+            console.log('Loading project from URL:', projectId);
+            projectSelect.value = projectId;
+            loadContent(projectId);
+        }
+        
+        // Show success message
+        statusElement.textContent = `Loaded ${projectIds.length} projects`;
+        statusElement.className = 'status success';
+        
+        return projectIds;
+    } catch (error) {
+        console.error('Error loading projects:', error);
+        statusElement.textContent = 'Error loading projects: ' + error.message;
+        statusElement.className = 'status error';
+        throw error;
+    }
+}
+
+// Load content for a specific project
+async function loadContent(projectId) {
+    try {
+        if (!projectId) return;
+        
+        statusElement.textContent = 'Loading content...';
+        statusElement.className = 'status info';
+        
+        logDebug('Loading content for project', projectId);
+        
+        // Use the URL format that worked in verification
+        const url = `${SUPABASE_URL}/rest/v1/dynamic_content?select=*&project_id=eq.${encodeURIComponent(projectId)}`;
+        logDebug('Fetching content from', url);
+        
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'apikey': SUPABASE_KEY,
+                'Authorization': `Bearer ${SUPABASE_KEY}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        logDebug('Response status', `${response.status} ${response.statusText}`);
+        
+        if (!response.ok) {
+            throw new Error(`Failed to load content: ${response.status} ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        logDebug('Content data received', data);
+        
+        if (!data || data.length === 0) {
+            throw new Error(`No content found for project: ${projectId}`);
+        }
+        
+        // Populate the form with the data
+        populateForm(data);
+        
+        // Show the view site button
+        document.getElementById('view-site-container').style.display = 'block';
+        document.getElementById('site-url').href = `/?project_id=${projectId}`;
+        document.getElementById('site-url').textContent = `/?project_id=${projectId}`;
+        
+        statusElement.textContent = `Loaded ${data.length} content items for project: ${projectId}`;
+        statusElement.className = 'status success';
+        
+        return data;
+    } catch (error) {
+        console.error('Error loading content:', error);
+        statusElement.textContent = 'Error loading content: ' + error.message;
+        statusElement.className = 'status error';
+        throw error;
+    }
+}
+
+// Populate form with project data
+function populateForm(data) {
+    try {
+        console.log('Populating form with data:', data);
+        
+        // Reset form first
+        document.getElementById('contentForm').reset();
+        
+        // Process each content item
+        data.forEach(item => {
+            const key = item.key;
+            const value = item.value;
+            
+            // Find form element with matching name/id
+            const element = document.getElementById(key) || document.querySelector(`[name="${key}"]`);
+            
+            if (element) {
+                // Set value based on element type
+                if (element.tagName === 'SELECT') {
+                    element.value = value;
+                } else if (element.type === 'checkbox') {
+                    element.checked = value === 'true';
+                } else if (element.type === 'radio') {
+                    const radio = document.querySelector(`[name="${key}"][value="${value}"]`);
+                    if (radio) radio.checked = true;
+                } else {
+                    element.value = value;
+                }
+                
+                // Trigger change event for elements that need it
+                if (key === 'style_package') {
+                    const event = new Event('change');
+                    element.dispatchEvent(event);
+                }
+            } else {
+                logDebug('No form element found for key', key);
+            }
+        });
+        
+        console.log('Form populated successfully');
+        
+    } catch (error) {
+        console.error('Error populating form:', error);
+        statusElement.textContent = 'Error populating form: ' + error.message;
+        statusElement.className = 'status error';
+    }
+}
+
+// Save content for a specific project
+async function saveContent(projectId, contentItems) {
+    try {
+        if (!projectId) {
+            throw new Error('No project ID specified');
+        }
+        
+        if (!contentItems || !Array.isArray(contentItems) || contentItems.length === 0) {
+            throw new Error('No content items to save');
+        }
+        
+        logDebug('Saving content for project', projectId);
+        logDebug('Content items to save', contentItems);
+        
+        const results = [];
+        
+        // Process each content item
+        for (const item of contentItems) {
+            try {
+                // Check if the item already exists
+                const checkUrl = `${SUPABASE_URL}/rest/v1/dynamic_content?project_id=eq.${encodeURIComponent(projectId)}&key=eq.${encodeURIComponent(item.key)}`;
+                logDebug('Checking if item exists', checkUrl);
+                
+                const checkResponse = await fetch(checkUrl, {
+                    method: 'GET',
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!checkResponse.ok) {
+                    throw new Error(`Failed to check item: ${checkResponse.status} ${checkResponse.statusText}`);
+                }
+                
+                const existingData = await checkResponse.json();
+                
+                if (existingData && existingData.length > 0) {
+                    // Update existing record
+                    const updateUrl = `${SUPABASE_URL}/rest/v1/dynamic_content?project_id=eq.${encodeURIComponent(projectId)}&key=eq.${encodeURIComponent(item.key)}`;
+                    logDebug('Updating existing item', updateUrl);
+                    
+                    const updateResponse = await fetch(updateUrl, {
+                        method: 'PATCH',
+                        headers: {
+                            'apikey': SUPABASE_KEY,
+                            'Authorization': `Bearer ${SUPABASE_KEY}`,
+                            'Content-Type': 'application/json',
+                            'Prefer': 'return=minimal'
+                        },
+                        body: JSON.stringify({ value: item.value })
+                    });
+                    
+                    if (!updateResponse.ok) {
+                        throw new Error(`Failed to update item: ${updateResponse.status} ${updateResponse.statusText}`);
+                    }
+                    
+                    results.push({ key: item.key, action: 'updated' });
+                } else {
+                    // Insert new record
+                    const insertUrl = `${SUPABASE_URL}/rest/v1/dynamic_content`;
+                    logDebug('Inserting new item', insertUrl);
+                    
+                    const insertResponse = await fetch(insertUrl, {
+                        method: 'POST',
+                        headers: {
+                            'apikey': SUPABASE_KEY,
+                            'Authorization': `Bearer ${SUPABASE_KEY}`,
+                            'Content-Type': 'application/json',
+                            'Prefer': 'return=minimal'
+                        },
+                        body: JSON.stringify({
+                            project_id: projectId,
+                            key: item.key,
+                            value: item.value
+                        })
+                    });
+                    
+                    if (!insertResponse.ok) {
+                        throw new Error(`Failed to insert item: ${insertResponse.status} ${insertResponse.statusText}`);
+                    }
+                    
+                    results.push({ key: item.key, action: 'inserted' });
+                }
+            } catch (error) {
+                console.error('Error saving item:', item, error);
+                logDebug('Error saving item', { key: item.key, error: error.message });
+                results.push({ key: item.key, action: 'error', error: error.message });
+            }
+        }
+        
+        return results;
+    } catch (error) {
+        console.error('Error saving content:', error);
+        logDebug('Error saving content', error.message);
+        throw error;
+    }
+}
+
+// Create a new project
+async function createProject(projectId, initialContent = {}) {
+    try {
+        if (!projectId) {
+            throw new Error('No project ID specified');
+        }
+        
+        logDebug('Creating new project', projectId);
+        
+        // Create a basic record to establish the project
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/dynamic_content`, {
+            method: 'POST',
+            headers: {
+                'apikey': SUPABASE_KEY,
+                'Authorization': `Bearer ${SUPABASE_KEY}`,
+                'Content-Type': 'application/json',
+                'Prefer': 'return=minimal'
+            },
+            body: JSON.stringify({
+                project_id: projectId,
+                key: 'rendered_title',
+                value: initialContent.title || 'New Site'
+            })
+        });
+        
+        if (!response.ok) {
+            throw new Error(`Failed to create project: ${response.status} ${response.statusText}`);
+        }
+        
+        logDebug('Project created successfully', projectId);
+        
+        return { projectId, success: true };
+    } catch (error) {
+        console.error('Error creating project:', error);
+        logDebug('Error creating project', error.message);
+        throw error;
+    }
+}
+
+// Form submission
+document.getElementById('contentForm').addEventListener('submit', async function(event) {
+    event.preventDefault();
+    
+    try {
+        const projectId = document.getElementById('project_id').value;
+        
+        if (!projectId) {
+            statusElement.textContent = 'Please select a project';
+            statusElement.className = 'status error';
+            return;
+        }
+        
+        statusElement.textContent = 'Saving content...';
+        statusElement.className = 'status info';
+        
+        // Collect form data
+        const formData = new FormData(this);
+        const contentItems = [];
+        
+        for (const [key, value] of formData.entries()) {
+            if (key !== 'project_id') {
+                contentItems.push({
+                    key: key,
+                    value: value
+                });
+            }
+        }
+        
+        console.log('Saving content items:', contentItems);
+        
+        // Save content
+        const results = await saveContent(projectId, contentItems);
+        
+        // Count successes and errors
+        const successCount = results.filter(r => r.action === 'updated' || r.action === 'inserted').length;
+        const errorCount = results.filter(r => r.action === 'error').length;
+        
+        // Show results
+        if (errorCount === 0) {
+            statusElement.textContent = `Saved ${successCount} content items successfully`;
+            statusElement.className = 'status success';
+            
+            // Show view site button
+            document.getElementById('view-site-container').style.display = 'block';
+            document.getElementById('site-url').href = `/?project_id=${projectId}`;
+            document.getElementById('site-url').textContent = `/?project_id=${projectId}`;
+        } else {
+            statusElement.textContent = `Saved ${successCount} items, but ${errorCount} items failed`;
+            statusElement.className = 'status error';
+        }
+        
+    } catch (error) {
+        console.error('Error saving content:', error);
+        statusElement.textContent = 'Error saving content: ' + error.message;
+        statusElement.className = 'status error';
+    }
+});
+
+// Save all content button
+document.getElementById('save-all-btn').addEventListener('click', function() {
+    document.getElementById('contentForm').dispatchEvent(new Event('submit'));
+});
+
+// Show new project form
+function showNewProjectForm() {
+    document.getElementById('new-project-form').style.display = 'block';
+    document.getElementById('create-project-btn').style.display = 'none';
+}
+
+// Hide new project form
+function hideNewProjectForm() {
+    document.getElementById('new-project-form').style.display = 'none';
+    document.getElementById('create-project-btn').style.display = 'inline-block';
+}
+
+// Save new project button
+document.getElementById('save-new-project-btn').addEventListener('click', async function() {
+    const newProjectId = document.getElementById('new-project-id').value.trim();
+    
+    if (!newProjectId) {
+        statusElement.textContent = 'Please enter a project ID';
+        statusElement.className = 'status error';
+        return;
+    }
+    
+    // Format validation - should follow lastname-firstname-YYYYMMDD-HHMM format
+    const projectIdRegex = /^[a-z0-9-]+$/;
+    if (!projectIdRegex.test(newProjectId)) {
+        statusElement.textContent = 'Project ID should only contain lowercase letters, numbers, and hyphens';
+        statusElement.className = 'status error';
+        return;
+    }
+    
+    try {
+        statusElement.textContent = 'Creating new project...';
+        statusElement.className = 'status info';
+        
+        // Create new project
+        await createProject(newProjectId);
+        
+        // Reload projects
+        await loadProjects();
+        
+        // Select the new project
+        document.getElementById('project_id').value = newProjectId;
+        
+        // Hide the new project form
+        document.getElementById('new-project-form').style.display = 'none';
+        document.getElementById('create-project-btn').style.display = 'inline-block';
+        
+        // Load the new project content (which will be minimal)
+        await loadContent(newProjectId);
+        
+        statusElement.textContent = `Created new project: ${newProjectId}`;
+        statusElement.className = 'status success';
+        
+    } catch (error) {
+        console.error('Error creating project:', error);
+        statusElement.textContent = 'Error creating project: ' + error.message;
+        statusElement.className = 'status error';
+    }
+});
+
+// View site button
+document.getElementById('view-site-button').addEventListener('click', function() {
+    const projectId = document.getElementById('project_id').value;
+    if (projectId) {
+        window.open(`/?project_id=${projectId}`, '_blank');
+    }
+});
+
+// Tab switching functionality
+document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', function() {
+        // Remove active class from all tabs and tab contents
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        
+        // Add active class to clicked tab
+        this.classList.add('active');
+        
+        // Show corresponding tab content
+        const tabId = this.getAttribute('data-tab');
+        document.getElementById(tabId).classList.add('active');
+    });
+});
+
+// Toggle section collapse/expand
+function toggleSection(button) {
+    const section = button.closest('.section');
+    const content = section.querySelector('.section-content');
+    
+    if (content.style.display === 'none') {
+        content.style.display = 'block';
+        button.textContent = '−';
+    } else {
+        content.style.display = 'none';
+        button.textContent = '+';
+    }
+}
+
+// Initialize when the DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    // Add debug info element if debug mode is enabled
+    if (window.debugMode && !document.getElementById('debug-info')) {
+        const debugInfo = document.createElement('div');
+        debugInfo.id = 'debug-info';
+        debugInfo.style.fontFamily = 'monospace';
+        debugInfo.style.fontSize = '12px';
+        debugInfo.style.whiteSpace = 'pre-wrap';
+        debugInfo.style.wordBreak = 'break-all';
+        debugInfo.style.marginTop = '1rem';
+        debugInfo.style.padding = '1rem';
+        debugInfo.style.background = '#f8f9fa';
+        debugInfo.style.border = '1px solid #ddd';
+        debugInfo.style.borderRadius = '4px';
+        debugInfo.style.display = 'block';
+        document.querySelector('.container').appendChild(debugInfo);
+    }
+    
+    // Set up collapse toggle buttons
+    document.querySelectorAll('.collapse-toggle').forEach(button => {
+        button.addEventListener('click', function() {
+            toggleSection(this);
+        });
+    });
+    
+    // Load projects
+    loadProjects();
+});
+    </pre>
+</body>
+</html>

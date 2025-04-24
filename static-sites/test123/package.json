@@ -1,0 +1,18 @@
+{
+  "name": "selfcast-dynamic-build-server",
+  "version": "1.0.0",
+  "description": "Server for building static sites in SelfCast Dynamic",
+  "main": "build-static-site.js",
+  "scripts": {
+    "start": "node build-static-site.js",
+    "dev": "nodemon build-static-site.js"
+  },
+  "dependencies": {
+    "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}

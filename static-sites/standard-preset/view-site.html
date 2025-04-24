@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redirecting to Site</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            background: #f5f5f5;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 1rem;
+        }
+        button:hover {
+            background: #0069d9;
+        }
+    </style>
+    <script>
+        // Wait for DOM to be fully loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get elements
+            const statusDiv = document.getElementById('status');
+            const detailsDiv = document.getElementById('details');
+            const tryAgainBtn = document.getElementById('try-again');
+            const directLinkBtn = document.getElementById('direct-link');
+            
+            // Get project ID from URL parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            const projectId = urlParams.get('project_id');
+            
+            console.log('Project ID from URL:', projectId);
+            
+            if (!projectId) {
+                console.error('No project ID specified in URL parameters');
+                statusDiv.innerHTML = '<div class="error">Error: No project ID specified</div>';
+                return;
+            }
+            
+            // Construct the target URL
+            const targetUrl = 'http://127.0.0.1:8100/' + projectId + '/index.html';
+            console.log('Target URL:', targetUrl);
+            
+            // Update the direct link button
+            directLinkBtn.href = targetUrl;
+            directLinkBtn.textContent = 'Open ' + targetUrl;
+            
+            // Check if the file exists (using fetch)
+            fetch(targetUrl)
+                .then(response => {
+                    console.log('Fetch response:', response);
+                    if (response.ok) {
+                        console.log('File exists, redirecting...');
+                        statusDiv.innerHTML = '<div class="info">Redirecting to ' + targetUrl + '...</div>';
+                        // Redirect to the static site
+                        window.location.href = targetUrl;
+                    } else {
+                        console.error('File not found:', response.status, response.statusText);
+                        statusDiv.innerHTML = '<div class="error">Error: Static site not found for project "' + projectId + '"</div>';
+                        detailsDiv.innerHTML = `
+                            <p>The static site for this project may not exist yet or might be in a different location.</p>
+                            <p>Details:</p>
+                            <pre>
+Status: ${response.status} ${response.statusText}
+URL: ${targetUrl}
+Project ID: ${projectId}
+Current location: ${window.location.href}
+                            </pre>
+                            <p>Possible solutions:</p>
+                            <ol>
+                                <li>Make sure you've run the static-build.js script for this project: <code>node static-build.js ${projectId}</code></li>
+                                <li>Check if the static site directory exists: <code>static-sites/${projectId}/</code></li>
+                                <li>Try viewing the dynamic site instead: <a href="index.html?project_id=${projectId}">index.html?project_id=${projectId}</a></li>
+                            </ol>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    console.error('Fetch error:', error);
+                    statusDiv.innerHTML = '<div class="error">Error: Failed to check if static site exists</div>';
+                    detailsDiv.innerHTML = `
+                        <p>An error occurred while trying to access the static site:</p>
+                        <pre>${error.toString()}</pre>
+                        <p>This might be due to CORS restrictions or network issues.</p>
+                    `;
+                });
+            
+            // Try again button
+            tryAgainBtn.addEventListener('click', function() {
+                window.location.reload();
+            });
+        });
+    </script>
+</head>
+<body>
+    <h1>Site Viewer</h1>
+    <div id="status">
+        <div class="info">Checking if static site exists...</div>
+    </div>
+    <div id="details"></div>
+    <div>
+        <button id="try-again">Try Again</button>
+        <a id="direct-link" href="#" target="_blank">Direct Link</a>
+    </div>
+    <div style="margin-top: 2rem;">
+        <h2>Console Output</h2>
+        <p>Check your browser's developer console (F12) for more detailed error information.</p>
+    </div>
+</body>
+</html>

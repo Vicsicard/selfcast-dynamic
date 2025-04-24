@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog | SelfCast</title>
+    <link rel="stylesheet" href="style.css">
+    <style id="dynamic-theme"></style>
+    <style>
+        /* Blog page specific styles */
+        .blog-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding: 1rem 0;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+        
+        .home-button {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1.5rem;
+            background-color: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        
+        .home-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .home-button svg {
+            margin-right: 0.5rem;
+            width: 16px;
+            height: 16px;
+        }
+        
+        .blog-title {
+            font-size: 2rem;
+            font-weight: bold;
+            font-family: var(--heading-font, sans-serif);
+            color: var(--primary-color);
+        }
+        
+        .blog-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .blog-post-number {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: var(--primary-color);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin: 2rem 0;
+        }
+        
+        .pagination button {
+            padding: 0.5rem 1rem;
+            margin: 0 0.25rem;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .pagination button:hover {
+            background: var(--accent-color);
+        }
+        
+        .pagination button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .pagination-info {
+            margin: 0 1rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .no-posts {
+            text-align: center;
+            padding: 3rem;
+            background: rgba(0,0,0,0.05);
+            border-radius: 8px;
+            margin: 2rem 0;
+        }
+        
+        @media (max-width: 768px) {
+            .blog-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .blog-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="site-wrapper">
+        <div class="blog-header">
+            <a href="index.html" class="home-button">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                </svg>
+                Return to Homepage
+            </a>
+            <h1 class="blog-title">Blog</h1>
+        </div>
+        
+        <div id="blog-container" class="blog-grid">
+            <!-- Blog posts will be dynamically inserted here -->
+            <div class="no-posts">Loading blog posts...</div>
+        </div>
+        
+        <div class="pagination">
+            <button id="prev-page" disabled>Previous</button>
+            <div class="pagination-info">Page <span id="current-page">1</span> of <span id="total-pages">1</span></div>
+            <button id="next-page" disabled>Next</button>
+        </div>
+    </div>
+    
+    <!-- Modal for viewing full blog posts -->
+    <div id="blog-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeModal('blog-modal')">&times;</span>
+            <h2 id="modal-title">Blog Post</h2>
+            <div id="modal-content"></div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script>
+        // Supabase Configuration with fallbacks
+        let SUPABASE_URL, SUPABASE_ANON_KEY, supabase;
+        
+        // Try to use the configuration from config.js
+        if (window.SUPABASE_CONFIG) {
+            console.log('Using Supabase config from config.js');
+            SUPABASE_URL = window.SUPABASE_CONFIG.url;
+            SUPABASE_ANON_KEY = window.SUPABASE_CONFIG.key;
+        } else {
+            // Fallback to hardcoded values
+            console.log('Using hardcoded Supabase config');
+            SUPABASE_URL = 'https://aqicztygjpmunfljjjuto.supabase.co';
+            SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxaWN6dHlnanBtdW5mbGpqdXRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3MDU1ODIsImV4cCI6MjA1OTI4MTU4Mn0.5e2hvTckSSbTFLBjQiccrvjoBd6QQDX0X4tccFOc1rs';
+        }
+        
+        // Clean up URL if needed (remove markdown formatting if present)
+        if (SUPABASE_URL.includes('](')) {
+            SUPABASE_URL = SUPABASE_URL.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '$2');
+        }
+        
+        console.log('Connecting to Supabase URL:', SUPABASE_URL);
+        
+        // Initialize Supabase client
+        try {
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            console.log('Supabase client initialized');
+        } catch (error) {
+            console.error('Error initializing Supabase client:', error);
+        }
+        
+        // Initialize site content storage
+        window.siteContent = {};
+        
+        // Pagination settings
+        const postsPerPage = 12;
+        let currentPage = 1;
+        let totalPosts = 0;
+        let totalPages = 1;
+        
+        // Get project ID from URL or use default
+        function getProjectId() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const projectId = urlParams.get('project_id');
+            console.log(`Project ID from URL: ${projectId || 'none'}`);
+            return projectId || 'adam-hyp-1';
+        }
+        
+        // Load and inject content
+        async function loadContent() {
+            try {
+                const projectId = getProjectId();
+                console.log('Loading content for project:', projectId);
+                
+                // Fetch all content from Supabase
+                const { data: contentData, error: contentError } = await supabase
+                    .from('dynamic_content')
+                    .select('*')
+                    .eq('project_id', projectId);
+                
+                if (contentError) throw contentError;
+                console.log('Content data:', contentData);
+                
+                // Convert array to object for theme styles
+                const themeData = {};
+                contentData.forEach(item => {
+                    themeData[item.key] = item.value;
+                    window.siteContent[item.key] = item.value;
+                });
+                
+                // Apply theme styles
+                injectStyles(themeData);
+                
+                // Load fonts
+                loadFonts(themeData.heading_font || 'Roboto', themeData.body_font || 'Open Sans');
+                
+                // Update blog title with project name if available
+                if (themeData.site_title) {
+                    document.querySelector('.blog-title').textContent = themeData.site_title + ' Blog';
+                    document.title = themeData.site_title + ' Blog';
+                }
+                
+                // Get all blog posts
+                const blogPosts = getBlogPosts(contentData);
+                
+                // Update pagination
+                updatePagination(blogPosts.length);
+                
+                // Display blog posts
+                displayBlogPosts(blogPosts, currentPage);
+                
+            } catch (error) {
+                console.error('Error loading content:', error);
+                document.getElementById('blog-container').innerHTML = `
+                    <div class="no-posts">
+                        <h3>Error Loading Blog Posts</h3>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // Extract blog posts from content data
+        function getBlogPosts(contentData) {
+            const blogPosts = [];
+            const blogTitleRegex = /^blog_(\d+)_title$/;
+            
+            // First, find all blog titles and their numbers
+            contentData.forEach(item => {
+                const match = item.key.match(blogTitleRegex);
+                if (match) {
+                    const blogNumber = parseInt(match[1]);
+                    
+                    // Check if this blog post has content
+                    const contentItem = contentData.find(ci => ci.key === `blog_${blogNumber}`);
+                    
+                    if (contentItem && contentItem.value) {
+                        blogPosts.push({
+                            number: blogNumber,
+                            title: item.value,
+                            content: contentItem.value,
+                            // Check if this blog is featured (shown on homepage)
+                            featured: contentData.find(ci => ci.key === `blog_${blogNumber}_featured`)?.value === 'true',
+                            // Check if this blog is active (not deleted)
+                            active: contentData.find(ci => ci.key === `blog_${blogNumber}_active`)?.value !== 'false',
+                            // Get date if available
+                            date: contentData.find(ci => ci.key === `blog_${blogNumber}_date`)?.value || 'No date'
+                        });
+                    }
+                }
+            });
+            
+            // Sort by blog number (newest first assuming higher numbers are newer)
+            return blogPosts.sort((a, b) => b.number - a.number);
+        }
+        
+        // Display blog posts for the current page
+        function displayBlogPosts(blogPosts, page) {
+            const container = document.getElementById('blog-container');
+            
+            // Calculate start and end indices for current page
+            const startIndex = (page - 1) * postsPerPage;
+            const endIndex = Math.min(startIndex + postsPerPage, blogPosts.length);
+            
+            // Clear container
+            container.innerHTML = '';
+            
+            // Check if there are any posts
+            if (blogPosts.length === 0) {
+                container.innerHTML = `
+                    <div class="no-posts">
+                        <h3>No Blog Posts Found</h3>
+                        <p>There are currently no blog posts available.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Add posts for current page
+            for (let i = startIndex; i < endIndex; i++) {
+                const post = blogPosts[i];
+                
+                // Create excerpt
+                const excerpt = post.content.length > 150 
+                    ? post.content.substring(0, 150) + '...' 
+                    : post.content;
+                
+                // Create blog post element
+                const postElement = document.createElement('div');
+                postElement.className = 'grid-item';
+                postElement.innerHTML = `
+                    <div class="blog-post-number">Blog ${post.number}</div>
+                    <h3 class="blog-title">${post.title}</h3>
+                    <p class="blog-excerpt">${excerpt}</p>
+                    <button class="read-more" onclick="openModal('blog-modal', ${post.number})">Read More</button>
+                `;
+                
+                container.appendChild(postElement);
+            }
+        }
+        
+        // Update pagination controls
+        function updatePagination(totalPostCount) {
+            totalPosts = totalPostCount;
+            totalPages = Math.ceil(totalPosts / postsPerPage);
+            
+            document.getElementById('total-pages').textContent = totalPages;
+            document.getElementById('current-page').textContent = currentPage;
+            
+            // Update button states
+            document.getElementById('prev-page').disabled = currentPage <= 1;
+            document.getElementById('next-page').disabled = currentPage >= totalPages;
+        }
+        
+        // Load fonts
+        function loadFonts(headingFont, bodyFont) {
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = `https://fonts.googleapis.com/css2?family=${headingFont.replace(' ', '+')}&family=${bodyFont.replace(' ', '+')}&display=swap`;
+            document.head.appendChild(link);
+            
+            // Apply fonts to elements
+            document.documentElement.style.setProperty('--heading-font', `'${headingFont}', sans-serif`);
+            document.documentElement.style.setProperty('--body-font', `'${bodyFont}', sans-serif`);
+        }
+        
+        // Inject dynamic theme styles
+        function injectStyles(styles) {
+            const style = document.getElementById('dynamic-theme');
+            if (!style) return;
+            
+            const css = `
+                :root {
+                    --primary-color: ${styles.primary_color || '#007bff'};
+                    --secondary-color: ${styles.secondary_color || '#6c757d'};
+                    --accent-color: ${styles.accent_color || '#333'};
+                    --text-color: ${styles.text_color || '#333'};
+                    --background-color: ${styles.background_color || '#fff'};
+                    --heading-font: '${styles.heading_font || 'Roboto'}', sans-serif;
+                    --body-font: '${styles.body_font || 'Open Sans'}', sans-serif;
+                }
+                
+                body {
+                    font-family: var(--body-font);
+                    color: var(--text-color);
+                    background-color: var(--background-color);
+                }
+                
+                h1, h2, h3, h4, h5, h6 {
+                    font-family: var(--heading-font);
+                }
+            `;
+            
+            style.textContent = css;
+        }
+        
+        // Modal Functions
+        function openModal(modalId, blogNumber) {
+            const modal = document.getElementById(modalId);
+            const modalTitle = document.getElementById('modal-title');
+            const modalContent = document.getElementById('modal-content');
+            
+            // Get blog content
+            const title = window.siteContent[`blog_${blogNumber}_title`] || `Blog Post ${blogNumber}`;
+            const content = window.siteContent[`blog_${blogNumber}`] || 'No content available';
+            
+            // Set modal content
+            modalTitle.textContent = title;
+            
+            // Format content with proper paragraph breaks
+            const paragraphs = content.split(/\n\s*\n/);
+            const formattedContent = paragraphs
+                .map(p => `<p>${p.trim().replace(/\n/g, '<br>')}</p>`)
+                .join('');
+            
+            modalContent.innerHTML = formattedContent;
+            
+            // Show modal
+            modal.style.display = 'flex';
+            
+            // Prevent body scrolling
+            document.body.style.overflow = 'hidden';
+            
+            // Add event listener to close when clicking outside
+            modal.addEventListener('click', function(event) {
+                if (event.target === modal) {
+                    closeModal(modalId);
+                }
+            });
+            
+            // Add event listener to close with Escape key
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'Escape') {
+                    closeModal(modalId);
+                }
+            });
+        }
+        
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.style.display = 'none';
+            
+            // Restore body scrolling
+            document.body.style.overflow = 'auto';
+        }
+        
+        // Pagination event handlers
+        document.getElementById('prev-page').addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                document.getElementById('current-page').textContent = currentPage;
+                
+                // Update button states
+                document.getElementById('prev-page').disabled = currentPage <= 1;
+                document.getElementById('next-page').disabled = currentPage >= totalPages;
+                
+                // Reload blog posts for current page
+                loadContent();
+            }
+        });
+        
+        document.getElementById('next-page').addEventListener('click', () => {
+            if (currentPage < totalPages) {
+                currentPage++;
+                document.getElementById('current-page').textContent = currentPage;
+                
+                // Update button states
+                document.getElementById('prev-page').disabled = currentPage <= 1;
+                document.getElementById('next-page').disabled = currentPage >= totalPages;
+                
+                // Reload blog posts for current page
+                loadContent();
+            }
+        });
+        
+        // Initialize content on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadContent();
+        });
+    </script>
+</body>
+</html>

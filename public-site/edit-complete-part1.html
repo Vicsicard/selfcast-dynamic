@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SelfCast Content Editor (Complete)</title>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2c3e50;
+            --accent-color: #e74c3c;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --error-color: #e74c3c;
+            --info-color: #3498db;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+            --border-color: #dee2e6;
+            --border-radius: 4px;
+            --box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: var(--box-shadow);
+        }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border-color);
+        }
+        
+        h1, h2, h3, h4 {
+            color: var(--secondary-color);
+            margin-top: 0;
+        }
+        
+        h1 {
+            font-size: 1.8rem;
+        }
+        
+        h2 {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+        }
+        
+        h3 {
+            font-size: 1.2rem;
+            margin-top: 1rem;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: var(--box-shadow);
+            border-top: 3px solid var(--primary-color);
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            cursor: pointer;
+        }
+        
+        .section-header h2 {
+            margin: 0;
+        }
+        
+        .section-content {
+            display: block;
+        }
+        
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            margin: 0 -10px 15px;
+        }
+        
+        .form-col {
+            flex: 1;
+            padding: 0 10px;
+            min-width: 200px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            font-family: inherit;
+            font-size: 14px;
+        }
+        
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        input[type="color"] {
+            height: 40px;
+            padding: 2px;
+        }
+        
+        input[type="checkbox"] {
+            width: auto;
+            margin-right: 5px;
+        }
+        
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+        }
+        
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+            transition: background-color 0.2s;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        button.secondary {
+            background-color: var(--secondary-color);
+        }
+        
+        button.secondary:hover {
+            background-color: #1a252f;
+        }
+        
+        button.success {
+            background-color: var(--success-color);
+        }
+        
+        button.success:hover {
+            background-color: #27ae60;
+        }
+        
+        button.warning {
+            background-color: var(--warning-color);
+        }
+        
+        button.warning:hover {
+            background-color: #e67e22;
+        }
+        
+        button.error {
+            background-color: var(--error-color);
+        }
+        
+        button.error:hover {
+            background-color: #c0392b;
+        }
+        
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: var(--border-radius);
+        }
+        
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        .warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            border-bottom: none;
+            border-radius: 4px 4px 0 0;
+            margin-right: 5px;
+            background-color: #f8f9fa;
+        }
+        
+        .tab.active {
+            background-color: white;
+            border-color: var(--border-color);
+            border-bottom-color: white;
+            margin-bottom: -1px;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        #debug-info {
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            word-break: break-all;
+            margin-top: 20px;
+            padding: 10px;
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            display: none;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        #view-site-container {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f0f7ff;
+            border-radius: 4px;
+            border: 1px solid #cce5ff;
+            display: none;
+        }
+        
+        #view-site-container a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+        
+        #view-site-container a:hover {
+            text-decoration: underline;
+        }
+        
+        .collapse-toggle {
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .help-text {
+            font-size: 0.85rem;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 0.25em 0.4em;
+            font-size: 75%;
+            font-weight: 700;
+            line-height: 1;
+            text-align: center;
+            white-space: nowrap;
+            vertical-align: baseline;
+            border-radius: 0.25rem;
+            margin-left: 5px;
+        }
+        
+        .badge-primary {
+            color: #fff;
+            background-color: var(--primary-color);
+        }
+        
+        .badge-secondary {
+            color: #fff;
+            background-color: var(--secondary-color);
+        }
+        
+        .badge-success {
+            color: #fff;
+            background-color: var(--success-color);
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .form-col {
+                flex: 100%;
+            }
+            
+            .form-row {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>SelfCast Content Editor</h1>
+            <div>
+                <button id="save-all-btn" class="success">Save All Content</button>
+            </div>
+        </header>
+        
+        <div id="status" class="status info">Ready to load projects</div>
+        
+        <!-- Project Selection Section -->
+        <div class="section">
+            <div class="section-header">
+                <h2>Project Selection</h2>
+            </div>
+            <div class="section-content">
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="project_id">Select Project:</label>
+                            <select id="project_id" onchange="loadContent(this.value)">
+                                <option value="">Select Project</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-col" style="display: flex; align-items: flex-end;">
+                        <button id="create-project-btn" onclick="showNewProjectForm()">Create New Project</button>
+                    </div>
+                </div>
+                
+                <div id="new-project-form" style="display: none;">
+                    <h3>Create New Project</h3>
+                    <div class="form-row">
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="new-project-id">Project ID:</label>
+                                <input type="text" id="new-project-id" placeholder="lastname-firstname-YYYYMMDD-HHMM">
+                                <p class="help-text">Format: lastname-firstname-YYYYMMDD-HHMM (e.g., smith-john-20250423-1530)</p>
+                            </div>
+                        </div>
+                        <div class="form-col" style="display: flex; align-items: flex-end;">
+                            <button id="save-new-project-btn">Save New Project</button>
+                            <button onclick="hideNewProjectForm()" class="secondary">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="view-site-container" style="display: none;">
+                    <h3>View Site</h3>
+                    <p>Your site is available at: <a id="site-url" href="#" target="_blank"></a></p>
+                    <button id="view-site-button">Open Site</button>
+                </div>
+            </div>
+        </div>
+        
+        <form id="contentForm">
+            <!-- Tabs Navigation -->
+            <div class="tabs">
+                <div class="tab active" data-tab="main-content">Main Content</div>
+                <div class="tab" data-tab="blog-posts">Blog Posts</div>
+                <div class="tab" data-tab="social-media">Social Media</div>
+                <div class="tab" data-tab="styling">Styling</div>
+                <div class="tab" data-tab="quotes">Quotes</div>
+                <div class="tab" data-tab="contact">Contact & Footer</div>
+                <div class="tab" data-tab="misc">Miscellaneous</div>
+            </div>
+            
+            <!-- Main Content Tab -->
+            <div class="tab-content active" id="main-content">
+                <!-- Basic Info Section -->
+                <div class="section">
+                    <div class="section-header">
+                        <h2>Basic Information</h2>
+                        <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
+                    </div>
+                    <div class="section-content">
+                        <div class="form-row">
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label for="rendered_title">Site Title:</label>
+                                    <input type="text" id="rendered_title" name="rendered_title">
+                                </div>
+                            </div>
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label for="rendered_subtitle">Subtitle:</label>
+                                    <input type="text" id="rendered_subtitle" name="rendered_subtitle">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label for="full_name">Full Name:</label>
+                                    <input type="text" id="full_name" name="full_name">
+                                </div>
+                            </div>
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label for="client_name">Client Name:</label>
+                                    <input type="text" id="client_name" name="client_name">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="professional_title">Professional Title:</label>
+                            <input type="text" id="professional_title" name="professional_title">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="profile_image_url">Profile Image URL:</label>
+                            <input type="url" id="profile_image_url" name="profile_image_url">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Bio Section -->
+                <div class="section">
+                    <div class="section-header">
+                        <h2>Bio</h2>
+                        <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
+                    </div>
+                    <div class="section-content">
+                        <div class="form-group">
+                            <label for="rendered_bio_html">Main Bio:</label>
+                            <textarea id="rendered_bio_html" name="rendered_bio_html" rows="10"></textarea>
+                            <p class="help-text">This is the main biography that appears on the site. Use line breaks for paragraphs.</p>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label for="rendered_bio_html_card_1">Bio Card 1:</label>
+                                    <input type="text" id="rendered_bio_html_card_1" name="rendered_bio_html_card_1">
+                                </div>
+                            </div>
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label for="rendered_bio_html_card_2">Bio Card 2:</label>
+                                    <input type="text" id="rendered_bio_html_card_2" name="rendered_bio_html_card_2">
+                                </div>
+                            </div>
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label for="rendered_bio_html_card_3">Bio Card 3:</label>
+                                    <input type="text" id="rendered_bio_html_card_3" name="rendered_bio_html_card_3">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Blog Posts Tab -->
+            <div class="tab-content" id="blog-posts">
+                <!-- Blog Post 1 Section -->
+                <div class="section">
+                    <div class="section-header">
+                        <h2>Blog Post 1</h2>
+                        <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
+                    </div>
+                    <div class="section-content">
+                        <div class="form-row">
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label for="blog_1_title">Title:</label>
+                                    <input type="text" id="blog_1_title" name="blog_1_title">
+                                </div>
+                            </div>
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label for="blog_1_date">Date:</label>
+                                    <input type="date" id="blog_1_date" name="blog_1_date">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="blog_1_short">Short Description:</label>
+                            <input type="text" id="blog_1_short" name="blog_1_short">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="blog_1_excerpt">Excerpt:</label>
+                            <textarea id="blog_1_excerpt" name="blog_1_excerpt" rows="3"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="blog_1_post">Full Post:</label>
+                            <textarea id="blog_1_post" name="blog_1_post" rows="10"></textarea>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="blog_1_featured" name="blog_1_featured" value="true">
+                                        Featured
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="blog_1_active" name="blog_1_active" value="true">
+                                        Active
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="blog_post_1_title">Alternative Title:</label>
+                            <input type="text" id="blog_post_1_title" name="blog_post_1_title">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="blog_post_1_description">Alternative Description:</label>
+                            <textarea id="blog_post_1_description" name="blog_post_1_description" rows="3"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="blog_post_1">Alternative Content:</label>
+                            <textarea id="blog_post_1" name="blog_post_1" rows="10"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="rendered_blog_post_1">Rendered Blog Post:</label>
+                            <textarea id="rendered_blog_post_1" name="rendered_blog_post_1" rows="10"></textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Blog Post 2 Section -->
+                <div class="section">
+                    <div class="section-header">
+                        <h2>Blog Post 2</h2>
+                        <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
+                    </div>
+                    <div class="section-content">
+                        <div class="form-row">
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label for="blog_2_title">Title:</label>
+                                    <input type="text" id="blog_2_title" name="blog_2_title">
+                                </div>
+                            </div>
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label for="blog_2_date">Date:</label>
+                                    <input type="date" id="blog_2_date" name="blog_2_date">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="blog_2_short">Short Description:</label>
+                            <input type="text" id="blog_2_short" name="blog_2_short">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="blog_2_excerpt">Excerpt:</label>
+                            <textarea id="blog_2_excerpt" name="blog_2_excerpt" rows="3"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="blog_2_post">Full Post:</label>
+                            <textarea id="blog_2_post" name="blog_2_post" rows="10"></textarea>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="blog_2_featured" name="blog_2_featured" value="true">
+                                        Featured
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="blog_2_active" name="blog_2_active" value="true">
+                                        Active
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="blog_post_2_title">Alternative Title:</label>
+                            <input type="text" id="blog_post_2_title" name="blog_post_2_title">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="blog_post_2_description">Alternative Description:</label>
+                            <textarea id="blog_post_2_description" name="blog_post_2_description" rows="3"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="blog_post_2">Alternative Content:</label>
+                            <textarea id="blog_post_2" name="blog_post_2" rows="10"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="rendered_blog_post_2">Rendered Blog Post:</label>
+                            <textarea id="rendered_blog_post_2" name="rendered_blog_post_2" rows="10"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+        
+        <div id="debug-info"></div>
+    </div>
+
+    <script>
+        // This is just Part 1 of the editor - JavaScript will be added in Part 2
+    </script>
+</body>
+</html>

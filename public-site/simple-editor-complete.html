@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Content Editor</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            margin-top: 0;
+        }
+        .status {
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1rem 0;
+        }
+        .success { 
+            background: #d4edda;
+            color: #155724;
+        }
+        .error { 
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .info {
+            background: #e3f2fd;
+            color: #0d47a1;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 4px;
+            overflow: auto;
+            max-height: 300px;
+        }
+        button {
+            background: #3399FF;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-right: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+        select {
+            width: 100%;
+            padding: 0.5rem;
+            margin-bottom: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .debug-info {
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            word-break: break-all;
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            display: none;
+        }
+        .content-preview {
+            margin-top: 1rem;
+        }
+        .content-item {
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 4px;
+            border-left: 4px solid #3399FF;
+        }
+        .content-key {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        .content-value {
+            white-space: pre-wrap;
+        }
+        .site-url {
+            display: block;
+            margin: 1rem 0;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Simple Content Editor</h1>
+        <p>This editor uses direct fetch requests instead of the Supabase client library.</p>
+        
+        <div>
+            <label for="project-select">Select Project:</label>
+            <select id="project-select">
+                <option value="">Loading projects...</option>
+            </select>
+        </div>
+        
+        <button id="load-button">Load Content</button>
+        <button id="view-button">View Site</button>
+        <button id="debug-toggle">Toggle Debug Info</button>
+        
+        <div id="status" class="status info">Ready to load projects</div>
+        
+        <div id="debug-info" class="debug-info"></div>
+        
+        <div id="site-url-container" style="display: none;">
+            <a id="site-url" class="site-url" href="#" target="_blank"></a>
+        </div>
+        
+        <h2>Project Content</h2>
+        <pre id="content-display"></pre>
+        
+        <div id="content-preview" class="content-preview"></div>
+    </div>
+
+    <script>
+        // Supabase configuration
+        const SUPABASE_URL = 'https://aqicztygjpmunfljjuto.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxaWN6dHlnanBtdW5mbGpqdXRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3MDU1ODIsImV4cCI6MjA1OTI4MTU4Mn0.5e2hvTckSSbTFLBjQiccrvjoBd6QQDX0X4tccFOc1rs';
+        
+        // Elements
+        const statusElement = document.getElementById('status');
+        const projectSelect = document.getElementById('project-select');
+        const contentDisplay = document.getElementById('content-display');
+        const contentPreview = document.getElementById('content-preview');
+        const siteUrlContainer = document.getElementById('site-url-container');
+        const siteUrl = document.getElementById('site-url');
+        const debugInfo = document.getElementById('debug-info');
+        const loadButton = document.getElementById('load-button');
+        const viewButton = document.getElementById('view-button');
+        const debugToggle = document.getElementById('debug-toggle');
+        
+        // Debug logging
+        function log(message, data) {
+            const timestamp = new Date().toISOString().substring(11, 19);
+            const formattedMessage = typeof data !== 'undefined' 
+                ? `[${timestamp}] ${message}: ${JSON.stringify(data, null, 2)}`
+                : `[${timestamp}] ${message}`;
+            
+            console.log(message, data);
+            debugInfo.innerHTML += formattedMessage + '<br>';
+            debugInfo.scrollTop = debugInfo.scrollHeight;
+        }
+        
+        // Toggle debug info
+        debugToggle.addEventListener('click', function() {
+            debugInfo.style.display = debugInfo.style.display === 'none' ? 'block' : 'none';
+        });
+        
+        // Load projects
+        async function loadProjects() {
+            try {
+                statusElement.textContent = 'Loading projects...';
+                statusElement.className = 'status info';
+                
+                log('Fetching projects from', `${SUPABASE_URL}/rest/v1/dynamic_content?select=project_id`);
+                
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/dynamic_content?select=project_id`, {
+                    method: 'GET',
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`
+                    }
+                });
+                
+                log('Projects response status', `${response.status} ${response.statusText}`);
+                
+                if (!response.ok) {
+                    throw new Error(`Failed to load projects: ${response.status} ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                log('Projects data received', data.length);
+                
+                // Get unique project IDs
+                const projectIds = [...new Set(data.map(item => item.project_id))];
+                log('Unique project IDs', projectIds.length);
+                
+                // Clear existing options
+                projectSelect.innerHTML = '<option value="">Select a project</option>';
+                
+                // Add options for each project
+                projectIds.forEach(projectId => {
+                    const option = document.createElement('option');
+                    option.value = projectId;
+                    option.textContent = projectId;
+                    projectSelect.appendChild(option);
+                });
+                
+                statusElement.textContent = `Loaded ${projectIds.length} projects`;
+                statusElement.className = 'status success';
+                
+            } catch (error) {
+                console.error('Error loading projects:', error);
+                log('Error loading projects', error.message);
+                statusElement.textContent = 'Error loading projects: ' + error.message;
+                statusElement.className = 'status error';
+            }
+        }
+        
+        // Load content for a project
+        async function loadContent(projectId) {
+            try {
+                if (!projectId) {
+                    statusElement.textContent = 'Please select a project';
+                    statusElement.className = 'status error';
+                    return;
+                }
+                
+                statusElement.textContent = `Loading content for project: ${projectId}...`;
+                statusElement.className = 'status info';
+                contentDisplay.textContent = '';
+                contentPreview.innerHTML = '';
+                
+                // Use the URL format that worked in verification
+                const url = `${SUPABASE_URL}/rest/v1/dynamic_content?select=*&project_id=eq.${encodeURIComponent(projectId)}`;
+                log('Fetching content from', url);
+                
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                log('Response status', `${response.status} ${response.statusText}`);
+                
+                if (!response.ok) {
+                    throw new Error(`Failed to load content: ${response.status} ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                log('Content data received', data.length);
+                
+                if (!data || data.length === 0) {
+                    statusElement.textContent = `No content found for project: ${projectId}`;
+                    statusElement.className = 'status error';
+                    return;
+                }
+                
+                // Display content
+                contentDisplay.textContent = JSON.stringify(data, null, 2);
+                
+                // Show site URL
+                siteUrlContainer.style.display = 'block';
+                const fullUrl = window.location.origin + `/?project_id=${projectId}`;
+                siteUrl.href = fullUrl;
+                siteUrl.textContent = fullUrl;
+                
+                // Display content preview
+                displayContentPreview(data);
+                
+                statusElement.textContent = `Loaded ${data.length} content items for project: ${projectId}`;
+                statusElement.className = 'status success';
+                
+            } catch (error) {
+                console.error('Error loading content:', error);
+                log('Error loading content', error.message);
+                statusElement.textContent = 'Error loading content: ' + error.message;
+                statusElement.className = 'status error';
+            }
+        }
+        
+        // Display content preview
+        function displayContentPreview(data) {
+            // Sort by key for easier viewing
+            data.sort((a, b) => a.key.localeCompare(b.key));
+            
+            // Display important content first
+            const importantKeys = ['rendered_title', 'rendered_subtitle', 'rendered_bio_html', 'style_package'];
+            
+            // First display important items
+            importantKeys.forEach(keyName => {
+                const item = data.find(item => item.key === keyName);
+                if (item) {
+                    addContentItem(item);
+                }
+            });
+            
+            // Then display the rest
+            data.forEach(item => {
+                if (!importantKeys.includes(item.key)) {
+                    addContentItem(item);
+                }
+            });
+        }
+        
+        // Add content item to preview
+        function addContentItem(item) {
+            const div = document.createElement('div');
+            div.className = 'content-item';
+            
+            const keyDiv = document.createElement('div');
+            keyDiv.className = 'content-key';
+            keyDiv.textContent = item.key;
+            
+            const valueDiv = document.createElement('div');
+            valueDiv.className = 'content-value';
+            valueDiv.textContent = item.value;
+            
+            div.appendChild(keyDiv);
+            div.appendChild(valueDiv);
+            contentPreview.appendChild(div);
+        }
+        
+        // Event listeners
+        loadButton.addEventListener('click', function() {
+            const selectedProject = projectSelect.value;
+            loadContent(selectedProject);
+        });
+        
+        viewButton.addEventListener('click', function() {
+            const selectedProject = projectSelect.value;
+            if (selectedProject) {
+                const siteUrl = window.location.origin + `/?project_id=${selectedProject}`;
+                window.open(siteUrl, '_blank');
+            } else {
+                statusElement.textContent = 'Please select a project';
+                statusElement.className = 'status error';
+            }
+        });
+        
+        // Load projects on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            log('Page loaded, initializing...');
+            loadProjects();
+        });
+    </script>
+</body>
+</html>

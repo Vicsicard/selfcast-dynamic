@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SelfCast Dynamic</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f5f5f5;
+            color: #333;
+        }
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 2rem;
+            text-align: center;
+        }
+        .spinner {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(0,0,0,0.1);
+            border-radius: 50%;
+            border-top-color: #3399FF;
+            animation: spin 1s ease-in-out infinite;
+            margin-bottom: 2rem;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .status {
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1rem 0;
+            max-width: 600px;
+        }
+        .info {
+            background: #e3f2fd;
+            color: #0d47a1;
+        }
+        .error {
+            background: #ffebee;
+            color: #c62828;
+        }
+        .debug-info {
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            padding: 1rem;
+            margin-top: 1rem;
+            border-radius: 4px;
+            text-align: left;
+            font-family: monospace;
+            font-size: 12px;
+            max-width: 600px;
+            max-height: 300px;
+            overflow: auto;
+        }
+        h1 {
+            margin-bottom: 1rem;
+        }
+        #content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .action-button {
+            background: #3399FF;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-container">
+        <div class="spinner"></div>
+        <h1>Loading SelfCast Dynamic</h1>
+        <div id="status" class="status info">Initializing...</div>
+        <div id="debug-info" class="debug-info" style="display: none;"></div>
+        <button id="test-connection" class="action-button" style="display: none;">Test Supabase Connection</button>
+    </div>
+    
+    <div id="content"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async function() {
+            const statusElement = document.getElementById('status');
+            const contentElement = document.getElementById('content');
+            const debugInfoElement = document.getElementById('debug-info');
+            const testConnectionButton = document.getElementById('test-connection');
+            
+            // Debug function to log information
+            function logDebug(message, data) {
+                console.log(message, data);
+                if (debugInfoElement) {
+                    const timestamp = new Date().toISOString().substring(11, 19);
+                    const formattedMessage = typeof data !== 'undefined' 
+                        ? `[${timestamp}] ${message}: ${JSON.stringify(data, null, 2)}`
+                        : `[${timestamp}] ${message}`;
+                    
+                    debugInfoElement.innerHTML += formattedMessage + '<br>';
+                    debugInfoElement.scrollTop = debugInfoElement.scrollHeight;
+                }
+            }
+            
+            try {
+                // Get the project_id from the URL
+                const urlParams = new URLSearchParams(window.location.search);
+                const projectId = urlParams.get('project_id');
+                const debug = urlParams.get('debug') === 'true';
+                
+                if (debug) {
+                    debugInfoElement.style.display = 'block';
+                    testConnectionButton.style.display = 'block';
+                }
+                
+                if (!projectId) {
+                    throw new Error('No project ID specified. Please provide a project_id parameter.');
+                }
+                
+                statusElement.textContent = `Loading project: ${projectId}...`;
+                logDebug(`Loading project: ${projectId}`);
+                
+                // Initialize Supabase client
+                let supabaseUrl, supabaseKey;
+                
+                // Check if we're on Vercel (environment variables will be available)
+                if (window.location.hostname.includes('vercel.app')) {
+                    // On Vercel, we can use process.env variables injected at build time
+                    // These will be replaced with actual values during the build process
+                    supabaseUrl = 'https://aqicztygjpmunfljjuto.supabase.co';
+                    supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxaWN6dHlnanBtdW5mbGpqdXRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3MDU1ODIsImV4cCI6MjA1OTI4MTU4Mn0.5e2hvTckSSbTFLBjQiccrvjoBd6QQDX0X4tccFOc1rs';
+                } else {
+                    // Locally, we'll use the config.js file
+                    try {
+                        supabaseUrl = SUPABASE_URL;
+                        supabaseKey = SUPABASE_KEY;
+                    } catch (e) {
+                        // Fallback to hardcoded values if config.js is not available
+                        supabaseUrl = 'https://aqicztygjpmunfljjuto.supabase.co';
+                        supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxaWN6dHlnanBtdW5mbGpqdXRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3MDU1ODIsImV4cCI6MjA1OTI4MTU4Mn0.5e2hvTckSSbTFLBjQiccrvjoBd6QQDX0X4tccFOc1rs';
+                    }
+                }
+                
+                logDebug('Using Supabase URL:', supabaseUrl);
+                
+                // Create the Supabase client
+                const { createClient } = supabase;
+                const supabaseClient = createClient(supabaseUrl, supabaseKey);
+                
+                // Test connection button handler
+                testConnectionButton.addEventListener('click', async () => {
+                    try {
+                        statusElement.textContent = 'Testing Supabase connection...';
+                        logDebug('Testing Supabase connection...');
+                        
+                        const { data, error } = await supabaseClient
+                            .from('dynamic_content')
+                            .select('count()', { count: 'exact' })
+                            .limit(1);
+                        
+                        if (error) throw error;
+                        
+                        logDebug('Connection test successful:', data);
+                        statusElement.textContent = 'Supabase connection successful!';
+                        statusElement.className = 'status success';
+                    } catch (error) {
+                        logDebug('Connection test failed:', error);
+                        statusElement.textContent = 'Supabase connection failed: ' + error.message;
+                        statusElement.className = 'status error';
+                    }
+                });
+                
+                // Fetch all content for this project
+                logDebug('Fetching content for project:', projectId);
+                const { data, error } = await supabaseClient
+                    .from('dynamic_content')
+                    .select('*')
+                    .eq('project_id', projectId);
+                
+                if (error) {
+                    logDebug('Error fetching project content:', error);
+                    throw new Error('Error fetching project content: ' + error.message);
+                }
+                
+                if (!data || data.length === 0) {
+                    logDebug('No content found for project:', projectId);
+                    throw new Error(`Project "${projectId}" not found or has no content.`);
+                }
+                
+                logDebug(`Loaded ${data.length} content items for project:`, projectId);
+                statusElement.textContent = `Rendering project: ${projectId}...`;
+                
+                // Create a content object from the data
+                const content = {};
+                data.forEach(item => {
+                    content[item.content_key] = item.content_value;
+                });
+                
+                // Fetch the template HTML
+                logDebug('Fetching template HTML');
+                const response = await fetch('public-site/template.html');
+                if (!response.ok) {
+                    logDebug('Failed to load template:', response.statusText);
+                    throw new Error('Failed to load template: ' + response.statusText);
+                }
+                
+                let html = await response.text();
+                logDebug('Template loaded, length:', html.length);
+                
+                // Replace content placeholders
+                logDebug('Replacing content placeholders');
+                for (const [key, value] of Object.entries(content)) {
+                    const placeholder = new RegExp(`\\{\\{\\s*${key}\\s*\\}\\}`, 'g');
+                    html = html.replace(placeholder, value || '');
+                }
+                
+                // Set the content
+                logDebug('Setting HTML content');
+                document.documentElement.innerHTML = html;
+                
+                // Initialize any scripts that might be needed
+                logDebug('Initializing scripts');
+                const scripts = document.querySelectorAll('script');
+                scripts.forEach(script => {
+                    if (script.src) {
+                        const newScript = document.createElement('script');
+                        newScript.src = script.src;
+                        document.body.appendChild(newScript);
+                    } else if (script.textContent) {
+                        eval(script.textContent);
+                    }
+                });
+                
+            } catch (error) {
+                console.error('Error:', error);
+                logDebug('Error:', error);
+                statusElement.className = 'status error';
+                statusElement.textContent = error.message;
+                
+                // Add a link to go back to the editor
+                const backLink = document.createElement('p');
+                backLink.innerHTML = '<a href="public-site/edit.html" style="color: #3399FF; text-decoration: underline;">Return to Content Editor</a>';
+                document.querySelector('.loading-container').appendChild(backLink);
+                
+                // Show debug info in case of error
+                debugInfoElement.style.display = 'block';
+                testConnectionButton.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>

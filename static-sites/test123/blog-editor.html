@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog Post Management</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            background: #f5f5f5;
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            color: #333;
+        }
+        input[type="text"],
+        input[type="email"],
+        input[type="url"],
+        textarea {
+            width: 100%;
+            padding: 0.5rem;
+            margin-bottom: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        textarea {
+            min-height: 100px;
+            font-family: inherit;
+        }
+        .section {
+            background: white;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .section h2 {
+            margin-top: 0;
+            color: #333;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 0.5rem;
+        }
+        button {
+            background: #3399FF;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+        .status {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 4px;
+        }
+        .success { 
+            background: #d4edda;
+            color: #155724;
+        }
+        .error { 
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .blog-section {
+            margin-bottom: 2rem;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 1.5rem;
+            position: relative;
+        }
+        .blog-section h3 {
+            margin-top: 0;
+        }
+        .action-button {
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 0.5rem;
+            margin-right: 0.5rem;
+        }
+        .action-button:hover {
+            background-color: #5a6268;
+        }
+        .delete-button {
+            background-color: #dc3545;
+        }
+        .delete-button:hover {
+            background-color: #c82333;
+        }
+        .featured-toggle {
+            display: flex;
+            align-items: center;
+            margin: 1rem 0;
+        }
+        .featured-toggle label {
+            margin: 0 0 0 0.5rem;
+            font-weight: normal;
+        }
+        .blog-list {
+            margin-bottom: 2rem;
+        }
+        .blog-list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid #eee;
+        }
+        .blog-list-item:last-child {
+            border-bottom: none;
+        }
+        .blog-list-item h4 {
+            margin: 0;
+            flex: 1;
+        }
+        .blog-list-item .blog-number {
+            background: #3399FF;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            margin-right: 1rem;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        .blog-list-item .featured-badge {
+            background: #28a745;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            margin-right: 1rem;
+            font-size: 0.8rem;
+        }
+        .blog-list-item .actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin: 2rem 0;
+        }
+        .pagination button {
+            padding: 0.5rem 1rem;
+            margin: 0 0.25rem;
+        }
+        .pagination-info {
+            margin: 0 1rem;
+            display: flex;
+            align-items: center;
+        }
+        .header-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        .back-to-editor {
+            display: inline-block;
+            margin-bottom: 1rem;
+            text-decoration: none;
+            color: #3399FF;
+        }
+        .back-to-editor:hover {
+            text-decoration: underline;
+        }
+        .search-box {
+            display: flex;
+            margin-bottom: 1rem;
+        }
+        .search-box input {
+            flex: 1;
+            margin-right: 0.5rem;
+            margin-bottom: 0;
+        }
+        .blog-form {
+            display: none;
+        }
+        .blog-form.active {
+            display: block;
+        }
+        .confirmation-dialog {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            display: none;
+        }
+        .confirmation-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            max-width: 500px;
+            width: 100%;
+        }
+        .confirmation-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 1.5rem;
+            gap: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <a href="edit.html" class="back-to-editor">← Back to Main Editor</a>
+    
+    <div class="section">
+        <h1>Blog Post Management</h1>
+        
+        <div class="header-actions">
+            <div>
+                <select id="project_id" required>
+                    <option value="">Select Project</option>
+                </select>
+            </div>
+            <button id="new-blog-button">Create New Blog Post</button>
+        </div>
+        
+        <div class="search-box">
+            <input type="text" id="search-input" placeholder="Search blog posts...">
+            <button id="search-button">Search</button>
+        </div>
+        
+        <div id="blog-list" class="blog-list">
+            <!-- Blog posts will be listed here -->
+            <div class="status">Select a project to view blog posts.</div>
+        </div>
+        
+        <div class="pagination">
+            <button id="prev-page" disabled>Previous</button>
+            <div class="pagination-info">Page <span id="current-page">1</span> of <span id="total-pages">1</span></div>
+            <button id="next-page" disabled>Next</button>
+        </div>
+        
+        <div id="blog-form" class="blog-form">
+            <h2>Edit Blog Post <span id="blog-number"></span></h2>
+            
+            <div class="form-group">
+                <label for="blog_title">Title:</label>
+                <input type="text" id="blog_title" placeholder="Blog Post Title">
+            </div>
+            
+            <div class="form-group">
+                <label for="blog_excerpt">Excerpt (will be shown as preview):</label>
+                <textarea id="blog_excerpt" placeholder="A brief description of your blog post (150-200 characters recommended)" maxlength="300"></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="blog_content">Full Content:</label>
+                <textarea id="blog_content" placeholder="Your full blog post content here..." rows="10"></textarea>
+            </div>
+            
+            <div class="featured-toggle">
+                <input type="checkbox" id="blog_featured">
+                <label for="blog_featured">Feature this post on homepage (max 4 featured posts)</label>
+            </div>
+            
+            <div class="form-actions">
+                <button id="save-blog-button">Save Blog Post</button>
+                <button id="cancel-blog-button" class="action-button">Cancel</button>
+            </div>
+        </div>
+        
+        <div id="status" class="status"></div>
+    </div>
+    
+    <!-- Confirmation Dialog -->
+    <div id="confirmation-dialog" class="confirmation-dialog">
+        <div class="confirmation-content">
+            <h3>Confirm Deletion</h3>
+            <p>Are you sure you want to delete this blog post? This action cannot be undone.</p>
+            <div class="confirmation-actions">
+                <button id="cancel-delete" class="action-button">Cancel</button>
+                <button id="confirm-delete" class="action-button delete-button">Delete</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script>
+        // Supabase Configuration with fallbacks
+        let SUPABASE_URL, SUPABASE_ANON_KEY, supabase;
+        
+        // Try to use the configuration from config.js
+        if (window.SUPABASE_CONFIG) {
+            console.log('Using Supabase config from config.js');
+            SUPABASE_URL = window.SUPABASE_CONFIG.url;
+            SUPABASE_ANON_KEY = window.SUPABASE_CONFIG.key;
+        } else {
+            // Fallback to hardcoded values
+            console.log('Using hardcoded Supabase config');
+            SUPABASE_URL = 'https://aqicztygjpmunfljjjuto.supabase.co';
+            SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxaWN6dHlnanBtdW5mbGpqdXRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3MDU1ODIsImV4cCI6MjA1OTI4MTU4Mn0.5e2hvTckSSbTFLBjQiccrvjoBd6QQDX0X4tccFOc1rs';
+        }
+        
+        // Clean up URL if needed (remove markdown formatting if present)
+        if (SUPABASE_URL.includes('](')) {
+            SUPABASE_URL = SUPABASE_URL.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '$2');
+        }
+        
+        console.log('Connecting to Supabase URL:', SUPABASE_URL);
+        
+        // Initialize Supabase client
+        try {
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            console.log('Supabase client initialized');
+        } catch (error) {
+            console.error('Error initializing Supabase client:', error);
+        }
+        
+        // DOM Elements
+        const projectSelect = document.getElementById('project_id');
+        const blogList = document.getElementById('blog-list');
+        const blogForm = document.getElementById('blog-form');
+        const blogNumber = document.getElementById('blog-number');
+        const blogTitle = document.getElementById('blog_title');
+        const blogExcerpt = document.getElementById('blog_excerpt');
+        const blogContent = document.getElementById('blog_content');
+        const blogFeatured = document.getElementById('blog_featured');
+        const newBlogButton = document.getElementById('new-blog-button');
+        const saveBlogButton = document.getElementById('save-blog-button');
+        const cancelBlogButton = document.getElementById('cancel-blog-button');
+        const status = document.getElementById('status');
+        const prevPageButton = document.getElementById('prev-page');
+        const nextPageButton = document.getElementById('next-page');
+        const currentPageSpan = document.getElementById('current-page');
+        const totalPagesSpan = document.getElementById('total-pages');
+        const searchInput = document.getElementById('search-input');
+        const searchButton = document.getElementById('search-button');
+        const confirmationDialog = document.getElementById('confirmation-dialog');
+        const cancelDeleteButton = document.getElementById('cancel-delete');
+        const confirmDeleteButton = document.getElementById('confirm-delete');
+        
+        // Pagination settings
+        const postsPerPage = 10;
+        let currentPage = 1;
+        let totalPages = 1;
+        let allBlogPosts = [];
+        let filteredBlogPosts = [];
+        let currentBlogNumber = null;
+        let blogToDelete = null;
+        
+        // Check connection to Supabase
+        async function checkConnection() {
+            try {
+                const { data, error } = await supabase.from('dynamic_content').select('project_id').limit(1);
+                
+                if (error) throw error;
+                
+                console.log('Connected to Supabase successfully');
+                return true;
+            } catch (error) {
+                console.error('Error connecting to Supabase:', error);
+                status.textContent = 'Error connecting to database: ' + error.message;
+                status.className = 'status error';
+                return false;
+            }
+        }
+        
+        // Load available projects
+        async function loadProjects() {
+            try {
+                const { data, error } = await supabase
+                    .from('dynamic_content')
+                    .select('project_id')
+                    .order('project_id', { ascending: true });
+                
+                if (error) throw error;
+                
+                // Get unique project IDs
+                const projectIds = [...new Set(data.map(item => item.project_id))];
+                
+                // Clear existing options
+                projectSelect.innerHTML = '<option value="">Select Project</option>';
+                
+                // Add options for each project
+                projectIds.forEach(projectId => {
+                    const option = document.createElement('option');
+                    option.value = projectId;
+                    option.textContent = projectId;
+                    projectSelect.appendChild(option);
+                });
+                
+                // Check if there's a project_id in the URL
+                const urlParams = new URLSearchParams(window.location.search);
+                const projectId = urlParams.get('project_id');
+                
+                if (projectId && projectIds.includes(projectId)) {
+                    projectSelect.value = projectId;
+                    loadBlogPosts(projectId);
+                }
+            } catch (error) {
+                console.error('Error loading projects:', error);
+                status.textContent = 'Error loading projects: ' + error.message;
+                status.className = 'status error';
+            }
+        }
+        
+        // Load blog posts for a project
+        async function loadBlogPosts(projectId) {
+            try {
+                blogList.innerHTML = '<div class="status">Loading blog posts...</div>';
+                
+                const { data, error } = await supabase
+                    .from('dynamic_content')
+                    .select('*')
+                    .eq('project_id', projectId);
+                
+                if (error) throw error;
+                
+                // Extract blog posts
+                allBlogPosts = extractBlogPosts(data);
+                filteredBlogPosts = [...allBlogPosts];
+                
+                // Update pagination
+                updatePagination();
+                
+                // Display blog posts
+                displayBlogPosts();
+                
+            } catch (error) {
+                console.error('Error loading blog posts:', error);
+                blogList.innerHTML = `<div class="status error">Error loading blog posts: ${error.message}</div>`;
+            }
+        }
+        
+        // Extract blog posts from content data
+        function extractBlogPosts(contentData) {
+            const blogPosts = [];
+            const blogTitleRegex = /^blog_(\d+)_title$/;
+            
+            // First, find all blog titles and their numbers
+            contentData.forEach(item => {
+                const match = item.key.match(blogTitleRegex);
+                if (match) {
+                    const blogNumber = parseInt(match[1]);
+                    
+                    // Find related content
+                    const content = contentData.find(ci => ci.key === `blog_${blogNumber}`)?.value || '';
+                    const excerpt = contentData.find(ci => ci.key === `blog_${blogNumber}_excerpt`)?.value || '';
+                    const featured = contentData.find(ci => ci.key === `blog_${blogNumber}_featured`)?.value === 'true';
+                    const active = contentData.find(ci => ci.key === `blog_${blogNumber}_active`)?.value !== 'false';
+                    
+                    // Only include active blog posts
+                    if (active) {
+                        blogPosts.push({
+                            number: blogNumber,
+                            title: item.value,
+                            content: content,
+                            excerpt: excerpt,
+                            featured: featured,
+                            active: active
+                        });
+                    }
+                }
+            });
+            
+            // Sort by blog number (newest first assuming higher numbers are newer)
+            return blogPosts.sort((a, b) => b.number - a.number);
+        }
+        
+        // Update pagination controls
+        function updatePagination() {
+            totalPages = Math.ceil(filteredBlogPosts.length / postsPerPage) || 1;
+            currentPage = Math.min(currentPage, totalPages);
+            
+            currentPageSpan.textContent = currentPage;
+            totalPagesSpan.textContent = totalPages;
+            
+            prevPageButton.disabled = currentPage <= 1;
+            nextPageButton.disabled = currentPage >= totalPages;
+        }
+        
+        // Display blog posts for current page
+        function displayBlogPosts() {
+            // Calculate start and end indices
+            const startIndex = (currentPage - 1) * postsPerPage;
+            const endIndex = Math.min(startIndex + postsPerPage, filteredBlogPosts.length);
+            const postsToShow = filteredBlogPosts.slice(startIndex, endIndex);
+            
+            // Clear blog list
+            blogList.innerHTML = '';
+            
+            // Check if there are any posts
+            if (postsToShow.length === 0) {
+                blogList.innerHTML = '<div class="status">No blog posts found.</div>';
+                return;
+            }
+            
+            // Create list items for each post
+            postsToShow.forEach(post => {
+                const listItem = document.createElement('div');
+                listItem.className = 'blog-list-item';
+                
+                // Create blog number badge
+                const numberBadge = document.createElement('span');
+                numberBadge.className = 'blog-number';
+                numberBadge.textContent = `Blog ${post.number}`;
+                
+                // Create title
+                const title = document.createElement('h4');
+                title.textContent = post.title;
+                
+                // Create featured badge if applicable
+                let featuredBadge = '';
+                if (post.featured) {
+                    featuredBadge = document.createElement('span');
+                    featuredBadge.className = 'featured-badge';
+                    featuredBadge.textContent = 'Featured';
+                }
+                
+                // Create actions
+                const actions = document.createElement('div');
+                actions.className = 'actions';
+                
+                const editButton = document.createElement('button');
+                editButton.className = 'action-button';
+                editButton.textContent = 'Edit';
+                editButton.onclick = () => editBlogPost(post.number);
+                
+                const deleteButton = document.createElement('button');
+                deleteButton.className = 'action-button delete-button';
+                deleteButton.textContent = 'Delete';
+                deleteButton.onclick = () => showDeleteConfirmation(post.number);
+                
+                actions.appendChild(editButton);
+                actions.appendChild(deleteButton);
+                
+                // Assemble list item
+                listItem.appendChild(numberBadge);
+                if (featuredBadge) {
+                    listItem.appendChild(featuredBadge);
+                }
+                listItem.appendChild(title);
+                listItem.appendChild(actions);
+                
+                blogList.appendChild(listItem);
+            });
+        }
+        
+        // Edit a blog post
+        async function editBlogPost(number) {
+            try {
+                currentBlogNumber = number;
+                
+                // Get project ID
+                const projectId = projectSelect.value;
+                
+                // Fetch blog post data
+                const { data, error } = await supabase
+                    .from('dynamic_content')
+                    .select('*')
+                    .eq('project_id', projectId)
+                    .or(`key.eq.blog_${number}_title,key.eq.blog_${number},key.eq.blog_${number}_excerpt,key.eq.blog_${number}_featured`);
+                
+                if (error) throw error;
+                
+                // Extract blog post data
+                const title = data.find(item => item.key === `blog_${number}_title`)?.value || '';
+                const content = data.find(item => item.key === `blog_${number}`)?.value || '';
+                const excerpt = data.find(item => item.key === `blog_${number}_excerpt`)?.value || '';
+                const featured = data.find(item => item.key === `blog_${number}_featured`)?.value === 'true';
+                
+                // Populate form
+                blogNumber.textContent = number;
+                blogTitle.value = title;
+                blogContent.value = content;
+                blogExcerpt.value = excerpt;
+                blogFeatured.checked = featured;
+                
+                // Show form
+                blogForm.classList.add('active');
+                blogList.style.display = 'none';
+                document.querySelector('.pagination').style.display = 'none';
+                
+                // Scroll to form
+                blogForm.scrollIntoView({ behavior: 'smooth' });
+                
+            } catch (error) {
+                console.error('Error editing blog post:', error);
+                status.textContent = 'Error editing blog post: ' + error.message;
+                status.className = 'status error';
+            }
+        }
+        
+        // Create a new blog post
+        function createNewBlogPost() {
+            // Find the highest blog number
+            const highestNumber = allBlogPosts.length > 0 
+                ? Math.max(...allBlogPosts.map(post => post.number)) 
+                : 0;
+            
+            // Set new blog number
+            currentBlogNumber = highestNumber + 1;
+            
+            // Clear form
+            blogNumber.textContent = currentBlogNumber;
+            blogTitle.value = '';
+            blogContent.value = '';
+            blogExcerpt.value = '';
+            blogFeatured.checked = false;
+            
+            // Show form
+            blogForm.classList.add('active');
+            blogList.style.display = 'none';
+            document.querySelector('.pagination').style.display = 'none';
+            
+            // Scroll to form
+            blogForm.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        // Save a blog post
+        async function saveBlogPost() {
+            try {
+                // Get project ID
+                const projectId = projectSelect.value;
+                
+                if (!projectId) {
+                    throw new Error('No project selected');
+                }
+                
+                // Validate form
+                if (!blogTitle.value) {
+                    throw new Error('Blog title is required');
+                }
+                
+                if (!blogContent.value) {
+                    throw new Error('Blog content is required');
+                }
+                
+                // Check if this would exceed the featured post limit
+                if (blogFeatured.checked) {
+                    const featuredPosts = allBlogPosts.filter(post => post.featured && post.number !== currentBlogNumber);
+                    
+                    if (featuredPosts.length >= 4) {
+                        throw new Error('You can only have 4 featured posts. Please unfeatured another post first.');
+                    }
+                }
+                
+                // Create excerpt if not provided
+                const excerpt = blogExcerpt.value || (blogContent.value.length > 150 
+                    ? blogContent.value.substring(0, 150) + '...' 
+                    : blogContent.value);
+                
+                // Prepare data for upsert
+                const upsertData = [
+                    {
+                        project_id: projectId,
+                        key: `blog_${currentBlogNumber}_title`,
+                        value: blogTitle.value
+                    },
+                    {
+                        project_id: projectId,
+                        key: `blog_${currentBlogNumber}`,
+                        value: blogContent.value
+                    },
+                    {
+                        project_id: projectId,
+                        key: `blog_${currentBlogNumber}_excerpt`,
+                        value: excerpt
+                    },
+                    {
+                        project_id: projectId,
+                        key: `blog_${currentBlogNumber}_featured`,
+                        value: blogFeatured.checked ? 'true' : 'false'
+                    },
+                    {
+                        project_id: projectId,
+                        key: `blog_${currentBlogNumber}_active`,
+                        value: 'true'
+                    }
+                ];
+                
+                // Upsert data
+                const { error } = await supabase
+                    .from('dynamic_content')
+                    .upsert(upsertData);
+                
+                if (error) throw error;
+                
+                // Show success message
+                status.textContent = 'Blog post saved successfully!';
+                status.className = 'status success';
+                
+                // Reload blog posts
+                await loadBlogPosts(projectId);
+                
+                // Hide form
+                cancelEditBlogPost();
+                
+            } catch (error) {
+                console.error('Error saving blog post:', error);
+                status.textContent = 'Error saving blog post: ' + error.message;
+                status.className = 'status error';
+            }
+        }
+        
+        // Cancel editing a blog post
+        function cancelEditBlogPost() {
+            blogForm.classList.remove('active');
+            blogList.style.display = 'block';
+            document.querySelector('.pagination').style.display = 'flex';
+            currentBlogNumber = null;
+        }
+        
+        // Show delete confirmation dialog
+        function showDeleteConfirmation(number) {
+            blogToDelete = number;
+            confirmationDialog.style.display = 'flex';
+        }
+        
+        // Hide delete confirmation dialog
+        function hideDeleteConfirmation() {
+            confirmationDialog.style.display = 'none';
+            blogToDelete = null;
+        }
+        
+        // Delete a blog post
+        async function deleteBlogPost() {
+            try {
+                if (!blogToDelete) return;
+                
+                // Get project ID
+                const projectId = projectSelect.value;
+                
+                // Mark blog as inactive instead of deleting
+                const { error } = await supabase
+                    .from('dynamic_content')
+                    .upsert({
+                        project_id: projectId,
+                        key: `blog_${blogToDelete}_active`,
+                        value: 'false'
+                    });
+                
+                if (error) throw error;
+                
+                // Hide confirmation dialog
+                hideDeleteConfirmation();
+                
+                // Show success message
+                status.textContent = 'Blog post deleted successfully!';
+                status.className = 'status success';
+                
+                // Reload blog posts
+                await loadBlogPosts(projectId);
+                
+            } catch (error) {
+                console.error('Error deleting blog post:', error);
+                status.textContent = 'Error deleting blog post: ' + error.message;
+                status.className = 'status error';
+                
+                // Hide confirmation dialog
+                hideDeleteConfirmation();
+            }
+        }
+        
+        // Search blog posts
+        function searchBlogPosts() {
+            const searchTerm = searchInput.value.toLowerCase();
+            
+            if (!searchTerm) {
+                filteredBlogPosts = [...allBlogPosts];
+            } else {
+                filteredBlogPosts = allBlogPosts.filter(post => 
+                    post.title.toLowerCase().includes(searchTerm) || 
+                    post.content.toLowerCase().includes(searchTerm)
+                );
+            }
+            
+            // Reset to first page
+            currentPage = 1;
+            
+            // Update pagination
+            updatePagination();
+            
+            // Display filtered blog posts
+            displayBlogPosts();
+        }
+        
+        // Event Listeners
+        projectSelect.addEventListener('change', () => {
+            const projectId = projectSelect.value;
+            if (projectId) {
+                loadBlogPosts(projectId);
+                
+                // Update URL with project ID
+                const url = new URL(window.location);
+                url.searchParams.set('project_id', projectId);
+                window.history.pushState({}, '', url);
+            } else {
+                blogList.innerHTML = '<div class="status">Select a project to view blog posts.</div>';
+            }
+        });
+        
+        newBlogButton.addEventListener('click', createNewBlogPost);
+        saveBlogButton.addEventListener('click', saveBlogPost);
+        cancelBlogButton.addEventListener('click', cancelEditBlogPost);
+        
+        prevPageButton.addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                updatePagination();
+                displayBlogPosts();
+            }
+        });
+        
+        nextPageButton.addEventListener('click', () => {
+            if (currentPage < totalPages) {
+                currentPage++;
+                updatePagination();
+                displayBlogPosts();
+            }
+        });
+        
+        searchButton.addEventListener('click', searchBlogPosts);
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                searchBlogPosts();
+            }
+        });
+        
+        cancelDeleteButton.addEventListener('click', hideDeleteConfirmation);
+        confirmDeleteButton.addEventListener('click', deleteBlogPost);
+        
+        // Initialize
+        checkConnection().then(connected => {
+            if (connected) {
+                loadProjects();
+            }
+        });
+    </script>
+</body>
+</html>

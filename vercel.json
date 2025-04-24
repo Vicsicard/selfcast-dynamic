@@ -11,7 +11,7 @@
   "redirects": [
     {
       "source": "/",
-      "destination": "/edit-complete-fixed.html",
+      "destination": "/login.html",
       "permanent": true
     },
     {
