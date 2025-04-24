@@ -6,7 +6,6 @@
     <title>SelfCast Dynamic Content Editor</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@clerk/clerk-js@latest/dist/clerk.browser.js"></script>
     <style>
         :root {
             --primary-color: #3498db;
@@ -883,82 +882,101 @@
     // Initialize
     document.addEventListener('DOMContentLoaded', function() {
         try {
-            const statusElement = document.getElementById('status');
+            statusElement.textContent = 'Loading authentication...';
+            statusElement.className = 'status info';
             
-            if (!window.Clerk) {
-                throw new Error('Clerk library not loaded. Please refresh the page or try again later.');
-            }
+            // Load Clerk script dynamically
+            const script = document.createElement('script');
+            script.src = `https://clerk.promoted-burro-68.accounts.dev/npm/@clerk/clerk-js@latest/dist/clerk.browser.js`;
+            script.async = true;
+            script.crossOrigin = "anonymous";
             
-            // Initialize Clerk
-            Clerk.load({
-                publishableKey: CLERK_PUBLISHABLE_KEY
-            }).then(clerk => {
-                // Check if user is authenticated
-                if (!clerk.user) {
-                    // Not authenticated, redirect to login
-                    window.location.href = 'login.html';
-                    return;
-                }
-                
-                // Get user information
-                currentUser = {
-                    id: clerk.user.id,
-                    email: clerk.user.primaryEmailAddress.emailAddress,
-                    name: clerk.user.fullName || clerk.user.primaryEmailAddress.emailAddress
-                };
-                
-                // Check if user is admin (can be set in Clerk user metadata)
-                isAdmin = clerk.user.publicMetadata.isAdmin || false;
-                
-                // Display user info
-                const headerDiv = document.querySelector('header div');
-                const userInfoSpan = document.createElement('span');
-                userInfoSpan.textContent = `Logged in as: ${currentUser.name} `;
-                userInfoSpan.style.marginRight = '10px';
-                headerDiv.insertBefore(userInfoSpan, headerDiv.firstChild);
-                
-                // Add logout button
-                const logoutBtn = document.createElement('button');
-                logoutBtn.textContent = 'Logout';
-                logoutBtn.className = 'error';
-                logoutBtn.style.marginLeft = '10px';
-                logoutBtn.addEventListener('click', () => {
-                    clerk.signOut().then(() => {
-                        window.location.href = 'login.html';
+            script.onload = function() {
+                try {
+                    // Initialize Clerk
+                    window.Clerk.load({
+                        publishableKey: CLERK_PUBLISHABLE_KEY
+                    }).then(clerk => {
+                        // Check if user is authenticated
+                        if (!clerk.user) {
+                            // Not authenticated, redirect to login
+                            window.location.href = 'login.html';
+                            return;
+                        }
+                        
+                        // Get user information
+                        currentUser = {
+                            id: clerk.user.id,
+                            email: clerk.user.primaryEmailAddress.emailAddress,
+                            name: clerk.user.fullName || clerk.user.primaryEmailAddress.emailAddress
+                        };
+                        
+                        // Check if user is admin (can be set in Clerk user metadata)
+                        isAdmin = clerk.user.publicMetadata.isAdmin || false;
+                        
+                        // Display user info
+                        const headerDiv = document.querySelector('header div');
+                        const userInfoSpan = document.createElement('span');
+                        userInfoSpan.textContent = `Logged in as: ${currentUser.name} `;
+                        userInfoSpan.style.marginRight = '10px';
+                        headerDiv.insertBefore(userInfoSpan, headerDiv.firstChild);
+                        
+                        // Add logout button
+                        const logoutBtn = document.createElement('button');
+                        logoutBtn.textContent = 'Logout';
+                        logoutBtn.className = 'error';
+                        logoutBtn.style.marginLeft = '10px';
+                        logoutBtn.addEventListener('click', () => {
+                            clerk.signOut().then(() => {
+                                window.location.href = 'login.html';
+                            });
+                        });
+                        headerDiv.appendChild(logoutBtn);
+                        
+                        // Load projects
+                        loadProjects();
+                        
+                        // Check for project in URL
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const projectParam = urlParams.get('project');
+                        
+                        if (projectParam) {
+                            // Set the project select value
+                            projectSelect.value = projectParam;
+                            
+                            // Load the project content if it exists
+                            if (projectSelect.value === projectParam) {
+                                loadContent(projectParam);
+                            } else {
+                                statusElement.textContent = `Project '${projectParam}' not found or you don't have access`;
+                                statusElement.className = 'status warning';
+                            }
+                        }
+                        
+                        // Set up event listeners
+                        setupEventListeners();
+                        
+                        statusElement.textContent = 'Authentication successful. Welcome to SelfCast Dashboard!';
+                        statusElement.className = 'status success';
+                    }).catch(error => {
+                        console.error('Clerk load error:', error);
+                        statusElement.textContent = `Authentication error: ${error.message}`;
+                        statusElement.className = 'status error';
                     });
-                });
-                headerDiv.appendChild(logoutBtn);
-                
-                // Load projects
-                loadProjects();
-                
-                // Check for project in URL
-                const urlParams = new URLSearchParams(window.location.search);
-                const projectParam = urlParams.get('project');
-                
-                if (projectParam) {
-                    // Set the project select value
-                    projectSelect.value = projectParam;
-                    
-                    // Load the project content if it exists
-                    if (projectSelect.value === projectParam) {
-                        loadContent(projectParam);
-                    } else {
-                        statusElement.textContent = `Project '${projectParam}' not found or you don't have access`;
-                        statusElement.className = 'status warning';
-                    }
+                } catch (error) {
+                    console.error('Clerk initialization error:', error);
+                    statusElement.textContent = `Authentication error: ${error.message}`;
+                    statusElement.className = 'status error';
                 }
-                
-                // Set up event listeners
-                setupEventListeners();
-                
-                statusElement.textContent = 'Authentication successful. Welcome to SelfCast Dashboard!';
-                statusElement.className = 'status success';
-            }).catch(error => {
-                console.error('Clerk load error:', error);
-                statusElement.textContent = `Authentication error: ${error.message}`;
+            };
+            
+            script.onerror = function() {
+                console.error('Failed to load Clerk script');
+                statusElement.textContent = 'Failed to load authentication system. Please try again later.';
                 statusElement.className = 'status error';
-            });
+            };
+            
+            document.head.appendChild(script);
         } catch (error) {
             console.error('Authentication error:', error);
             statusElement.textContent = `Authentication error: ${error.message}`;
