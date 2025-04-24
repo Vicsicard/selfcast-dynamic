@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SelfCast Dynamic Content Editor</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2c3e50;
+            --accent-color: #e74c3c;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --error-color: #e74c3c;
+            --info-color: #3498db;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+            --border-color: #dee2e6;
+            --border-radius: 4px;
+            --box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: var(--box-shadow);
+        }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border-color);
+        }
+        
+        h1, h2, h3, h4 {
+            color: var(--secondary-color);
+            margin-top: 0;
+        }
+        
+        h1 {
+            font-size: 1.8rem;
+        }
+        
+        h2 {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+        }
+        
+        h3 {
+            font-size: 1.2rem;
+            margin-top: 1rem;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: var(--box-shadow);
+            border-top: 3px solid var(--primary-color);
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            cursor: pointer;
+        }
+        
+        .section-header h2 {
+            margin: 0;
+        }
+        
+        .section-content {
+            display: block;
+        }
+        
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            margin: 0 -10px 15px;
+        }
+        
+        .form-col {
+            flex: 1;
+            padding: 0 10px;
+            min-width: 200px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            font-family: inherit;
+            font-size: 14px;
+        }
+        
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        input[type="color"] {
+            height: 40px;
+            padding: 2px;
+        }
+        
+        input[type="checkbox"] {
+            width: auto;
+            margin-right: 5px;
+        }
+        
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+        }
+        
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+            transition: background-color 0.2s;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        button.secondary {
+            background-color: var(--secondary-color);
+        }
+        
+        button.secondary:hover {
+            background-color: #1a252f;
+        }
+        
+        button.success {
+            background-color: var(--success-color);
+        }
+        
+        button.success:hover {
+            background-color: #27ae60;
+        }
+        
+        button.warning {
+            background-color: var(--warning-color);
+        }
+        
+        button.warning:hover {
+            background-color: #e67e22;
+        }
+        
+        button.error {
+            background-color: var(--error-color);
+        }
+        
+        button.error:hover {
+            background-color: #c0392b;
+        }
+        
+        .status {
+            padding: 10px 15px;
+            margin: 15px 0;
+            border-radius: var(--border-radius);
+        }
+        
+        .status.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status.info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        .status.warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+        
+        .status.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .tabs {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            margin-right: 5px;
+            transition: all 0.2s;
+        }
+        
+        .tab:hover {
+            background-color: var(--light-color);
+        }
+        
+        .tab.active {
+            border-bottom-color: var(--primary-color);
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .collapse-toggle {
+            background: none;
+            border: none;
+            color: var(--secondary-color);
+            font-size: 20px;
+            cursor: pointer;
+            padding: 0;
+            margin: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .collapse-toggle:hover {
+            background: var(--light-color);
+            border-radius: 50%;
+        }
+        
+        .collapsed .section-content {
+            display: none;
+        }
+        
+        .project-selector {
+            margin-bottom: 20px;
+        }
+        
+        #project-select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            font-family: inherit;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        
+        .debug-info {
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            word-break: break-all;
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>SelfCast Content Editor</h1>
+            <div>
+                <button id="view-site-button" class="secondary">View Your Website</button>
+                <button id="save-button" class="success">Save Changes</button>
+                <button id="debug-toggle" class="warning">Toggle Debug</button>
+            </div>
+        </header>
+        
+        <div class="project-selector">
+            <label for="project-select">Select Project:</label>
+            <select id="project-select">
+                <option value="">Loading projects...</option>
+            </select>
+        </div>
+        
+        <div id="status" class="status info">Ready to load projects</div>
+        <div id="debug-info" class="debug-info"></div>
+        
+        <form id="contentForm">
+            <!-- Tabs Navigation -->
+            <div class="tabs">
+                <div class="tab active" data-tab="main-content">Main Content</div>
+                <div class="tab" data-tab="blog-posts">Blog Posts</div>
+                <div class="tab" data-tab="social-media">Social Media</div>
+                <div class="tab" data-tab="styling">Styling</div>
+                <div class="tab" data-tab="quotes">Quotes</div>
+                <div class="tab" data-tab="contact">Contact</div>
+                <div class="tab" data-tab="misc">Miscellaneous</div>
+            </div>
+            
+            <!-- Main Content Tab -->
+            <div class="tab-content active" id="main-content">
+                <!-- Main Content Section -->
+                <div class="section">
+                    <div class="section-header">
+                        <h2>Main Content</h2>
+                        <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
+                    </div>
+                    <div class="section-content">
+                        <div class="form-group">
+                            <label for="rendered_title">Site Title</label>
+                            <input type="text" id="rendered_title" name="rendered_title">
+                        </div>
+                        <div class="form-group">
+                            <label for="rendered_subtitle">Subtitle</label>
+                            <input type="text" id="rendered_subtitle" name="rendered_subtitle">
+                        </div>
+                        <div class="form-group">
+                            <label for="rendered_bio_html">Bio Content (HTML)</label>
+                            <textarea id="rendered_bio_html" name="rendered_bio_html"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Blog Posts Tab -->
+            <div class="tab-content" id="blog-posts">
+                <!-- Blog Post 1 Section -->
+                <div class="section">
+                    <div class="section-header">
+                        <h2>Blog Post 1</h2>
+                        <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
+                    </div>
+                    <div class="section-content">
+                        <div class="form-group">
+                            <label for="blog_1_title">Title</label>
+                            <input type="text" id="blog_1_title" name="blog_1_title">
+                        </div>
+                        <div class="form-group">
+                            <label for="blog_1">Content</label>
+                            <textarea id="blog_1" name="blog_1"></textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Blog Post 2 Section -->
+                <div class="section">
+                    <div class="section-header">
+                        <h2>Blog Post 2</h2>
+                        <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
+                    </div>
+                    <div class="section-content">
+                        <div class="form-group">
+                            <label for="blog_2_title">Title</label>
+                            <input type="text" id="blog_2_title" name="blog_2_title">
+                        </div>
+                        <div class="form-group">
+                            <label for="blog_2">Content</label>
+                            <textarea id="blog_2" name="blog_2"></textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Blog Post 3 Section -->
+                <div class="section">
+                    <div class="section-header">
+                        <h2>Blog Post 3</h2>
+                        <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
+                    </div>
+                    <div class="section-content">
+                        <div class="form-group">
+                            <label for="blog_3_title">Title</label>
+                            <input type="text" id="blog_3_title" name="blog_3_title">
+                        </div>
+                        <div class="form-group">
+                            <label for="blog_3">Content</label>
+                            <textarea id="blog_3" name="blog_3"></textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Blog Post 4 Section -->
+                <div class="section">
+                    <div class="section-header">
+                        <h2>Blog Post 4</h2>
+                        <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
+                    </div>
+                    <div class="section-content">
+                        <div class="form-group">
+                            <label for="blog_4_title">Title</label>
+                            <input type="text" id="blog_4_title" name="blog_4_title">
+                        </div>
+                        <div class="form-group">
+                            <label for="blog_4">Content</label>
+                            <textarea id="blog_4" name="blog_4"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Social Media Tab -->
+            <div class="tab-content" id="social-media">
+                <!-- Facebook Section -->
+                <div class="section">
+                    <div class="section-header">
+                        <h2>Facebook</h2>
+                        <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
+                    </div>
+                    <div class="section-content">
+                        <div class="form-group">
+                            <label for="facebook_post">Facebook Post</label>
+                            <textarea id="facebook_post" name="facebook_post"></textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Twitter Section -->
+                <div class="section">
+                    <div class="section-header">
+                        <h2>Twitter</h2>
+                        <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
+                    </div>
+                    <div class="section-content">
+                        <div class="form-group">
+                            <label for="twitter_post">Twitter Post</label>
+                            <textarea id="twitter_post" name="twitter_post"></textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Instagram Section -->
+                <div class="section">
+                    <div class="section-header">
+                        <h2>Instagram</h2>
+                        <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
+                    </div>
+                    <div class="section-content">
+                        <div class="form-group">
+                            <label for="instagram_post">Instagram Post</label>
+                            <textarea id="instagram_post" name="instagram_post"></textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- LinkedIn Section -->
+                <div class="section">
+                    <div class="section-header">
+                        <h2>LinkedIn</h2>
+                        <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
+                    </div>
+                    <div class="section-content">
+                        <div class="form-group">
+                            <label for="linkedin_post">LinkedIn Post</label>
+                            <textarea id="linkedin_post" name="linkedin_post"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Styling Tab -->
+            <div class="tab-content" id="styling">
+                <!-- Colors Section -->
+                <div class="section">
+                    <div class="section-header">
+                        <h2>Colors</h2>
+                        <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
+                    </div>
+                    <div class="section-content">
+                        <div class="form-row">
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label for="primary_color">Primary Color</label>
+                                    <input type="color" id="primary_color" name="primary_color" value="#3498db">
+                                </div>
+                            </div>
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label for="secondary_color">Secondary Color</label>
+                                    <input type="color" id="secondary_color" name="secondary_color" value="#2c3e50">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label for="accent_color">Accent Color</label>
+                                    <input type="color" id="accent_color" name="accent_color" value="#e74c3c">
+                                </div>
+                            </div>
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label for="text_color">Text Color</label>
+                                    <input type="color" id="text_color" name="text_color" value="#333333">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label for="background_color">Background Color</label>
+                                    <input type="color" id="background_color" name="background_color" value="#f5f5f5">
+                                </div>
+                            </div>
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label for="preset_style">Style Preset</label>
+                                    <select id="preset_style" name="preset_style">
+                                        <option value="standard-preset">Standard (Blue)</option>
+                                        <option value="his-preset">Navy</option>
+                                        <option value="her-preset">Gold</option>
+                                        <option value="green-preset">Green</option>
+                                        <option value="red-preset">Red</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Fonts Section -->
+                <div class="section">
+                    <div class="section-header">
+                        <h2>Fonts</h2>
+                        <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
+                    </div>
+                    <div class="section-content">
+                        <div class="form-group">
+                            <label for="heading_font">Heading Font</label>
+                            <select id="heading_font" name="heading_font">
+                                <option value="Roboto, sans-serif">Roboto</option>
+                                <option value="Montserrat, sans-serif">Montserrat</option>
+                                <option value="Playfair Display, serif">Playfair Display</option>
+                                <option value="Merriweather, serif">Merriweather</option>
+                                <option value="Lato, sans-serif">Lato</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="body_font">Body Font</label>
+                            <select id="body_font" name="body_font">
+                                <option value="Open Sans, sans-serif">Open Sans</option>
+                                <option value="Roboto, sans-serif">Roboto</option>
+                                <option value="Lato, sans-serif">Lato</option>
+                                <option value="Source Sans Pro, sans-serif">Source Sans Pro</option>
+                                <option value="Nunito, sans-serif">Nunito</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Quotes Tab -->
+            <div class="tab-content" id="quotes">
+                <!-- Quote 1 Section -->
+                <div class="section">
+                    <div class="section-header">
+                        <h2>Quote 1</h2>
+                        <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
+                    </div>
+                    <div class="section-content">
+                        <div class="form-group">
+                            <label for="quote_1">Quote Text</label>
+                            <textarea id="quote_1" name="quote_1"></textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Quote 2 Section -->
+                <div class="section">
+                    <div class="section-header">
+                        <h2>Quote 2</h2>
+                        <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
+                    </div>
+                    <div class="section-content">
+                        <div class="form-group">
+                            <label for="quote_2">Quote Text</label>
+                            <textarea id="quote_2" name="quote_2"></textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Quote 3 Section -->
+                <div class="section">
+                    <div class="section-header">
+                        <h2>Quote 3</h2>
+                        <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
+                    </div>
+                    <div class="section-content">
+                        <div class="form-group">
+                            <label for="quote_3">Quote Text</label>
+                            <textarea id="quote_3" name="quote_3"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Contact Tab -->
+            <div class="tab-content" id="contact">
+                <!-- Contact Information Section -->
+                <div class="section">
+                    <div class="section-header">
+                        <h2>Contact Information</h2>
+                        <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
+                    </div>
+                    <div class="section-content">
+                        <div class="form-row">
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label for="email_address">Email Address</label>
+                                    <input type="email" id="email_address" name="email_address">
+                                </div>
+                            </div>
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label for="phone_number">Phone Number</label>
+                                    <input type="tel" id="phone_number" name="phone_number">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="contact_message">Contact Form Message</label>
+                            <textarea id="contact_message" name="contact_message"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Miscellaneous Tab -->
+            <div class="tab-content" id="misc">
+                <!-- Onboarding Information Section -->
+                <div class="section">
+                    <div class="section-header">
+                        <h2>Onboarding Information</h2>
+                        <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
+                    </div>
+                    <div class="section-content">
+                        <div class="form-group">
+                            <label for="client_name">Client Name</label>
+                            <input type="text" id="client_name" name="client_name">
+                        </div>
+                        <div class="form-group">
+                            <label for="client_email">Client Email</label>
+                            <input type="email" id="client_email" name="client_email">
+                        </div>
+                        <div class="form-group">
+                            <label for="onboarding_notes">Onboarding Notes</label>
+                            <textarea id="onboarding_notes" name="onboarding_notes"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+    <script>
+        // Constants
+        const SUPABASE_URL = 'https://aqicztygjpmunfljjuto.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxaWN6dHlnanBtdW5mbGpqdXRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3MDU1ODIsImV4cCI6MjA1OTI4MTU4Mn0.5e2hvTckSSbTFLBjQiccrvjoBd6QQDX0X4tccFOc1rs';
+        
+        // Elements
+        const statusElement = document.getElementById('status');
+        const projectSelect = document.getElementById('project-select');
+        const debugInfo = document.getElementById('debug-info');
+        const viewSiteButton = document.getElementById('view-site-button');
+        const saveButton = document.getElementById('save-button');
+        const debugToggle = document.getElementById('debug-toggle');
+        
+        // Initialize Supabase client
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        
+        // Global variables
+        let currentProjectId = null;
+        let autoSaveTimer = null;
+        
+        // Debug logging
+        function log(message, data) {
+            const timestamp = new Date().toISOString().substring(11, 19);
+            const formattedMessage = typeof data !== 'undefined' 
+                ? `[${timestamp}] ${message}: ${JSON.stringify(data, null, 2)}`
+                : `[${timestamp}] ${message}`;
+            
+            console.log(message, data);
+            debugInfo.innerHTML += formattedMessage + '<br>';
+            debugInfo.scrollTop = debugInfo.scrollHeight;
+        }
+        
+        // Load all projects without user filtering
+        async function loadAllProjects() {
+            try {
+                statusElement.textContent = 'Loading projects...';
+                statusElement.className = 'status info';
+                
+                log('Fetching all projects');
+                
+                const { data, error } = await supabase
+                    .from('dynamic_content')
+                    .select('project_id')
+                    .order('project_id');
+                
+                if (error) throw error;
+                
+                // Get unique project IDs
+                const projectIds = [...new Set(data.map(item => item.project_id))];
+                log('Unique project IDs found', projectIds.length);
+                
+                // Clear existing options
+                projectSelect.innerHTML = '<option value="">Select a project</option>';
+                
+                // Add options for each project
+                projectIds.forEach(projectId => {
+                    const option = document.createElement('option');
+                    option.value = projectId;
+                    option.textContent = projectId;
+                    projectSelect.appendChild(option);
+                });
+                
+                statusElement.textContent = `Loaded ${projectIds.length} projects`;
+                statusElement.className = 'status success';
+                
+                // Check URL for project_id parameter
+                const urlParams = new URLSearchParams(window.location.search);
+                const projectIdParam = urlParams.get('project_id');
+                
+                if (projectIdParam) {
+                    log('Project ID found in URL', projectIdParam);
+                    projectSelect.value = projectIdParam;
+                    loadContent(projectIdParam);
+                }
+                
+            } catch (error) {
+                console.error('Error loading projects:', error);
+                log('Error loading projects', error.message);
+                statusElement.textContent = 'Error loading projects: ' + error.message;
+                statusElement.className = 'status error';
+            }
+        }
+        
+        // Set up event listeners
+        function setupEventListeners() {
+            // Project selection
+            projectSelect.addEventListener('change', function() {
+                const selectedProject = this.value;
+                if (selectedProject) {
+                    loadContent(selectedProject);
+                }
+            });
+            
+            // View site button
+            viewSiteButton.addEventListener('click', function() {
+                if (currentProjectId) {
+                    window.open(`/index.html?project_id=${currentProjectId}`, '_blank');
+                } else {
+                    showStatus('Please select a project first', 'error');
+                }
+            });
+            
+            // Save button
+            saveButton.addEventListener('click', function() {
+                if (currentProjectId) {
+                    const contentItems = collectFormData();
+                    saveContent(currentProjectId, contentItems);
+                } else {
+                    showStatus('Please select a project first', 'error');
+                }
+            });
+            
+            // Debug toggle
+            debugToggle.addEventListener('click', function() {
+                debugInfo.style.display = debugInfo.style.display === 'none' ? 'block' : 'none';
+            });
+            
+            // Tab navigation
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabId = this.getAttribute('data-tab');
+                    activateTab(tabId);
+                });
+            });
+        }
+        
+        // Set up auto-save
+        function setupAutoSave() {
+            document.getElementById('contentForm').addEventListener('input', function() {
+                resetAutoSaveTimer();
+            });
+        }
+        
+        // Reset auto-save timer
+        function resetAutoSaveTimer() {
+            if (autoSaveTimer) {
+                clearTimeout(autoSaveTimer);
+            }
+            
+            autoSaveTimer = setTimeout(function() {
+                autoSave();
+            }, 30000); // 30 seconds
+        }
+        
+        // Auto-save function
+        function autoSave() {
+            if (currentProjectId) {
+                const contentItems = collectFormData();
+                
+                // Only save if there's a current project
+                if (contentItems.length > 0) {
+                    saveContent(currentProjectId, contentItems, true);
+                }
+            }
+        }
+        
+        // Activate tab
+        function activateTab(tabId) {
+            // Deactivate all tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Deactivate all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Activate selected tab
+            document.querySelector(`.tab[data-tab="${tabId}"]`).classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        }
+        
+        // Toggle section collapse
+        function toggleSection(button) {
+            const section = button.closest('.section');
+            section.classList.toggle('collapsed');
+            
+            if (section.classList.contains('collapsed')) {
+                button.textContent = '+';
+            } else {
+                button.textContent = '−';
+            }
+        }
+        
+        // Load content for a project
+        async function loadContent(projectId) {
+            try {
+                if (!projectId) {
+                    showStatus('Please select a project', 'error');
+                    return;
+                }
+                
+                currentProjectId = projectId;
+                
+                // Update URL without redirect
+                const newUrl = new URL(window.location.href);
+                newUrl.searchParams.set('project_id', projectId);
+                window.history.pushState({}, '', newUrl);
+                
+                showStatus(`Loading content for project: ${projectId}...`, 'info');
+                log('Loading content for project', projectId);
+                
+                const { data, error } = await supabase
+                    .from('dynamic_content')
+                    .select('*')
+                    .eq('project_id', projectId);
+                
+                if (error) throw error;
+                
+                if (!data || data.length === 0) {
+                    showStatus(`No content found for project: ${projectId}`, 'error');
+                    log('No content found for project', projectId);
+                    return;
+                }
+                
+                // Process content data
+                const content = {};
+                data.forEach(item => {
+                    content[item.content_key] = item.content_value;
+                });
+                
+                // Populate form fields
+                populateFormFields(content);
+                
+                // Enable view site button
+                viewSiteButton.style.display = 'inline-block';
+                
+                showStatus(`Loaded ${data.length} content items for project: ${projectId}`, 'success');
+                log('Content loaded successfully', data.length);
+                
+            } catch (error) {
+                console.error('Error loading content:', error);
+                log('Error loading content', error.message);
+                showStatus('Error loading content: ' + error.message, 'error');
+            }
+        }
+        
+        // Populate form fields with content data
+        function populateFormFields(content) {
+            // Clear all form fields first
+            document.querySelectorAll('input, textarea, select').forEach(field => {
+                if (field.id && field.id !== 'project-select') {
+                    field.value = '';
+                }
+            });
+            
+            // Populate fields based on content keys
+            for (const [key, value] of Object.entries(content)) {
+                const field = document.getElementById(key);
+                if (field) {
+                    if (field.type === 'checkbox') {
+                        field.checked = value === 'true';
+                    } else {
+                        field.value = value;
+                    }
+                }
+            }
+        }
+        
+        // Collect form data
+        function collectFormData() {
+            const contentItems = [];
+            
+            document.querySelectorAll('input, textarea, select').forEach(field => {
+                if (field.id && field.id !== 'project-select' && field.name) {
+                    let value;
+                    
+                    if (field.type === 'checkbox') {
+                        value = field.checked ? 'true' : 'false';
+                    } else {
+                        value = field.value;
+                    }
+                    
+                    contentItems.push({
+                        content_key: field.name,
+                        content_value: value
+                    });
+                }
+            });
+            
+            return contentItems;
+        }
+        
+        // Validate form data
+        function validateFormData(contentItems) {
+            const errors = [];
+            
+            // Check for required fields
+            const requiredFields = ['rendered_title'];
+            
+            requiredFields.forEach(fieldName => {
+                const item = contentItems.find(item => item.content_key === fieldName);
+                
+                if (!item || !item.content_value.trim()) {
+                    errors.push(`${fieldName} is required`);
+                }
+            });
+            
+            return errors;
+        }
+        
+        // Save content for a project
+        async function saveContent(projectId, contentItems, isAutoSave = false) {
+            try {
+                if (!projectId) {
+                    showStatus('Please select a project', 'error');
+                    return;
+                }
+                
+                // Validate form data
+                const validationErrors = validateFormData(contentItems);
+                
+                if (validationErrors.length > 0) {
+                    showStatus('Validation errors: ' + validationErrors.join(', '), 'error');
+                    return;
+                }
+                
+                if (!isAutoSave) {
+                    showStatus(`Saving content for project: ${projectId}...`, 'info');
+                }
+                
+                log('Saving content for project', { projectId, itemCount: contentItems.length, isAutoSave });
+                
+                // Prepare data for upsert
+                const upsertData = contentItems.map(item => ({
+                    project_id: projectId,
+                    content_key: item.content_key,
+                    content_value: item.content_value
+                }));
+                
+                // Get existing content for this project
+                const { data: existingData, error: fetchError } = await supabase
+                    .from('dynamic_content')
+                    .select('content_key')
+                    .eq('project_id', projectId);
+                
+                if (fetchError) throw fetchError;
+                
+                // Extract existing keys
+                const existingKeys = existingData.map(item => item.content_key);
+                
+                // Split data into updates and inserts
+                const updates = [];
+                const inserts = [];
+                
+                upsertData.forEach(item => {
+                    if (existingKeys.includes(item.content_key)) {
+                        updates.push(item);
+                    } else {
+                        inserts.push(item);
+                    }
+                });
+                
+                // Process updates
+                if (updates.length > 0) {
+                    log('Processing updates', updates.length);
+                    
+                    for (const item of updates) {
+                        const { error } = await supabase
+                            .from('dynamic_content')
+                            .update({ content_value: item.content_value })
+                            .eq('project_id', projectId)
+                            .eq('content_key', item.content_key);
+                        
+                        if (error) throw error;
+                    }
+                }
+                
+                // Process inserts
+                if (inserts.length > 0) {
+                    log('Processing inserts', inserts.length);
+                    
+                    const { error } = await supabase
+                        .from('dynamic_content')
+                        .insert(inserts);
+                    
+                    if (error) throw error;
+                }
+                
+                if (!isAutoSave) {
+                    showStatus(`Saved ${contentItems.length} content items for project: ${projectId}`, 'success');
+                } else {
+                    showStatus(`Auto-saved at ${new Date().toLocaleTimeString()}`, 'info');
+                    setTimeout(() => {
+                        statusElement.textContent = '';
+                        statusElement.className = 'status';
+                    }, 3000);
+                }
+                
+                log('Content saved successfully', { updates: updates.length, inserts: inserts.length });
+                
+            } catch (error) {
+                console.error('Error saving content:', error);
+                log('Error saving content', error.message);
+                showStatus('Error saving content: ' + error.message, 'error');
+            }
+        }
+        
+        // Show status message
+        function showStatus(message, type) {
+            statusElement.textContent = message;
+            statusElement.className = `status ${type}`;
+        }
+        
+        // Initialize the editor
+        document.addEventListener('DOMContentLoaded', function() {
+            log('Editor initializing...');
+            loadAllProjects();
+            setupEventListeners();
+            setupAutoSave();
+        });
+    </script>
+</body>
+</html>

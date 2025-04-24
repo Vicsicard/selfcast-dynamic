@@ -2,6 +2,19 @@
 
 A multi-client website platform for personal branding and content management.
 
+## Latest Updates (April 24, 2025)
+
+- **New Standalone Editor Implementation:**
+  - Created a new `editor.html` file that eliminates the need for redirects
+  - Direct Supabase integration without authentication requirements
+  - URL parameter support for deep linking to specific projects (`?project_id=xyz`)
+  - History API integration for updating URLs without page reloads
+  - Complete form functionality matching the original editor
+  - Debug mode with detailed logging for troubleshooting
+  - Auto-save functionality every 30 seconds
+  - Direct "View Your Website" navigation without redirects
+  - Improved reliability by removing redirect chains that broke authentication flows
+
 ## Latest Updates (April 18, 2025)
 
 - **Improved Bio/About Section Formatting:**
@@ -88,15 +101,17 @@ A multi-client website platform for personal branding and content management.
 ```
 SelfCast Dynamic/
 ├── public-site/
-│   ├── edit.html      # Content management interface
-│   ├── index.html     # Public-facing site
-│   ├── script.js      # Client-side functionality
-│   └── style.css      # Styling
-├── config.js          # Supabase configuration
-├── config.example.js  # Example configuration template
-├── check_latest.sql   # Latest content verification
-├── view_latest_content.sql  # Content viewing queries
-└── view_content_md.sql      # Markdown content viewing
+│   ├── edit.html                # Original content management interface
+│   ├── edit-complete-fixed.html # Enhanced editor with full functionality
+│   ├── editor.html              # New standalone editor (no redirects required)
+│   ├── index.html               # Public-facing site
+│   ├── script.js                # Client-side functionality
+│   └── style.css                # Styling
+├── config.js                    # Supabase configuration
+├── config.example.js            # Example configuration template
+├── check_latest.sql             # Latest content verification
+├── view_latest_content.sql      # Content viewing queries
+└── view_content_md.sql          # Markdown content viewing
 ```
 
 ## Features
