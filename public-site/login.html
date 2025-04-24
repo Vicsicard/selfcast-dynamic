@@ -3,162 +3,131 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SelfCast Dashboard Login</title>
+    <title>SelfCast Dashboard - Login</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@clerk/clerk-js@latest/dist/clerk.browser.js"></script>
     <style>
-        :root {
-            --primary-color: #3498db;
-            --secondary-color: #2c3e50;
-            --accent-color: #e74c3c;
-            --success-color: #2ecc71;
-            --warning-color: #f39c12;
-            --error-color: #e74c3c;
-            --info-color: #3498db;
-            --light-color: #f8f9fa;
-            --dark-color: #343a40;
-            --border-color: #dee2e6;
-            --border-radius: 4px;
-            --box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        
-        * {
-            box-sizing: border-box;
-        }
-        
         body {
-            font-family: system-ui, -apple-system, sans-serif;
-            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
             padding: 20px;
-            background-color: #f5f5f5;
-            color: #333;
-            line-height: 1.6;
-            background-image: url('https://images.unsplash.com/photo-1516541196182-6bdb0516ed27?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-            min-height: 100vh;
         }
-        
-        .container {
-            max-width: 500px;
-            margin: 50px auto;
-            background: rgba(255, 255, 255, 0.95);
-            padding: 30px;
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+        }
+        header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .login-container {
+            background-color: #f9f9f9;
             border-radius: 8px;
-            box-shadow: var(--box-shadow);
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+        .login-container h2 {
+            margin-top: 0;
+            margin-bottom: 20px;
             text-align: center;
         }
-        
-        h1 {
-            color: var(--secondary-color);
-            margin-top: 0;
-            margin-bottom: 30px;
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
         }
-        
-        .logo {
-            max-width: 200px;
-            margin-bottom: 20px;
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
         }
-        
-        #clerk-auth {
-            min-height: 400px;
+        .success {
+            background-color: #d4edda;
+            color: #155724;
         }
-        
-        .footer {
-            margin-top: 20px;
-            font-size: 12px;
+        .warning {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+        footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 14px;
             color: #666;
+            border-top: 1px solid #ddd;
+            padding-top: 20px;
         }
-        
-        .footer a {
-            color: var(--primary-color);
-            text-decoration: none;
-        }
-        
-        .footer a:hover {
-            text-decoration: underline;
+        #clerk-auth {
+            min-height: 300px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
+    <header>
         <h1>SelfCast Dashboard</h1>
+        <div></div>
+    </header>
+
+    <div class="login-container">
+        <h2>Login</h2>
+        <div id="status" class="status info">Please sign in to access your SelfCast dashboard.</div>
         <div id="clerk-auth"></div>
-        <div class="footer">
-            <p>Need help? Contact <a href="mailto:support@selfcaststudios.com">support@selfcaststudios.com</a></p>
-        </div>
     </div>
+
+    <footer>
+        <p>Need help? Contact <a href="mailto:support@selfcaststudios.com">support@selfcaststudios.com</a></p>
+    </footer>
 
     <script>
         // Initialize Clerk with your publishable key
         const CLERK_PUBLISHABLE_KEY = 'pk_test_cHJvbW90ZWQtYnVycm8tNjguY2xlcmsuYWNjb3VudHMuZGV2JA';
         
-        document.addEventListener('DOMContentLoaded', async function() {
+        document.addEventListener('DOMContentLoaded', function() {
             try {
-                // Load Clerk script directly
-                const script = document.createElement('script');
-                script.async = true;
-                script.src = 'https://cdn.jsdelivr.net/npm/@clerk/clerk-js@latest/dist/clerk.browser.js';
-                script.crossOrigin = 'anonymous';
+                const statusElement = document.getElementById('status');
                 
-                script.onload = function() {
-                    try {
-                        // Initialize Clerk with the window.Clerk object
-                        window.Clerk.load({
-                            publishableKey: CLERK_PUBLISHABLE_KEY
-                        }).then(clerk => {
-                            // Mount authentication component
-                            clerk.mountSignIn({
-                                elementId: 'clerk-auth',
-                                afterSignInUrl: '/edit-complete-fixed.html',
-                                afterSignUpUrl: '/edit-complete-fixed.html'
-                            });
-                            
-                            // Check if already signed in
-                            if (clerk.user) {
-                                // Already signed in, redirect to editor
-                                window.location.href = '/edit-complete-fixed.html';
-                            }
-                        }).catch(error => {
-                            console.error('Error initializing Clerk:', error);
-                            document.getElementById('clerk-auth').innerHTML = `
-                                <div style="padding: 20px; background-color: #f8d7da; color: #721c24; border-radius: 4px;">
-                                    <p><strong>Authentication Error</strong></p>
-                                    <p>There was a problem loading the authentication system. Please try again later or contact support.</p>
-                                    <p><small>Error: ${error.message}</small></p>
-                                </div>
-                            `;
-                        });
-                    } catch (error) {
-                        console.error('Error initializing Clerk:', error);
-                        document.getElementById('clerk-auth').innerHTML = `
-                            <div style="padding: 20px; background-color: #f8d7da; color: #721c24; border-radius: 4px;">
-                                <p><strong>Authentication Error</strong></p>
-                                <p>There was a problem loading the authentication system. Please try again later or contact support.</p>
-                                <p><small>Error: ${error.message}</small></p>
-                            </div>
-                        `;
+                if (!window.Clerk) {
+                    throw new Error('Clerk library not loaded. Please refresh the page or try again later.');
+                }
+                
+                // Initialize Clerk
+                Clerk.load({
+                    publishableKey: CLERK_PUBLISHABLE_KEY,
+                    afterSignInUrl: '/edit-complete-fixed.html',
+                    afterSignUpUrl: '/edit-complete-fixed.html'
+                }).then(clerk => {
+                    // Mount the sign-in component
+                    clerk.mountSignIn({
+                        elementId: 'clerk-auth'
+                    });
+                    
+                    // Check if already signed in
+                    if (clerk.user) {
+                        statusElement.textContent = 'You are already signed in. Redirecting to dashboard...';
+                        statusElement.className = 'status success';
+                        setTimeout(() => {
+                            window.location.href = '/edit-complete-fixed.html';
+                        }, 1000);
                     }
-                };
-                
-                script.onerror = function() {
-                    console.error('Failed to load Clerk script');
-                    document.getElementById('clerk-auth').innerHTML = `
-                        <div style="padding: 20px; background-color: #f8d7da; color: #721c24; border-radius: 4px;">
-                            <p><strong>Authentication Error</strong></p>
-                            <p>There was a problem loading the authentication system. Please try again later or contact support.</p>
-                        </div>
-                    `;
-                };
-                
-                document.body.appendChild(script);
+                }).catch(error => {
+                    console.error('Error initializing Clerk:', error);
+                    statusElement.textContent = `Authentication Error: ${error.message}`;
+                    statusElement.className = 'status error';
+                });
             } catch (error) {
                 console.error('Error initializing Clerk:', error);
-                document.getElementById('clerk-auth').innerHTML = `
-                    <div style="padding: 20px; background-color: #f8d7da; color: #721c24; border-radius: 4px;">
-                        <p><strong>Authentication Error</strong></p>
-                        <p>There was a problem loading the authentication system. Please try again later or contact support.</p>
-                    </div>
-                `;
+                document.getElementById('status').textContent = `Authentication Error: ${error.message}`;
+                document.getElementById('status').className = 'status error';
             }
         });
     </script>

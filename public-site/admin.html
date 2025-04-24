@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SelfCast Admin Dashboard</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@clerk/clerk-js@latest/dist/clerk.browser.js"></script>
     <style>
         :root {
             --primary-color: #3498db;
@@ -270,77 +273,59 @@
         const assignmentsBody = document.getElementById('assignments-body');
         
         // Initialize
-        document.addEventListener('DOMContentLoaded', async function() {
+        document.addEventListener('DOMContentLoaded', function() {
             try {
-                // Load Clerk script directly
-                const script = document.createElement('script');
-                script.async = true;
-                script.src = 'https://cdn.jsdelivr.net/npm/@clerk/clerk-js@latest/dist/clerk.browser.js';
-                script.crossOrigin = 'anonymous';
+                if (!window.Clerk) {
+                    throw new Error('Clerk library not loaded. Please refresh the page or try again later.');
+                }
                 
-                script.onload = function() {
-                    try {
-                        // Initialize Clerk with the window.Clerk object
-                        window.Clerk.load({
-                            publishableKey: CLERK_PUBLISHABLE_KEY
-                        }).then(clerk => {
-                            // Check if user is authenticated
-                            if (!clerk.user) {
-                                // Not authenticated, redirect to login
-                                window.location.href = 'login.html';
-                                return;
-                            }
-                            
-                            // Check if user is admin
-                            const isAdmin = clerk.user.publicMetadata.isAdmin || false;
-                            
-                            if (!isAdmin) {
-                                // Not an admin, redirect to editor
-                                statusElement.textContent = 'You do not have admin privileges.';
-                                statusElement.className = 'status error';
-                                setTimeout(() => {
-                                    window.location.href = 'edit-complete-fixed.html';
-                                }, 2000);
-                                return;
-                            }
-                            
-                            // Display user info
-                            const headerDiv = document.querySelector('header div');
-                            const userInfoSpan = document.createElement('span');
-                            userInfoSpan.textContent = `Admin: ${clerk.user.fullName || clerk.user.primaryEmailAddress.emailAddress} `;
-                            userInfoSpan.style.marginRight = '10px';
-                            headerDiv.insertBefore(userInfoSpan, headerDiv.firstChild);
-                            
-                            // Set up event listeners
-                            setupEventListeners(clerk);
-                            
-                            // Load project assignments
-                            loadAssignments();
-                            
-                            statusElement.textContent = 'Admin dashboard loaded successfully.';
-                            statusElement.className = 'status success';
-                        }).catch(error => {
-                            console.error('Clerk load error:', error);
-                            statusElement.textContent = 'Authentication error. Please try logging in again.';
-                            statusElement.className = 'status error';
-                        });
-                    } catch (error) {
-                        console.error('Clerk initialization error:', error);
-                        statusElement.textContent = 'Authentication error. Please try logging in again.';
-                        statusElement.className = 'status error';
+                // Initialize Clerk with the window.Clerk object
+                Clerk.load({
+                    publishableKey: CLERK_PUBLISHABLE_KEY
+                }).then(clerk => {
+                    // Check if user is authenticated
+                    if (!clerk.user) {
+                        // Not authenticated, redirect to login
+                        window.location.href = 'login.html';
+                        return;
                     }
-                };
-                
-                script.onerror = function() {
-                    console.error('Failed to load Clerk script');
-                    statusElement.textContent = 'Authentication system failed to load. Please try again later.';
+                    
+                    // Check if user is admin
+                    const isAdmin = clerk.user.publicMetadata.isAdmin || false;
+                    
+                    if (!isAdmin) {
+                        // Not an admin, redirect to editor
+                        statusElement.textContent = 'You do not have admin privileges.';
+                        statusElement.className = 'status error';
+                        setTimeout(() => {
+                            window.location.href = 'edit-complete-fixed.html';
+                        }, 2000);
+                        return;
+                    }
+                    
+                    // Display user info
+                    const headerDiv = document.querySelector('header div');
+                    const userInfoSpan = document.createElement('span');
+                    userInfoSpan.textContent = `Admin: ${clerk.user.fullName || clerk.user.primaryEmailAddress.emailAddress} `;
+                    userInfoSpan.style.marginRight = '10px';
+                    headerDiv.insertBefore(userInfoSpan, headerDiv.firstChild);
+                    
+                    // Set up event listeners
+                    setupEventListeners(clerk);
+                    
+                    // Load project assignments
+                    loadAssignments();
+                    
+                    statusElement.textContent = 'Admin dashboard loaded successfully.';
+                    statusElement.className = 'status success';
+                }).catch(error => {
+                    console.error('Clerk load error:', error);
+                    statusElement.textContent = `Authentication error: ${error.message}`;
                     statusElement.className = 'status error';
-                };
-                
-                document.body.appendChild(script);
+                });
             } catch (error) {
                 console.error('Authentication error:', error);
-                statusElement.textContent = 'Authentication error. Please try logging in again.';
+                statusElement.textContent = `Authentication error: ${error.message}`;
                 statusElement.className = 'status error';
             }
         });
