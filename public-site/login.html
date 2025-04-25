@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SelfCast Dynamic - Login</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            font-family: var(--body-font);
+            background-color: #f5f7fa;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .auth-container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            padding: 2rem;
+        }
+
+        .logo-container {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .logo {
+            max-width: 180px;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary-color, #0066cc);
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid #e1e5eb;
+        }
+
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 0.75rem;
+            cursor: pointer;
+            font-weight: 500;
+            color: #64748b;
+            transition: all 0.2s ease;
+        }
+
+        .tab.active {
+            color: var(--primary-color, #0066cc);
+            border-bottom: 2px solid var(--primary-color, #0066cc);
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #334155;
+        }
+
+        input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            font-size: 1rem;
+            transition: border-color 0.2s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary-color, #0066cc);
+            box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.1);
+        }
+
+        button {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: var(--primary-color, #0066cc);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        button:hover {
+            background-color: var(--primary-color-dark, #0052a3);
+        }
+
+        .error-message {
+            color: #e11d48;
+            margin-top: 1rem;
+            text-align: center;
+            display: none;
+        }
+
+        .form-container {
+            display: none;
+        }
+
+        .form-container.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="logo-container">
+            <img src="https://imagestopost.carrd.co/assets/images/image06.jpg?v=773739fd" alt="SelfCast Studios Logo" class="logo">
+        </div>
+        
+        <h1>Content Editor Dashboard</h1>
+        
+        <div class="tabs">
+            <div class="tab active" id="signin-tab">Sign In</div>
+            <div class="tab" id="signup-tab">Sign Up</div>
+        </div>
+        
+        <div class="form-container active" id="signin-form-container">
+            <form id="signin-form">
+                <div class="form-group">
+                    <label for="signin-email">Email</label>
+                    <input type="email" id="signin-email" required>
+                </div>
+                <div class="form-group">
+                    <label for="signin-password">Password</label>
+                    <input type="password" id="signin-password" required>
+                </div>
+                <button type="submit">Sign In</button>
+            </form>
+            <div class="error-message" id="signin-error"></div>
+        </div>
+        
+        <div class="form-container" id="signup-form-container">
+            <form id="signup-form">
+                <div class="form-group">
+                    <label for="signup-email">Email</label>
+                    <input type="email" id="signup-email" required>
+                </div>
+                <div class="form-group">
+                    <label for="signup-password">Password</label>
+                    <input type="password" id="signup-password" required minlength="6">
+                </div>
+                <div class="form-group">
+                    <label for="signup-confirm-password">Confirm Password</label>
+                    <input type="password" id="signup-confirm-password" required minlength="6">
+                </div>
+                <button type="submit">Sign Up</button>
+            </form>
+            <div class="error-message" id="signup-error"></div>
+        </div>
+    </div>
+
+    <!-- Load Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- Load configuration -->
+    <script src="config.js"></script>
+    
+    <!-- Load auth helper -->
+    <script src="js/supabase-auth.js"></script>
+    
+    <script>
+        // Tab switching functionality
+        const signinTab = document.getElementById('signin-tab');
+        const signupTab = document.getElementById('signup-tab');
+        const signinFormContainer = document.getElementById('signin-form-container');
+        const signupFormContainer = document.getElementById('signup-form-container');
+        
+        signinTab.addEventListener('click', () => {
+            signinTab.classList.add('active');
+            signupTab.classList.remove('active');
+            signinFormContainer.classList.add('active');
+            signupFormContainer.classList.remove('active');
+        });
+        
+        signupTab.addEventListener('click', () => {
+            signupTab.classList.add('active');
+            signinTab.classList.remove('active');
+            signupFormContainer.classList.add('active');
+            signinFormContainer.classList.remove('active');
+        });
+        
+        // Form submission handlers
+        const signinForm = document.getElementById('signin-form');
+        const signupForm = document.getElementById('signup-form');
+        const signinError = document.getElementById('signin-error');
+        const signupError = document.getElementById('signup-error');
+        
+        // Check if user is already logged in
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const { data } = await window.SupabaseAuth.getSession();
+                if (data.session) {
+                    // User is already logged in, redirect to editor
+                    window.location.href = 'editor-enhanced.html';
+                }
+            } catch (error) {
+                console.error('Error checking session:', error);
+            }
+        });
+        
+        // Sign in form submission
+        signinForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('signin-email').value;
+            const password = document.getElementById('signin-password').value;
+            
+            try {
+                signinError.style.display = 'none';
+                const { data, error } = await window.SupabaseAuth.signIn(email, password);
+                
+                if (error) {
+                    signinError.textContent = error.message;
+                    signinError.style.display = 'block';
+                    return;
+                }
+                
+                // Redirect to editor on success
+                window.location.href = 'editor-enhanced.html';
+            } catch (error) {
+                signinError.textContent = 'An unexpected error occurred. Please try again.';
+                signinError.style.display = 'block';
+                console.error('Sign in error:', error);
+            }
+        });
+        
+        // Sign up form submission
+        signupForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('signup-email').value;
+            const password = document.getElementById('signup-password').value;
+            const confirmPassword = document.getElementById('signup-confirm-password').value;
+            
+            // Check if passwords match
+            if (password !== confirmPassword) {
+                signupError.textContent = 'Passwords do not match';
+                signupError.style.display = 'block';
+                return;
+            }
+            
+            try {
+                signupError.style.display = 'none';
+                const { data, error } = await window.SupabaseAuth.signUp(email, password);
+                
+                if (error) {
+                    signupError.textContent = error.message;
+                    signupError.style.display = 'block';
+                    return;
+                }
+                
+                // Since email verification is disabled, redirect to editor
+                window.location.href = 'editor-enhanced.html';
+            } catch (error) {
+                signupError.textContent = 'An unexpected error occurred. Please try again.';
+                signupError.style.display = 'block';
+                console.error('Sign up error:', error);
+            }
+        });
+    </script>
+</body>
+</html>
