@@ -1402,6 +1402,46 @@
             }
         }
         
+        // Populate form fields with content
+        function populateFormFields(content) {
+            log('Populating form fields with content');
+            
+            // Get all input, textarea, and select elements in the form
+            const formElements = document.querySelectorAll('#contentForm input, #contentForm textarea, #contentForm select');
+            
+            // Loop through each form element
+            formElements.forEach(element => {
+                const fieldName = element.id || element.name;
+                
+                // Skip elements without an ID or name
+                if (!fieldName) return;
+                
+                // If content exists for this field, set the value
+                if (content.hasOwnProperty(fieldName)) {
+                    if (element.type === 'checkbox') {
+                        element.checked = content[fieldName] === 'true' || content[fieldName] === true;
+                    } else if (element.type === 'color') {
+                        // Ensure color values have a # prefix
+                        let colorValue = content[fieldName];
+                        if (colorValue && !colorValue.startsWith('#') && colorValue.length === 6) {
+                            colorValue = '#' + colorValue;
+                        }
+                        element.value = colorValue || '';
+                    } else {
+                        element.value = content[fieldName] || '';
+                    }
+                    
+                    // Trigger change event for elements that need it (like select dropdowns)
+                    if (element.tagName === 'SELECT') {
+                        const event = new Event('change');
+                        element.dispatchEvent(event);
+                    }
+                }
+            });
+            
+            log('Form fields populated successfully');
+        }
+        
         // Show status message
         function showStatus(message, type = 'info') {
             if (!statusElement) return;
