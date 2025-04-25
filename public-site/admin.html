@@ -344,13 +344,14 @@
                             <tr>
                                 <th>User Email</th>
                                 <th>Project ID</th>
+                                <th>Display Name</th>
                                 <th>Created At</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
-                                <td colspan="4">Loading user-project mappings...</td>
+                                <td colspan="5">Loading user-project mappings...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -568,63 +569,166 @@
             }
         }
         
-        // Load user-project mappings
-        async function loadUserProjects() {
+        // Assign project to user
+        async function assignProjectToUser() {
             try {
+                const userEmail = document.getElementById('user-email-input').value.trim();
+                const projectId = document.getElementById('project-select').value;
+                
+                if (!userEmail || !projectId) {
+                    showStatus('Please enter a user email and select a project', 'error');
+                    return;
+                }
+                
+                if (!validateEmail(userEmail)) {
+                    showStatus('Please enter a valid email address', 'error');
+                    return;
+                }
+                
+                showStatus('Assigning project to user...', 'info');
+                
+                // Update the project_display_names table with the user email
                 const { data, error } = await supabase
-                    .from('user_projects')
-                    .select('*')
-                    .order('created_at', { ascending: false });
+                    .from('project_display_names')
+                    .update({ user_email: userEmail })
+                    .eq('project_id', projectId);
                 
                 if (error) {
-                    console.error('Error loading user projects:', error);
-                    showStatus('Error loading user-project mappings', 'error');
+                    console.error('Error assigning project to user:', error);
+                    
+                    // If the user_email column doesn't exist yet, show a helpful message
+                    if (error.code === '42703') {
+                        showStatus('The user_email column does not exist in the project_display_names table. Please run the SQL migration script first.', 'error');
+                        return;
+                    }
+                    
+                    showStatus('Error assigning project to user: ' + error.message, 'error');
                     return;
                 }
                 
-                // Clear existing rows
-                userProjectsTable.innerHTML = '';
+                showStatus(`Project ${projectId} assigned to ${userEmail}`, 'success');
                 
-                if (data.length === 0) {
-                    userProjectsTable.innerHTML = '<tr><td colspan="4">No user-project mappings found</td></tr>';
+                // Refresh the user-projects table
+                loadUserProjects();
+            } catch (err) {
+                console.error('Error in assignProjectToUser:', err);
+                showStatus('An unexpected error occurred', 'error');
+            }
+        }
+        
+        // Load user-project relationships
+        async function loadUserProjects() {
+            try {
+                showStatus('Loading user-project relationships...', 'info');
+                
+                // Query the project_display_names table to get all user-project relationships
+                const { data, error } = await supabase
+                    .from('project_display_names')
+                    .select('project_id, display_name, user_email, created_at')
+                    .order('user_email');
+                
+                if (error) {
+                    console.error('Error loading user-project relationships:', error);
+                    
+                    // If the table or column doesn't exist yet, show a helpful message
+                    if (error.code === '42P01' || error.code === '42703') {
+                        showStatus('The project_display_names table or user_email column does not exist yet. Please run the SQL migration script first.', 'error');
+                        return;
+                    }
+                    
+                    showStatus('Error loading user-project relationships: ' + error.message, 'error');
                     return;
                 }
                 
-                // Add rows for each mapping
-                data.forEach(mapping => {
-                    const row = document.createElement('tr');
-                    
-                    // Format date
-                    const createdAt = new Date(mapping.created_at);
-                    const formattedDate = createdAt.toLocaleDateString() + ' ' + createdAt.toLocaleTimeString();
-                    
-                    row.innerHTML = `
-                        <td>${mapping.user_email}</td>
-                        <td>${mapping.project_id}</td>
-                        <td>${formattedDate}</td>
-                        <td>
-                            <div class="table-actions">
-                                <button class="danger remove-mapping" data-id="${mapping.id}">
+                // Clear the table
+                const tableBody = document.querySelector('#user-projects-table tbody');
+                tableBody.innerHTML = '';
+                
+                // Add rows for each relationship
+                if (data && data.length > 0) {
+                    data.forEach(item => {
+                        const row = document.createElement('tr');
+                        
+                        // Format date
+                        const createdAt = item.created_at ? new Date(item.created_at).toLocaleString() : 'N/A';
+                        
+                        row.innerHTML = `
+                            <td>${item.user_email || 'N/A'}</td>
+                            <td>${item.project_id}</td>
+                            <td>${item.display_name || item.project_id}</td>
+                            <td>${createdAt}</td>
+                            <td>
+                                <button class="remove-project-button" data-project-id="${item.project_id}">
                                     <i class="fas fa-trash"></i> Remove
                                 </button>
-                            </div>
-                        </td>
-                    `;
-                    
-                    userProjectsTable.appendChild(row);
-                });
-                
-                // Add event listeners for remove buttons
-                document.querySelectorAll('.remove-mapping').forEach(button => {
-                    button.addEventListener('click', () => {
-                        const id = button.getAttribute('data-id');
-                        removeUserProject(id);
+                            </td>
+                        `;
+                        
+                        tableBody.appendChild(row);
                     });
-                });
-            } catch (error) {
-                console.error('Error in loadUserProjects:', error);
-                showStatus('Error loading user-project mappings', 'error');
+                    
+                    // Add event listeners to remove buttons
+                    document.querySelectorAll('.remove-project-button').forEach(button => {
+                        button.addEventListener('click', function() {
+                            const projectId = this.getAttribute('data-project-id');
+                            removeUserFromProject(projectId);
+                        });
+                    });
+                    
+                    showStatus(`Loaded ${data.length} user-project relationships`, 'success');
+                } else {
+                    const row = document.createElement('tr');
+                    row.innerHTML = '<td colspan="5" class="text-center">No user-project relationships found</td>';
+                    tableBody.appendChild(row);
+                    
+                    showStatus('No user-project relationships found', 'info');
+                }
+            } catch (err) {
+                console.error('Error in loadUserProjects:', err);
+                showStatus('An unexpected error occurred', 'error');
             }
+        }
+        
+        // Remove user from project
+        async function removeUserFromProject(projectId) {
+            try {
+                if (!projectId) {
+                    showStatus('Project ID is required', 'error');
+                    return;
+                }
+                
+                if (!confirm(`Are you sure you want to remove the user from project ${projectId}?`)) {
+                    return;
+                }
+                
+                showStatus('Removing user from project...', 'info');
+                
+                // Set the user_email to the default admin email
+                const { data, error } = await supabase
+                    .from('project_display_names')
+                    .update({ user_email: 'vicsicard@gmail.com' })
+                    .eq('project_id', projectId);
+                
+                if (error) {
+                    console.error('Error removing user from project:', error);
+                    showStatus('Error removing user from project: ' + error.message, 'error');
+                    return;
+                }
+                
+                showStatus(`User removed from project ${projectId}`, 'success');
+                
+                // Refresh the user-projects table
+                loadUserProjects();
+            } catch (err) {
+                console.error('Error in removeUserFromProject:', err);
+                showStatus('An unexpected error occurred', 'error');
+            }
+        }
+        
+        // Validate email format
+        function validateEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
         }
         
         // Load admin users
@@ -686,87 +790,6 @@
             } catch (error) {
                 console.error('Error in loadAdminUsers:', error);
                 showStatus('Error loading admin users', 'error');
-            }
-        }
-        
-        // Assign project to user
-        async function assignProject() {
-            const email = userEmailInput.value.trim();
-            const projectId = projectSelect.value;
-            
-            if (!email) {
-                showStatus('Please enter a user email', 'warning');
-                return;
-            }
-            
-            if (!projectId) {
-                showStatus('Please select a project', 'warning');
-                return;
-            }
-            
-            try {
-                showStatus('Assigning project...', 'info');
-                
-                const { error } = await supabase
-                    .from('user_projects')
-                    .insert({ user_email: email, project_id: projectId });
-                
-                if (error) {
-                    if (error.code === '23505') {
-                        showStatus('This user already has access to this project', 'warning');
-                    } else {
-                        console.error('Error assigning project:', error);
-                        showStatus('Error assigning project: ' + error.message, 'error');
-                    }
-                    return;
-                }
-                
-                showStatus('Project assigned successfully', 'success');
-                userEmailInput.value = '';
-                projectSelect.value = '';
-                
-                // Update owner_email in dynamic_content table
-                const { error: updateError } = await supabase
-                    .from('dynamic_content')
-                    .update({ owner_email: email })
-                    .eq('project_id', projectId)
-                    .is('owner_email', null);
-                
-                if (updateError) {
-                    console.error('Error updating owner_email:', updateError);
-                }
-                
-                // Reload user-project mappings
-                loadUserProjects();
-            } catch (error) {
-                console.error('Error in assignProject:', error);
-                showStatus('Error assigning project', 'error');
-            }
-        }
-        
-        // Remove user-project mapping
-        async function removeUserProject(id) {
-            try {
-                showStatus('Removing user-project mapping...', 'info');
-                
-                const { error } = await supabase
-                    .from('user_projects')
-                    .delete()
-                    .eq('id', id);
-                
-                if (error) {
-                    console.error('Error removing user-project mapping:', error);
-                    showStatus('Error removing user-project mapping: ' + error.message, 'error');
-                    return;
-                }
-                
-                showStatus('User-project mapping removed successfully', 'success');
-                
-                // Reload user-project mappings
-                loadUserProjects();
-            } catch (error) {
-                console.error('Error in removeUserProject:', error);
-                showStatus('Error removing user-project mapping', 'error');
             }
         }
         
@@ -850,7 +873,7 @@
             loadAdminUsers();
             
             // Set up event listeners
-            assignProjectButton.addEventListener('click', assignProject);
+            assignProjectButton.addEventListener('click', assignProjectToUser);
             addAdminButton.addEventListener('click', addAdmin);
             viewEditorButton.addEventListener('click', () => {
                 window.location.href = 'editor-enhanced.html';

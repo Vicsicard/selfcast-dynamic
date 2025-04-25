@@ -142,52 +142,86 @@ async function getUserProjects() {
     // Check if admin first (admins see all projects)
     const adminStatus = await isAdmin(email);
     
-    // DEVELOPMENT MODE: If user_projects table doesn't exist, show all projects for admins
-    // and no projects for regular users
     try {
       if (adminStatus) {
-        // Admin user - get all distinct project IDs
+        // Admin user - get all projects with display names
         const { data, error } = await supabase
-          .from('dynamic_content')
-          .select('project_id')
-          .order('project_id');
+          .from('project_display_names')
+          .select('project_id, display_name')
+          .order('display_name');
           
         if (error) {
-          return { data: [], error };
-        }
-        
-        // Extract unique project IDs
-        const uniqueProjects = [...new Set(data.map(item => item.project_id))];
-        return { data: uniqueProjects.map(id => ({ project_id: id })), error: null };
-      } else {
-        // Regular user - get only their projects
-        const { data, error } = await supabase
-          .from('user_projects')
-          .select('project_id')
-          .eq('user_email', email)
-          .order('project_id');
+          console.error('Error fetching projects for admin:', error);
           
-        if (error) {
-          // If table doesn't exist, check for projects with matching email
+          // Fallback to getting projects from dynamic_content if project_display_names table doesn't exist
           if (error.code === '42P01') {
-            console.log('DEVELOPMENT MODE: user_projects table not found, checking for email match in dynamic_content');
+            console.log('DEVELOPMENT MODE: project_display_names table not found, falling back to dynamic_content');
             
-            // Look for projects with matching email in dynamic_content
-            const { data: emailData, error: emailError } = await supabase
+            const { data: fallbackData, error: fallbackError } = await supabase
               .from('dynamic_content')
               .select('project_id')
-              .eq('key', 'email_address')
-              .eq('content', email)
               .order('project_id');
               
-            if (emailError) {
-              console.error('Error finding projects by email:', emailError);
-              return { data: [], error: emailError };
+            if (fallbackError) {
+              return { data: [], error: fallbackError };
             }
             
             // Extract unique project IDs
-            const uniqueProjects = [...new Set(emailData.map(item => item.project_id))];
+            const uniqueProjects = [...new Set(fallbackData.map(item => item.project_id))];
             return { data: uniqueProjects.map(id => ({ project_id: id })), error: null };
+          }
+          
+          return { data: [], error };
+        }
+        
+        return { data, error: null };
+      } else {
+        // Regular user - get only their projects
+        const { data, error } = await supabase
+          .from('project_display_names')
+          .select('project_id, display_name')
+          .eq('user_email', email)
+          .order('display_name');
+          
+        if (error) {
+          console.error('Error fetching projects for user:', error);
+          
+          // Fallback to checking user_projects table if project_display_names doesn't have user_email column
+          if (error.code === '42703') { // Column doesn't exist
+            console.log('DEVELOPMENT MODE: user_email column not found in project_display_names, checking user_projects');
+            
+            const { data: userProjectsData, error: userProjectsError } = await supabase
+              .from('user_projects')
+              .select('project_id')
+              .eq('user_email', email)
+              .order('project_id');
+              
+            if (userProjectsError) {
+              // If user_projects table doesn't exist, check for email match in dynamic_content
+              if (userProjectsError.code === '42P01') {
+                console.log('DEVELOPMENT MODE: user_projects table not found, checking for email match in dynamic_content');
+                
+                const { data: emailData, error: emailError } = await supabase
+                  .from('dynamic_content')
+                  .select('project_id')
+                  .eq('key', 'email_address')
+                  .eq('content', email)
+                  .order('project_id');
+                  
+                if (emailError) {
+                  console.error('Error finding projects by email:', emailError);
+                  return { data: [], error: emailError };
+                }
+                
+                // Extract unique project IDs
+                const uniqueProjects = [...new Set(emailData.map(item => item.project_id))];
+                return { data: uniqueProjects.map(id => ({ project_id: id })), error: null };
+              }
+              
+              return { data: [], error: userProjectsError };
+            }
+            
+            return { data: userProjectsData, error: null };
           }
           
           return { data: [], error };
@@ -215,11 +249,11 @@ async function getUserProjects() {
         return { data: uniqueProjects.map(id => ({ project_id: id })), error: null };
       }
       
-      return { data: [], error: { message: 'Error getting user projects' } };
+      return { data: [], error: err };
     }
   } catch (err) {
-    console.error('Error getting user projects:', err);
-    return { data: [], error: { message: 'Error getting user projects' } };
+    console.error('Error in getUserProjects:', err);
+    return { data: [], error: err };
   }
 }
 
