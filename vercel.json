@@ -11,17 +11,17 @@
   "redirects": [
     {
       "source": "/",
-      "destination": "/edit.html",
+      "destination": "/login.html",
       "permanent": true
     },
     {
       "source": "/admin",
-      "destination": "/edit.html",
+      "destination": "/admin.html",
       "permanent": true
     },
     {
       "source": "/editor",
-      "destination": "/edit.html",
+      "destination": "/editor-enhanced.html",
       "permanent": true
     }
   ],
