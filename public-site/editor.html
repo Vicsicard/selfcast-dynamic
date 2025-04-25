@@ -1,14 +1,33 @@
 <!DOCTYPE html>
+<!--
+*******************************************************************************
+* PRIMARY EDITOR VERSION - MODERN UI                                          *
+*******************************************************************************
+* This is the primary editor version with the modern UI that we're actively   *
+* developing and enhancing. It features:                                      *
+*                                                                             *
+* - Modern dark sidebar with icon-based navigation                            *
+* - Improved header and status indicators                                     *
+* - Enhanced styling and layout                                               *
+* - Direct Supabase integration without authentication                        *
+* - URL parameter support for deep linking                                    *
+*                                                                             *
+* Last updated: April 24, 2025                                                *
+*******************************************************************************
+-->
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SelfCast Dynamic Content Editor</title>
+    <title>SelfCast Content Editor</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <!-- Add Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root {
             --primary-color: #3498db;
+            --primary-dark: #2980b9;
             --secondary-color: #2c3e50;
             --accent-color: #e74c3c;
             --success-color: #2ecc71;
@@ -18,8 +37,9 @@
             --light-color: #f8f9fa;
             --dark-color: #343a40;
             --border-color: #dee2e6;
-            --border-radius: 4px;
-            --box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            --border-radius: 8px;
+            --box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            --transition-speed: 0.3s;
         }
         
         * {
@@ -29,7 +49,7 @@
         body {
             font-family: system-ui, -apple-system, sans-serif;
             margin: 0;
-            padding: 20px;
+            padding: 0;
             background-color: #f5f5f5;
             color: #333;
             line-height: 1.6;
@@ -39,27 +59,143 @@
             max-width: 1200px;
             margin: 0 auto;
             background: white;
-            padding: 20px;
-            border-radius: 8px;
+            padding: 0;
+            border-radius: var(--border-radius);
             box-shadow: var(--box-shadow);
+            overflow: hidden;
         }
         
         header {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            padding: 15px 20px;
+            background: var(--primary-color);
+            color: white;
+            margin-bottom: 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            color: white;
+            display: flex;
+            align-items: center;
+        }
+        
+        header h1 i {
+            margin-right: 10px;
+        }
+        
+        header .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .editor-main {
+            display: flex;
+            min-height: calc(100vh - 60px);
+        }
+        
+        .sidebar {
+            width: 250px;
+            background: #2c3e50;
+            color: #fff;
+            border-right: 1px solid var(--border-color);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .sidebar .project-selector {
             margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .sidebar .project-selector label {
+            color: #ecf0f1;
+        }
+        
+        .sidebar .project-selector select {
+            background-color: rgba(255,255,255,0.1);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .sidebar .nav-tabs {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .sidebar .nav-tabs li {
+            margin-bottom: 8px;
+        }
+        
+        .sidebar .nav-tabs a {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            border-radius: var(--border-radius);
+            transition: all var(--transition-speed);
+        }
+        
+        .sidebar .nav-tabs a:hover {
+            background-color: rgba(255,255,255,0.1);
+            color: #fff;
+        }
+        
+        .sidebar .nav-tabs a.active {
+            background-color: var(--primary-color);
+            color: #fff;
+        }
+        
+        .sidebar .nav-tabs a i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .sidebar .status-indicator {
+            margin-top: auto;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.7);
+        }
+        
+        .sidebar .status-indicator .indicator {
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+        }
+        
+        .sidebar .status-indicator .indicator i {
+            margin-right: 8px;
+        }
+        
+        .sidebar .status-indicator .indicator.saving i {
+            color: var(--warning-color);
+        }
+        
+        .sidebar .status-indicator .indicator.saved i {
+            color: var(--success-color);
+        }
+        
+        .content-area {
+            flex: 1;
+            padding: 25px;
+            overflow-y: auto;
+            background-color: #f8f9fa;
         }
         
         h1, h2, h3, h4 {
             color: var(--secondary-color);
             margin-top: 0;
-        }
-        
-        h1 {
-            font-size: 1.8rem;
         }
         
         h2 {
@@ -76,9 +212,15 @@
             margin-bottom: 30px;
             padding: 20px;
             background: #fff;
-            border-radius: 8px;
+            border-radius: var(--border-radius);
             box-shadow: var(--box-shadow);
             border-top: 3px solid var(--primary-color);
+            transition: transform var(--transition-speed), box-shadow var(--transition-speed);
+        }
+        
+        .section:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
         
         .section-header {
@@ -126,6 +268,13 @@
             border-radius: var(--border-radius);
             font-family: inherit;
             font-size: 14px;
+            transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
+        }
+        
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
         }
         
         textarea {
@@ -157,11 +306,19 @@
             cursor: pointer;
             font-size: 16px;
             margin-right: 10px;
-            transition: background-color 0.2s;
+            transition: background-color var(--transition-speed), transform var(--transition-speed);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        button i {
+            margin-right: 8px;
         }
         
         button:hover {
-            background-color: #2980b9;
+            background-color: var(--primary-dark);
+            transform: translateY(-1px);
         }
         
         button.secondary {
@@ -197,9 +354,17 @@
         }
         
         .status {
-            padding: 10px 15px;
+            padding: 15px;
             margin: 15px 0;
             border-radius: var(--border-radius);
+            display: flex;
+            align-items: center;
+            transition: opacity 0.5s ease;
+        }
+        
+        .status i {
+            margin-right: 10px;
+            font-size: 18px;
         }
         
         .status.success {
@@ -226,28 +391,41 @@
             border: 1px solid #f5c6cb;
         }
         
+        .status.fade-out {
+            opacity: 0;
+        }
+        
         .tabs {
             display: flex;
-            flex-wrap: wrap;
+            flex-direction: column;
             margin-bottom: 20px;
-            border-bottom: 1px solid var(--border-color);
         }
         
         .tab {
-            padding: 10px 20px;
+            padding: 12px 15px;
             cursor: pointer;
-            border-bottom: 3px solid transparent;
-            margin-right: 5px;
-            transition: all 0.2s;
+            border-left: 3px solid transparent;
+            margin-bottom: 5px;
+            transition: all var(--transition-speed);
+            display: flex;
+            align-items: center;
+            border-radius: 0 var(--border-radius) var(--border-radius) 0;
+        }
+        
+        .tab i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
         }
         
         .tab:hover {
-            background-color: var(--light-color);
+            background-color: rgba(52, 152, 219, 0.1);
+            border-left-color: rgba(52, 152, 219, 0.5);
         }
         
         .tab.active {
-            border-bottom-color: var(--primary-color);
-            color: var(--primary-color);
+            background-color: rgba(52, 152, 219, 0.2);
+            border-left-color: var(--primary-color);
             font-weight: 500;
         }
         
@@ -257,6 +435,12 @@
         
         .tab-content.active {
             display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         
         .collapse-toggle {
@@ -289,12 +473,13 @@
         
         #project-select {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             border: 1px solid var(--border-color);
             border-radius: var(--border-radius);
             font-family: inherit;
             font-size: 14px;
             margin-bottom: 10px;
+            background-color: white;
         }
         
         .debug-info {
@@ -306,395 +491,649 @@
             padding: 1rem;
             background: #f8f9fa;
             border: 1px solid #ddd;
-            border-radius: 4px;
+            border-radius: var(--border-radius);
             display: none;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .debug-panel {
+            margin-top: 20px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 20px;
+        }
+        
+        .debug-panel h3 {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .debug-panel h3 i {
+            margin-right: 8px;
+        }
+        
+        .auto-save-indicator {
+            display: inline-flex;
+            align-items: center;
+            font-size: 14px;
+            color: #666;
+            margin-left: 10px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .auto-save-indicator.visible {
+            opacity: 1;
+        }
+        
+        .auto-save-indicator i {
+            margin-right: 5px;
+            color: var(--success-color);
+        }
+        
+        .style-preview {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            border: 1px solid var(--border-color);
+            transition: all var(--transition-speed);
+        }
+        
+        .style-preview h3 {
+            margin-top: 0;
+        }
+        
+        .style-preview-content {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .preview-item {
+            padding: 15px;
+            border-radius: var(--border-radius);
+            background-color: white;
+            box-shadow: var(--box-shadow);
+        }
+        
+        .preview-heading {
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+        
+        .preview-text {
+            margin: 0;
+        }
+        
+        .button-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        @media (max-width: 768px) {
+            .editor-main {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+            }
+            
+            .tabs {
+                flex-direction: row;
+                flex-wrap: wrap;
+                border-bottom: 1px solid var(--border-color);
+            }
+            
+            .tab {
+                border-left: none;
+                border-bottom: 3px solid transparent;
+                border-radius: var(--border-radius) var(--border-radius) 0 0;
+            }
+            
+            .tab.active {
+                border-bottom-color: var(--primary-color);
+                border-left-color: transparent;
+            }
+        }
+        
+        /* Style Preview Section */
+        .style-preview {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: var(--box-shadow);
+        }
+        
+        .style-preview h3 {
+            margin-top: 0;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .style-preview h3 i {
+            margin-right: 8px;
+            color: var(--primary-color);
+        }
+        
+        .preview-item {
+            margin-bottom: 15px;
+        }
+        
+        .preview-item h4 {
+            margin-bottom: 5px;
+            font-size: 1rem;
+            color: var(--secondary-color);
+        }
+        
+        .preview-sample {
+            padding: 15px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+        }
+        
+        /* Auto-save indicator */
+        .auto-save-indicator {
+            display: none;
+            align-items: center;
+            padding: 5px 10px;
+            background-color: rgba(243, 156, 18, 0.2);
+            color: var(--warning-color);
+            border-radius: var(--border-radius);
+            font-size: 0.9rem;
+            animation: pulse 1.5s infinite;
+        }
+        
+        .auto-save-indicator i {
+            margin-right: 5px;
+            animation: spin 1.5s linear infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.7; }
+            50% { opacity: 1; }
+            100% { opacity: 0.7; }
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .save-button {
+            display: flex;
+            align-items: center;
+            background-color: var(--success-color);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background-color 0.3s;
+        }
+        
+        .save-button:hover {
+            background-color: #27ae60;
+        }
+        
+        .save-button i {
+            margin-right: 8px;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>SelfCast Content Editor</h1>
-            <div>
-                <button id="view-site-button" class="secondary">View Your Website</button>
-                <button id="save-button" class="success">Save Changes</button>
-                <button id="debug-toggle" class="warning">Toggle Debug</button>
+            <h1><i class="fas fa-edit"></i> SelfCast Content Editor</h1>
+            <div class="header-actions">
+                <button id="view-site-button" class="secondary"><i class="fas fa-external-link-alt"></i> View Site</button>
+                <button id="debug-toggle-button" class="secondary"><i class="fas fa-bug"></i> Debug</button>
             </div>
         </header>
         
-        <div class="project-selector">
-            <label for="project-select">Select Project:</label>
-            <select id="project-select">
-                <option value="">Loading projects...</option>
-            </select>
+        <div class="editor-main">
+            <div class="sidebar">
+                <div class="project-selector">
+                    <label for="project-select">Select Project:</label>
+                    <select id="project-select">
+                        <option value="">Loading projects...</option>
+                    </select>
+                </div>
+                
+                <ul class="nav-tabs">
+                    <li><a href="#main-content" class="active" onclick="activateTab('main-content')"><i class="fas fa-home"></i>Main Content</a></li>
+                    <li><a href="#blog-posts" onclick="activateTab('blog-posts')"><i class="fas fa-blog"></i>Blog Posts</a></li>
+                    <li><a href="#social-media" onclick="activateTab('social-media')"><i class="fas fa-share-alt"></i>Social Media</a></li>
+                    <li><a href="#styling" onclick="activateTab('styling')"><i class="fas fa-palette"></i>Styling</a></li>
+                    <li><a href="#quotes" onclick="activateTab('quotes')"><i class="fas fa-quote-right"></i>Quotes</a></li>
+                    <li><a href="#contact" onclick="activateTab('contact')"><i class="fas fa-envelope"></i>Contact</a></li>
+                    <li><a href="#misc" onclick="activateTab('misc')"><i class="fas fa-cog"></i>Miscellaneous</a></li>
+                </ul>
+                
+                <div class="status-indicator">
+                    <div>Status:</div>
+                    <div class="indicator saved" id="save-indicator">
+                        <i class="fas fa-check-circle"></i>
+                        <span>All changes saved</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="content-area">
+                <div id="status" class="status info">
+                    <i class="fas fa-info-circle"></i>
+                    <span>Ready to load projects</span>
+                </div>
+                
+                <div class="debug-panel">
+                    <h3 id="debug-toggle"><i class="fas fa-bug"></i> Debug Panel</h3>
+                    <div id="debug-info" class="debug-info"></div>
+                </div>
+                
+                <form id="contentForm">
+                    <!-- Main Content Tab -->
+                    <div class="tab-content active" id="main-content">
+                        <!-- Main Content Section -->
+                        <div class="section">
+                            <div class="section-header">
+                                <h2>Main Content</h2>
+                                <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
+                            </div>
+                            <div class="section-content">
+                                <div class="form-group">
+                                    <label for="rendered_title">Site Title</label>
+                                    <input type="text" id="rendered_title" name="rendered_title">
+                                </div>
+                                <div class="form-group">
+                                    <label for="rendered_subtitle">Subtitle</label>
+                                    <input type="text" id="rendered_subtitle" name="rendered_subtitle">
+                                </div>
+                                <div class="form-group">
+                                    <label for="rendered_bio_html">Bio Content (HTML)</label>
+                                    <textarea id="rendered_bio_html" name="rendered_bio_html"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Blog Posts Tab -->
+                    <div class="tab-content" id="blog-posts">
+                        <!-- Blog Post 1 Section -->
+                        <div class="section">
+                            <div class="section-header">
+                                <h2>Blog Post 1</h2>
+                                <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
+                            </div>
+                            <div class="section-content">
+                                <div class="form-group">
+                                    <label for="blog_1_title">Title</label>
+                                    <input type="text" id="blog_1_title" name="blog_1_title">
+                                </div>
+                                <div class="form-group">
+                                    <label for="blog_1">Content</label>
+                                    <textarea id="blog_1" name="blog_1"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Blog Post 2 Section -->
+                        <div class="section">
+                            <div class="section-header">
+                                <h2>Blog Post 2</h2>
+                                <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
+                            </div>
+                            <div class="section-content">
+                                <div class="form-group">
+                                    <label for="blog_2_title">Title</label>
+                                    <input type="text" id="blog_2_title" name="blog_2_title">
+                                </div>
+                                <div class="form-group">
+                                    <label for="blog_2">Content</label>
+                                    <textarea id="blog_2" name="blog_2"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Blog Post 3 Section -->
+                        <div class="section">
+                            <div class="section-header">
+                                <h2>Blog Post 3</h2>
+                                <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
+                            </div>
+                            <div class="section-content">
+                                <div class="form-group">
+                                    <label for="blog_3_title">Title</label>
+                                    <input type="text" id="blog_3_title" name="blog_3_title">
+                                </div>
+                                <div class="form-group">
+                                    <label for="blog_3">Content</label>
+                                    <textarea id="blog_3" name="blog_3"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Blog Post 4 Section -->
+                        <div class="section">
+                            <div class="section-header">
+                                <h2>Blog Post 4</h2>
+                                <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
+                            </div>
+                            <div class="section-content">
+                                <div class="form-group">
+                                    <label for="blog_4_title">Title</label>
+                                    <input type="text" id="blog_4_title" name="blog_4_title">
+                                </div>
+                                <div class="form-group">
+                                    <label for="blog_4">Content</label>
+                                    <textarea id="blog_4" name="blog_4"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Social Media Tab -->
+                    <div class="tab-content" id="social-media">
+                        <!-- Facebook Section -->
+                        <div class="section">
+                            <div class="section-header">
+                                <h2>Facebook</h2>
+                                <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
+                            </div>
+                            <div class="section-content">
+                                <div class="form-group">
+                                    <label for="facebook_post">Facebook Post</label>
+                                    <textarea id="facebook_post" name="facebook_post"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Twitter Section -->
+                        <div class="section">
+                            <div class="section-header">
+                                <h2>Twitter</h2>
+                                <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
+                            </div>
+                            <div class="section-content">
+                                <div class="form-group">
+                                    <label for="twitter_post">Twitter Post</label>
+                                    <textarea id="twitter_post" name="twitter_post"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Instagram Section -->
+                        <div class="section">
+                            <div class="section-header">
+                                <h2>Instagram</h2>
+                                <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
+                            </div>
+                            <div class="section-content">
+                                <div class="form-group">
+                                    <label for="instagram_post">Instagram Post</label>
+                                    <textarea id="instagram_post" name="instagram_post"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- LinkedIn Section -->
+                        <div class="section">
+                            <div class="section-header">
+                                <h2>LinkedIn</h2>
+                                <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
+                            </div>
+                            <div class="section-content">
+                                <div class="form-group">
+                                    <label for="linkedin_post">LinkedIn Post</label>
+                                    <textarea id="linkedin_post" name="linkedin_post"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Styling Tab -->
+                    <div class="tab-content" id="styling">
+                        <!-- Colors Section -->
+                        <div class="section">
+                            <div class="section-header">
+                                <h2>Colors</h2>
+                                <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
+                            </div>
+                            <div class="section-content">
+                                <div class="form-row">
+                                    <div class="form-col">
+                                        <div class="form-group">
+                                            <label for="primary_color">Primary Color:</label>
+                                            <input type="color" id="primary_color" name="primary_color" value="#3498db" oninput="updateStylePreview()">
+                                        </div>
+                                    </div>
+                                    <div class="form-col">
+                                        <div class="form-group">
+                                            <label for="secondary_color">Secondary Color:</label>
+                                            <input type="color" id="secondary_color" name="secondary_color" value="#2c3e50" oninput="updateStylePreview()">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-col">
+                                        <div class="form-group">
+                                            <label for="accent_color">Accent Color:</label>
+                                            <input type="color" id="accent_color" name="accent_color" value="#e74c3c" oninput="updateStylePreview()">
+                                        </div>
+                                    </div>
+                                    <div class="form-col">
+                                        <div class="form-group">
+                                            <label for="text_color">Text Color:</label>
+                                            <input type="color" id="text_color" name="text_color" value="#333333" oninput="updateStylePreview()">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-col">
+                                        <div class="form-group">
+                                            <label for="background_color">Background Color:</label>
+                                            <input type="color" id="background_color" name="background_color" value="#f5f5f5" oninput="updateStylePreview()">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Fonts Section -->
+                        <div class="section">
+                            <div class="section-header">
+                                <h2>Fonts</h2>
+                                <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
+                            </div>
+                            <div class="section-content">
+                                <div class="form-row">
+                                    <div class="form-col">
+                                        <div class="form-group">
+                                            <label for="heading_font">Heading Font:</label>
+                                            <select id="heading_font" name="heading_font" oninput="updateStylePreview()">
+                                                <option value="Arial, sans-serif">Arial</option>
+                                                <option value="Helvetica, sans-serif">Helvetica</option>
+                                                <option value="Georgia, serif">Georgia</option>
+                                                <option value="'Times New Roman', serif">Times New Roman</option>
+                                                <option value="Verdana, sans-serif">Verdana</option>
+                                                <option value="'Courier New', monospace">Courier New</option>
+                                                <option value="'Open Sans', sans-serif">Open Sans</option>
+                                                <option value="'Roboto', sans-serif">Roboto</option>
+                                                <option value="'Montserrat', sans-serif">Montserrat</option>
+                                                <option value="'Lato', sans-serif">Lato</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-col">
+                                        <div class="form-group">
+                                            <label for="body_font">Body Font:</label>
+                                            <select id="body_font" name="body_font" oninput="updateStylePreview()">
+                                                <option value="Arial, sans-serif">Arial</option>
+                                                <option value="Helvetica, sans-serif">Helvetica</option>
+                                                <option value="Georgia, serif">Georgia</option>
+                                                <option value="'Times New Roman', serif">Times New Roman</option>
+                                                <option value="Verdana, sans-serif">Verdana</option>
+                                                <option value="'Courier New', monospace">Courier New</option>
+                                                <option value="'Open Sans', sans-serif">Open Sans</option>
+                                                <option value="'Roboto', sans-serif">Roboto</option>
+                                                <option value="'Montserrat', sans-serif">Montserrat</option>
+                                                <option value="'Lato', sans-serif">Lato</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Style Preview Section -->
+                        <div class="style-preview">
+                            <h3><i class="fas fa-eye"></i> Live Style Preview</h3>
+                            
+                            <div class="preview-item">
+                                <h4>Heading Styles</h4>
+                                <div class="preview-sample" id="heading-preview">
+                                    <h1 style="margin-top: 0;">Heading 1</h1>
+                                    <h2>Heading 2</h2>
+                                    <h3>Heading 3</h3>
+                                </div>
+                            </div>
+                            
+                            <div class="preview-item">
+                                <h4>Button Styles</h4>
+                                <div class="preview-sample" id="button-preview">
+                                    <button style="background-color: var(--primary-color); color: white; border: none; padding: 10px 20px; border-radius: 4px; margin-right: 10px;">Primary Button</button>
+                                    <button style="background-color: var(--secondary-color); color: white; border: none; padding: 10px 20px; border-radius: 4px; margin-right: 10px;">Secondary Button</button>
+                                    <button style="background-color: var(--accent-color); color: white; border: none; padding: 10px 20px; border-radius: 4px;">Accent Button</button>
+                                </div>
+                            </div>
+                            
+                            <div class="preview-item">
+                                <h4>Text Styles</h4>
+                                <div class="preview-sample" id="text-preview">
+                                    <p>This is a paragraph of text that demonstrates how your body text will look on your website. The font family, size, and color can all be customized to match your brand's style.</p>
+                                    <p>Here's a <a href="#" style="color: var(--primary-color);">hyperlink</a> styled with your primary color.</p>
+                                    <p><strong>This text is bold</strong> and <em>this text is italicized</em>.</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button type="button" class="save-button" onclick="saveContent(currentProjectId, collectFormData())">
+                            <i class="fas fa-save"></i> Save Style Changes
+                        </button>
+                    </div>
+                    
+                    <!-- Quotes Tab -->
+                    <div class="tab-content" id="quotes">
+                        <!-- Quote 1 Section -->
+                        <div class="section">
+                            <div class="section-header">
+                                <h2>Quote 1</h2>
+                                <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
+                            </div>
+                            <div class="section-content">
+                                <div class="form-group">
+                                    <label for="quote_1">Quote Text</label>
+                                    <textarea id="quote_1" name="quote_1"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Quote 2 Section -->
+                        <div class="section">
+                            <div class="section-header">
+                                <h2>Quote 2</h2>
+                                <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
+                            </div>
+                            <div class="section-content">
+                                <div class="form-group">
+                                    <label for="quote_2">Quote Text</label>
+                                    <textarea id="quote_2" name="quote_2"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Quote 3 Section -->
+                        <div class="section">
+                            <div class="section-header">
+                                <h2>Quote 3</h2>
+                                <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
+                            </div>
+                            <div class="section-content">
+                                <div class="form-group">
+                                    <label for="quote_3">Quote Text</label>
+                                    <textarea id="quote_3" name="quote_3"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Contact Tab -->
+                    <div class="tab-content" id="contact">
+                        <!-- Contact Information Section -->
+                        <div class="section">
+                            <div class="section-header">
+                                <h2>Contact Information</h2>
+                                <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
+                            </div>
+                            <div class="section-content">
+                                <div class="form-row">
+                                    <div class="form-col">
+                                        <div class="form-group">
+                                            <label for="email_address">Email Address</label>
+                                            <input type="email" id="email_address" name="email_address">
+                                        </div>
+                                    </div>
+                                    <div class="form-col">
+                                        <div class="form-group">
+                                            <label for="phone_number">Phone Number</label>
+                                            <input type="tel" id="phone_number" name="phone_number">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="contact_message">Contact Form Message</label>
+                                    <textarea id="contact_message" name="contact_message"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Miscellaneous Tab -->
+                    <div class="tab-content" id="misc">
+                        <!-- Onboarding Information Section -->
+                        <div class="section">
+                            <div class="section-header">
+                                <h2>Onboarding Information</h2>
+                                <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
+                            </div>
+                            <div class="section-content">
+                                <div class="form-group">
+                                    <label for="client_name">Client Name</label>
+                                    <input type="text" id="client_name" name="client_name">
+                                </div>
+                                <div class="form-group">
+                                    <label for="client_email">Client Email</label>
+                                    <input type="email" id="client_email" name="client_email">
+                                </div>
+                                <div class="form-group">
+                                    <label for="onboarding_notes">Onboarding Notes</label>
+                                    <textarea id="onboarding_notes" name="onboarding_notes"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
         </div>
-        
-        <div id="status" class="status info">Ready to load projects</div>
-        <div id="debug-info" class="debug-info"></div>
-        
-        <form id="contentForm">
-            <!-- Tabs Navigation -->
-            <div class="tabs">
-                <div class="tab active" data-tab="main-content">Main Content</div>
-                <div class="tab" data-tab="blog-posts">Blog Posts</div>
-                <div class="tab" data-tab="social-media">Social Media</div>
-                <div class="tab" data-tab="styling">Styling</div>
-                <div class="tab" data-tab="quotes">Quotes</div>
-                <div class="tab" data-tab="contact">Contact</div>
-                <div class="tab" data-tab="misc">Miscellaneous</div>
-            </div>
-            
-            <!-- Main Content Tab -->
-            <div class="tab-content active" id="main-content">
-                <!-- Main Content Section -->
-                <div class="section">
-                    <div class="section-header">
-                        <h2>Main Content</h2>
-                        <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
-                    </div>
-                    <div class="section-content">
-                        <div class="form-group">
-                            <label for="rendered_title">Site Title</label>
-                            <input type="text" id="rendered_title" name="rendered_title">
-                        </div>
-                        <div class="form-group">
-                            <label for="rendered_subtitle">Subtitle</label>
-                            <input type="text" id="rendered_subtitle" name="rendered_subtitle">
-                        </div>
-                        <div class="form-group">
-                            <label for="rendered_bio_html">Bio Content (HTML)</label>
-                            <textarea id="rendered_bio_html" name="rendered_bio_html"></textarea>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Blog Posts Tab -->
-            <div class="tab-content" id="blog-posts">
-                <!-- Blog Post 1 Section -->
-                <div class="section">
-                    <div class="section-header">
-                        <h2>Blog Post 1</h2>
-                        <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
-                    </div>
-                    <div class="section-content">
-                        <div class="form-group">
-                            <label for="blog_1_title">Title</label>
-                            <input type="text" id="blog_1_title" name="blog_1_title">
-                        </div>
-                        <div class="form-group">
-                            <label for="blog_1">Content</label>
-                            <textarea id="blog_1" name="blog_1"></textarea>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Blog Post 2 Section -->
-                <div class="section">
-                    <div class="section-header">
-                        <h2>Blog Post 2</h2>
-                        <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
-                    </div>
-                    <div class="section-content">
-                        <div class="form-group">
-                            <label for="blog_2_title">Title</label>
-                            <input type="text" id="blog_2_title" name="blog_2_title">
-                        </div>
-                        <div class="form-group">
-                            <label for="blog_2">Content</label>
-                            <textarea id="blog_2" name="blog_2"></textarea>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Blog Post 3 Section -->
-                <div class="section">
-                    <div class="section-header">
-                        <h2>Blog Post 3</h2>
-                        <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
-                    </div>
-                    <div class="section-content">
-                        <div class="form-group">
-                            <label for="blog_3_title">Title</label>
-                            <input type="text" id="blog_3_title" name="blog_3_title">
-                        </div>
-                        <div class="form-group">
-                            <label for="blog_3">Content</label>
-                            <textarea id="blog_3" name="blog_3"></textarea>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Blog Post 4 Section -->
-                <div class="section">
-                    <div class="section-header">
-                        <h2>Blog Post 4</h2>
-                        <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
-                    </div>
-                    <div class="section-content">
-                        <div class="form-group">
-                            <label for="blog_4_title">Title</label>
-                            <input type="text" id="blog_4_title" name="blog_4_title">
-                        </div>
-                        <div class="form-group">
-                            <label for="blog_4">Content</label>
-                            <textarea id="blog_4" name="blog_4"></textarea>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Social Media Tab -->
-            <div class="tab-content" id="social-media">
-                <!-- Facebook Section -->
-                <div class="section">
-                    <div class="section-header">
-                        <h2>Facebook</h2>
-                        <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
-                    </div>
-                    <div class="section-content">
-                        <div class="form-group">
-                            <label for="facebook_post">Facebook Post</label>
-                            <textarea id="facebook_post" name="facebook_post"></textarea>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Twitter Section -->
-                <div class="section">
-                    <div class="section-header">
-                        <h2>Twitter</h2>
-                        <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
-                    </div>
-                    <div class="section-content">
-                        <div class="form-group">
-                            <label for="twitter_post">Twitter Post</label>
-                            <textarea id="twitter_post" name="twitter_post"></textarea>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Instagram Section -->
-                <div class="section">
-                    <div class="section-header">
-                        <h2>Instagram</h2>
-                        <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
-                    </div>
-                    <div class="section-content">
-                        <div class="form-group">
-                            <label for="instagram_post">Instagram Post</label>
-                            <textarea id="instagram_post" name="instagram_post"></textarea>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- LinkedIn Section -->
-                <div class="section">
-                    <div class="section-header">
-                        <h2>LinkedIn</h2>
-                        <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
-                    </div>
-                    <div class="section-content">
-                        <div class="form-group">
-                            <label for="linkedin_post">LinkedIn Post</label>
-                            <textarea id="linkedin_post" name="linkedin_post"></textarea>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Styling Tab -->
-            <div class="tab-content" id="styling">
-                <!-- Colors Section -->
-                <div class="section">
-                    <div class="section-header">
-                        <h2>Colors</h2>
-                        <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
-                    </div>
-                    <div class="section-content">
-                        <div class="form-row">
-                            <div class="form-col">
-                                <div class="form-group">
-                                    <label for="primary_color">Primary Color</label>
-                                    <input type="color" id="primary_color" name="primary_color" value="#3498db">
-                                </div>
-                            </div>
-                            <div class="form-col">
-                                <div class="form-group">
-                                    <label for="secondary_color">Secondary Color</label>
-                                    <input type="color" id="secondary_color" name="secondary_color" value="#2c3e50">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-col">
-                                <div class="form-group">
-                                    <label for="accent_color">Accent Color</label>
-                                    <input type="color" id="accent_color" name="accent_color" value="#e74c3c">
-                                </div>
-                            </div>
-                            <div class="form-col">
-                                <div class="form-group">
-                                    <label for="text_color">Text Color</label>
-                                    <input type="color" id="text_color" name="text_color" value="#333333">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-col">
-                                <div class="form-group">
-                                    <label for="background_color">Background Color</label>
-                                    <input type="color" id="background_color" name="background_color" value="#f5f5f5">
-                                </div>
-                            </div>
-                            <div class="form-col">
-                                <div class="form-group">
-                                    <label for="preset_style">Style Preset</label>
-                                    <select id="preset_style" name="preset_style">
-                                        <option value="standard-preset">Standard (Blue)</option>
-                                        <option value="his-preset">Navy</option>
-                                        <option value="her-preset">Gold</option>
-                                        <option value="green-preset">Green</option>
-                                        <option value="red-preset">Red</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Fonts Section -->
-                <div class="section">
-                    <div class="section-header">
-                        <h2>Fonts</h2>
-                        <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
-                    </div>
-                    <div class="section-content">
-                        <div class="form-group">
-                            <label for="heading_font">Heading Font</label>
-                            <select id="heading_font" name="heading_font">
-                                <option value="Roboto, sans-serif">Roboto</option>
-                                <option value="Montserrat, sans-serif">Montserrat</option>
-                                <option value="Playfair Display, serif">Playfair Display</option>
-                                <option value="Merriweather, serif">Merriweather</option>
-                                <option value="Lato, sans-serif">Lato</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="body_font">Body Font</label>
-                            <select id="body_font" name="body_font">
-                                <option value="Open Sans, sans-serif">Open Sans</option>
-                                <option value="Roboto, sans-serif">Roboto</option>
-                                <option value="Lato, sans-serif">Lato</option>
-                                <option value="Source Sans Pro, sans-serif">Source Sans Pro</option>
-                                <option value="Nunito, sans-serif">Nunito</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Quotes Tab -->
-            <div class="tab-content" id="quotes">
-                <!-- Quote 1 Section -->
-                <div class="section">
-                    <div class="section-header">
-                        <h2>Quote 1</h2>
-                        <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
-                    </div>
-                    <div class="section-content">
-                        <div class="form-group">
-                            <label for="quote_1">Quote Text</label>
-                            <textarea id="quote_1" name="quote_1"></textarea>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Quote 2 Section -->
-                <div class="section">
-                    <div class="section-header">
-                        <h2>Quote 2</h2>
-                        <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
-                    </div>
-                    <div class="section-content">
-                        <div class="form-group">
-                            <label for="quote_2">Quote Text</label>
-                            <textarea id="quote_2" name="quote_2"></textarea>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Quote 3 Section -->
-                <div class="section">
-                    <div class="section-header">
-                        <h2>Quote 3</h2>
-                        <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
-                    </div>
-                    <div class="section-content">
-                        <div class="form-group">
-                            <label for="quote_3">Quote Text</label>
-                            <textarea id="quote_3" name="quote_3"></textarea>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Contact Tab -->
-            <div class="tab-content" id="contact">
-                <!-- Contact Information Section -->
-                <div class="section">
-                    <div class="section-header">
-                        <h2>Contact Information</h2>
-                        <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
-                    </div>
-                    <div class="section-content">
-                        <div class="form-row">
-                            <div class="form-col">
-                                <div class="form-group">
-                                    <label for="email_address">Email Address</label>
-                                    <input type="email" id="email_address" name="email_address">
-                                </div>
-                            </div>
-                            <div class="form-col">
-                                <div class="form-group">
-                                    <label for="phone_number">Phone Number</label>
-                                    <input type="tel" id="phone_number" name="phone_number">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="contact_message">Contact Form Message</label>
-                            <textarea id="contact_message" name="contact_message"></textarea>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Miscellaneous Tab -->
-            <div class="tab-content" id="misc">
-                <!-- Onboarding Information Section -->
-                <div class="section">
-                    <div class="section-header">
-                        <h2>Onboarding Information</h2>
-                        <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
-                    </div>
-                    <div class="section-content">
-                        <div class="form-group">
-                            <label for="client_name">Client Name</label>
-                            <input type="text" id="client_name" name="client_name">
-                        </div>
-                        <div class="form-group">
-                            <label for="client_email">Client Email</label>
-                            <input type="email" id="client_email" name="client_email">
-                        </div>
-                        <div class="form-group">
-                            <label for="onboarding_notes">Onboarding Notes</label>
-                            <textarea id="onboarding_notes" name="onboarding_notes"></textarea>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </form>
     </div>
     <script>
         // Constants
@@ -708,6 +1147,7 @@
         const viewSiteButton = document.getElementById('view-site-button');
         const saveButton = document.getElementById('save-button');
         const debugToggle = document.getElementById('debug-toggle');
+        const autoSaveIndicator = document.getElementById('auto-save-indicator');
         
         // Initialize Supabase client
         const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -731,8 +1171,7 @@
         // Load all projects without user filtering
         async function loadAllProjects() {
             try {
-                statusElement.textContent = 'Loading projects...';
-                statusElement.className = 'status info';
+                showStatus(`<i class="fas fa-sync fa-spin"></i><span>Loading projects...</span>`, 'info');
                 
                 log('Fetching all projects');
                 
@@ -758,8 +1197,7 @@
                     projectSelect.appendChild(option);
                 });
                 
-                statusElement.textContent = `Loaded ${projectIds.length} projects`;
-                statusElement.className = 'status success';
+                showStatus(`<i class="fas fa-check-circle"></i><span>Loaded ${projectIds.length} projects</span>`, 'success');
                 
                 // Check URL for project_id parameter
                 const urlParams = new URLSearchParams(window.location.search);
@@ -774,8 +1212,7 @@
             } catch (error) {
                 console.error('Error loading projects:', error);
                 log('Error loading projects', error.message);
-                statusElement.textContent = 'Error loading projects: ' + error.message;
-                statusElement.className = 'status error';
+                showStatus(`<i class="fas fa-exclamation-triangle"></i><span>Error loading projects: ${error.message}</span>`, 'error');
             }
         }
         
@@ -794,7 +1231,7 @@
                 if (currentProjectId) {
                     window.open(`/index.html?project_id=${currentProjectId}`, '_blank');
                 } else {
-                    showStatus('Please select a project first', 'error');
+                    showStatus(`<i class="fas fa-exclamation-circle"></i><span>Please select a project first</span>`, 'error');
                 }
             });
             
@@ -804,7 +1241,7 @@
                     const contentItems = collectFormData();
                     saveContent(currentProjectId, contentItems);
                 } else {
-                    showStatus('Please select a project first', 'error');
+                    showStatus(`<i class="fas fa-exclamation-circle"></i><span>Please select a project first</span>`, 'error');
                 }
             });
             
@@ -820,6 +1257,156 @@
                     activateTab(tabId);
                 });
             });
+            
+            // Style preview for styling tab
+            if (document.getElementById('styling')) {
+                // Add style preview section if it doesn't exist
+                if (!document.getElementById('style-preview')) {
+                    const styleTab = document.getElementById('styling');
+                    const previewSection = document.createElement('div');
+                    previewSection.id = 'style-preview';
+                    previewSection.className = 'style-preview';
+                    previewSection.innerHTML = `
+                        <h3>Style Preview</h3>
+                        <div class="style-preview-content">
+                            <div class="preview-item">
+                                <h3 class="preview-heading">Heading Example</h3>
+                                <p class="preview-text">This is an example of how your text will look with the selected styles.</p>
+                            </div>
+                            <div class="preview-item">
+                                <h3 class="preview-heading">Color Palette</h3>
+                                <div class="button-row">
+                                    <button class="preview-primary">Primary</button>
+                                    <button class="preview-secondary">Secondary</button>
+                                    <button class="preview-accent">Accent</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    styleTab.appendChild(previewSection);
+                }
+                
+                // Update preview when colors or fonts change
+                const colorInputs = document.querySelectorAll('#styling input[type="color"]');
+                const fontSelects = document.querySelectorAll('#styling select');
+                
+                const updatePreview = () => {
+                    const primaryColor = document.getElementById('primary_color').value;
+                    const secondaryColor = document.getElementById('secondary_color').value;
+                    const accentColor = document.getElementById('accent_color').value;
+                    const textColor = document.getElementById('text_color').value;
+                    const backgroundColor = document.getElementById('background_color').value;
+                    const headingFont = document.getElementById('heading_font').value;
+                    const bodyFont = document.getElementById('body_font').value;
+                    
+                    const previewHeadings = document.querySelectorAll('.preview-heading');
+                    const previewTexts = document.querySelectorAll('.preview-text');
+                    const previewItems = document.querySelectorAll('.preview-item');
+                    const previewPrimary = document.querySelector('.preview-primary');
+                    const previewSecondary = document.querySelector('.preview-secondary');
+                    const previewAccent = document.querySelector('.preview-accent');
+                    
+                    // Apply styles to preview elements
+                    previewHeadings.forEach(heading => {
+                        heading.style.fontFamily = headingFont;
+                        heading.style.color = secondaryColor;
+                    });
+                    
+                    previewTexts.forEach(text => {
+                        text.style.fontFamily = bodyFont;
+                        text.style.color = textColor;
+                    });
+                    
+                    previewItems.forEach(item => {
+                        item.style.backgroundColor = backgroundColor;
+                    });
+                    
+                    if (previewPrimary) previewPrimary.style.backgroundColor = primaryColor;
+                    if (previewSecondary) previewSecondary.style.backgroundColor = secondaryColor;
+                    if (previewAccent) previewAccent.style.backgroundColor = accentColor;
+                };
+                
+                // Add event listeners for style changes
+                colorInputs.forEach(input => {
+                    input.addEventListener('input', updatePreview);
+                });
+                
+                fontSelects.forEach(select => {
+                    select.addEventListener('change', updatePreview);
+                });
+                
+                // Add event listener for preset selection
+                const presetSelect = document.getElementById('preset_style');
+                if (presetSelect) {
+                    presetSelect.addEventListener('change', function() {
+                        const preset = this.value;
+                        applyPreset(preset);
+                        updatePreview();
+                    });
+                }
+            }
+        }
+        
+        // Apply style preset
+        function applyPreset(preset) {
+            const presets = {
+                'standard-preset': {
+                    primary: '#3498db',
+                    secondary: '#2c3e50',
+                    accent: '#e74c3c',
+                    text: '#333333',
+                    background: '#f5f5f5',
+                    heading: 'Roboto, sans-serif',
+                    body: 'Open Sans, sans-serif'
+                },
+                'his-preset': {
+                    primary: '#2c3e50',
+                    secondary: '#34495e',
+                    accent: '#3498db',
+                    text: '#333333',
+                    background: '#ecf0f1',
+                    heading: 'Montserrat, sans-serif',
+                    body: 'Roboto, sans-serif'
+                },
+                'her-preset': {
+                    primary: '#d4af37',
+                    secondary: '#5d4037',
+                    accent: '#ff7043',
+                    text: '#3e2723',
+                    background: '#fff8e1',
+                    heading: 'Playfair Display, serif',
+                    body: 'Merriweather, serif'
+                },
+                'green-preset': {
+                    primary: '#27ae60',
+                    secondary: '#2c3e50',
+                    accent: '#16a085',
+                    text: '#333333',
+                    background: '#f5f5f5',
+                    heading: 'Montserrat, sans-serif',
+                    body: 'Lato, sans-serif'
+                },
+                'red-preset': {
+                    primary: '#c0392b',
+                    secondary: '#2c3e50',
+                    accent: '#e67e22',
+                    text: '#333333',
+                    background: '#f5f5f5',
+                    heading: 'Merriweather, serif',
+                    body: 'Source Sans Pro, sans-serif'
+                }
+            };
+            
+            if (presets[preset]) {
+                const p = presets[preset];
+                document.getElementById('primary_color').value = p.primary;
+                document.getElementById('secondary_color').value = p.secondary;
+                document.getElementById('accent_color').value = p.accent;
+                document.getElementById('text_color').value = p.text;
+                document.getElementById('background_color').value = p.background;
+                document.getElementById('heading_font').value = p.heading;
+                document.getElementById('body_font').value = p.body;
+            }
         }
         
         // Set up auto-save
@@ -850,6 +1437,15 @@
                     saveContent(currentProjectId, contentItems, true);
                 }
             }
+        }
+        
+        // Show auto-save indicator
+        function showAutoSaveIndicator() {
+            autoSaveIndicator.classList.add('visible');
+            
+            setTimeout(() => {
+                autoSaveIndicator.classList.remove('visible');
+            }, 3000);
         }
         
         // Activate tab
@@ -885,7 +1481,7 @@
         async function loadContent(projectId) {
             try {
                 if (!projectId) {
-                    showStatus('Please select a project', 'error');
+                    showStatus(`<i class="fas fa-exclamation-circle"></i><span>Please select a project</span>`, 'error');
                     return;
                 }
                 
@@ -896,7 +1492,7 @@
                 newUrl.searchParams.set('project_id', projectId);
                 window.history.pushState({}, '', newUrl);
                 
-                showStatus(`Loading content for project: ${projectId}...`, 'info');
+                showStatus(`<i class="fas fa-sync fa-spin"></i><span>Loading content for project: ${projectId}...</span>`, 'info');
                 log('Loading content for project', projectId);
                 
                 const { data, error } = await supabase
@@ -907,7 +1503,7 @@
                 if (error) throw error;
                 
                 if (!data || data.length === 0) {
-                    showStatus(`No content found for project: ${projectId}`, 'error');
+                    showStatus(`<i class="fas fa-exclamation-triangle"></i><span>No content found for project: ${projectId}</span>`, 'error');
                     log('No content found for project', projectId);
                     return;
                 }
@@ -924,13 +1520,19 @@
                 // Enable view site button
                 viewSiteButton.style.display = 'inline-block';
                 
-                showStatus(`Loaded ${data.length} content items for project: ${projectId}`, 'success');
+                showStatus(`<i class="fas fa-check-circle"></i><span>Loaded ${data.length} content items for project: ${projectId}</span>`, 'success');
                 log('Content loaded successfully', data.length);
+                
+                // Update style preview if on styling tab
+                if (document.getElementById('style-preview') && document.querySelector('.tab[data-tab="styling"]').classList.contains('active')) {
+                    const updateEvent = new Event('change');
+                    document.getElementById('heading_font').dispatchEvent(updateEvent);
+                }
                 
             } catch (error) {
                 console.error('Error loading content:', error);
                 log('Error loading content', error.message);
-                showStatus('Error loading content: ' + error.message, 'error');
+                showStatus(`<i class="fas fa-exclamation-triangle"></i><span>Error loading content: ${error.message}</span>`, 'error');
             }
         }
         
@@ -1002,103 +1604,196 @@
         async function saveContent(projectId, contentItems, isAutoSave = false) {
             try {
                 if (!projectId) {
-                    showStatus('Please select a project', 'error');
+                    showStatus('No project selected', 'error');
+                    updateSaveIndicator('error');
                     return;
                 }
                 
-                // Validate form data
-                const validationErrors = validateFormData(contentItems);
-                
-                if (validationErrors.length > 0) {
-                    showStatus('Validation errors: ' + validationErrors.join(', '), 'error');
+                if (!validateFormData(contentItems)) {
+                    showStatus('Please fill in all required fields', 'error');
+                    updateSaveIndicator('error');
                     return;
                 }
                 
+                // Show saving indicator
                 if (!isAutoSave) {
-                    showStatus(`Saving content for project: ${projectId}...`, 'info');
+                    showStatus('Saving content...', 'info');
                 }
+                updateSaveIndicator('saving');
                 
-                log('Saving content for project', { projectId, itemCount: contentItems.length, isAutoSave });
+                log('Saving content for project: ' + projectId, contentItems);
                 
-                // Prepare data for upsert
-                const upsertData = contentItems.map(item => ({
-                    project_id: projectId,
-                    content_key: item.content_key,
-                    content_value: item.content_value
-                }));
-                
-                // Get existing content for this project
-                const { data: existingData, error: fetchError } = await supabase
-                    .from('dynamic_content')
-                    .select('content_key')
-                    .eq('project_id', projectId);
-                
-                if (fetchError) throw fetchError;
-                
-                // Extract existing keys
-                const existingKeys = existingData.map(item => item.content_key);
-                
-                // Split data into updates and inserts
-                const updates = [];
-                const inserts = [];
-                
-                upsertData.forEach(item => {
-                    if (existingKeys.includes(item.content_key)) {
-                        updates.push(item);
-                    } else {
-                        inserts.push(item);
-                    }
+                // Convert content items to key-value pairs for storage
+                const contentData = {};
+                contentItems.forEach(item => {
+                    contentData[item.content_key] = item.content_value;
                 });
                 
-                // Process updates
-                if (updates.length > 0) {
-                    log('Processing updates', updates.length);
-                    
-                    for (const item of updates) {
-                        const { error } = await supabase
-                            .from('dynamic_content')
-                            .update({ content_value: item.content_value })
-                            .eq('project_id', projectId)
-                            .eq('content_key', item.content_key);
-                        
-                        if (error) throw error;
-                    }
-                }
-                
-                // Process inserts
-                if (inserts.length > 0) {
-                    log('Processing inserts', inserts.length);
-                    
-                    const { error } = await supabase
-                        .from('dynamic_content')
-                        .insert(inserts);
-                    
-                    if (error) throw error;
-                }
-                
-                if (!isAutoSave) {
-                    showStatus(`Saved ${contentItems.length} content items for project: ${projectId}`, 'success');
-                } else {
-                    showStatus(`Auto-saved at ${new Date().toLocaleTimeString()}`, 'info');
-                    setTimeout(() => {
-                        statusElement.textContent = '';
-                        statusElement.className = 'status';
-                    }, 3000);
-                }
-                
-                log('Content saved successfully', { updates: updates.length, inserts: inserts.length });
-                
+                // Save to Supabase
+                supabase
+                    .from('dynamic_content')
+                    .update({ content: contentData })
+                    .eq('project_id', projectId)
+                    .then(response => {
+                        if (response.error) {
+                            log('Error saving content', response.error);
+                            showStatus('Error saving content: ' + response.error.message, 'error');
+                            updateSaveIndicator('error');
+                        } else {
+                            log('Content saved successfully', response);
+                            if (!isAutoSave) {
+                                showStatus('Content saved successfully', 'success');
+                            }
+                            updateSaveIndicator('saved');
+                            
+                            // Update URL with project ID if not already there
+                            if (!window.location.search.includes('project_id=')) {
+                                const newUrl = window.location.pathname + '?project_id=' + projectId;
+                                history.pushState({ projectId: projectId }, '', newUrl);
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        log('Error saving content', error);
+                        showStatus('Error saving content: ' + error.message, 'error');
+                        updateSaveIndicator('error');
+                    });
             } catch (error) {
                 console.error('Error saving content:', error);
                 log('Error saving content', error.message);
                 showStatus('Error saving content: ' + error.message, 'error');
+                updateSaveIndicator('error');
             }
         }
         
         // Show status message
         function showStatus(message, type) {
-            statusElement.textContent = message;
+            statusElement.innerHTML = message;
             statusElement.className = `status ${type}`;
+            
+            // Auto-hide success and info messages after 5 seconds
+            if (type === 'success' || type === 'info') {
+                setTimeout(() => {
+                    statusElement.classList.add('fade-out');
+                    
+                    setTimeout(() => {
+                        if (statusElement.classList.contains('fade-out')) {
+                            statusElement.innerHTML = '';
+                            statusElement.className = 'status';
+                            statusElement.classList.remove('fade-out');
+                        }
+                    }, 500);
+                }, 5000);
+            }
+        }
+        
+        // Update save indicator
+        function updateSaveIndicator(status) {
+            const indicator = document.getElementById('save-indicator');
+            
+            if (status === 'saving') {
+                indicator.className = 'indicator saving';
+                indicator.innerHTML = '<i class="fas fa-sync-alt fa-spin"></i><span>Saving changes...</span>';
+            } else if (status === 'saved') {
+                indicator.className = 'indicator saved';
+                indicator.innerHTML = '<i class="fas fa-check-circle"></i><span>All changes saved</span>';
+            } else if (status === 'error') {
+                indicator.className = 'indicator error';
+                indicator.innerHTML = '<i class="fas fa-exclamation-circle"></i><span>Save failed</span>';
+            }
+        }
+        
+        // Functions for auto-save and UI updates
+        function setupAutoSave() {
+            // Set up event listeners for all form inputs
+            const formInputs = document.querySelectorAll('input, textarea, select');
+            formInputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    resetAutoSaveTimer();
+                    updateSaveIndicator('saving');
+                });
+            });
+            
+            log('Auto-save setup complete');
+        }
+        
+        function resetAutoSaveTimer() {
+            if (window.autoSaveTimer) {
+                clearTimeout(window.autoSaveTimer);
+            }
+            
+            window.autoSaveTimer = setTimeout(function() {
+                autoSave();
+            }, 2000); // Auto-save after 2 seconds of inactivity
+        }
+        
+        function autoSave() {
+            if (!currentProjectId) {
+                log('Auto-save skipped: No project selected');
+                return;
+            }
+            
+            const contentItems = collectFormData();
+            saveContent(currentProjectId, contentItems, true);
+        }
+        
+        function updateStylePreview() {
+            // Get current style values
+            const primaryColor = document.getElementById('primary_color').value;
+            const secondaryColor = document.getElementById('secondary_color').value;
+            const accentColor = document.getElementById('accent_color').value;
+            const textColor = document.getElementById('text_color').value;
+            const backgroundColor = document.getElementById('background_color').value;
+            const headingFont = document.getElementById('heading_font').value;
+            const bodyFont = document.getElementById('body_font').value;
+            
+            // Update heading preview
+            const headingPreview = document.getElementById('heading-preview');
+            if (headingPreview) {
+                headingPreview.style.fontFamily = headingFont;
+                headingPreview.style.color = textColor;
+                
+                // Update individual headings
+                const headings = headingPreview.querySelectorAll('h1, h2, h3');
+                headings.forEach(heading => {
+                    heading.style.fontFamily = headingFont;
+                    heading.style.color = secondaryColor;
+                });
+                
+                // Make h1 use primary color
+                const h1 = headingPreview.querySelector('h1');
+                if (h1) {
+                    h1.style.color = primaryColor;
+                }
+            }
+            
+            // Update button preview
+            const buttonPreview = document.getElementById('button-preview');
+            if (buttonPreview) {
+                const buttons = buttonPreview.querySelectorAll('button');
+                if (buttons.length >= 3) {
+                    buttons[0].style.backgroundColor = primaryColor;
+                    buttons[1].style.backgroundColor = secondaryColor;
+                    buttons[2].style.backgroundColor = accentColor;
+                }
+            }
+            
+            // Update text preview
+            const textPreview = document.getElementById('text-preview');
+            if (textPreview) {
+                textPreview.style.fontFamily = bodyFont;
+                textPreview.style.color = textColor;
+                textPreview.style.backgroundColor = backgroundColor;
+                
+                // Update link color
+                const links = textPreview.querySelectorAll('a');
+                links.forEach(link => {
+                    link.style.color = primaryColor;
+                });
+            }
+            
+            // Reset auto-save timer when styles are updated
+            resetAutoSaveTimer();
         }
         
         // Initialize the editor
@@ -1107,6 +1802,37 @@
             loadAllProjects();
             setupEventListeners();
             setupAutoSave();
+            
+            // Check for project_id in URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const projectId = urlParams.get('project_id');
+            if (projectId) {
+                log('Project ID found in URL: ' + projectId);
+                // Wait for projects to load before selecting
+                setTimeout(() => {
+                    const projectSelect = document.getElementById('project-select');
+                    if (projectSelect) {
+                        projectSelect.value = projectId;
+                        if (projectSelect.value === projectId) {
+                            loadContent(projectId);
+                        }
+                    }
+                }, 1000);
+            }
+            
+            // Initialize style preview
+            setTimeout(() => {
+                updateStylePreview();
+            }, 1500);
+            
+            // Set up debug toggle
+            const debugToggleButton = document.getElementById('debug-toggle-button');
+            const debugPanel = document.querySelector('.debug-panel');
+            if (debugToggleButton && debugPanel) {
+                debugToggleButton.addEventListener('click', function() {
+                    debugPanel.classList.toggle('visible');
+                });
+            }
         });
     </script>
 </body>

@@ -15,6 +15,10 @@ A multi-client website platform for personal branding and content management.
   - Direct "View Your Website" navigation without redirects
   - Improved reliability by removing redirect chains that broke authentication flows
 
+### Editor Version Management
+
+> **IMPORTANT**: `editor.html` is the primary editor version we're actively developing and enhancing. It features a modern UI with a dark sidebar, improved navigation, and better user feedback. While there are several editor versions in the project for historical and testing purposes, all new features and improvements should be made to this file.
+
 ## Latest Updates (April 18, 2025)
 
 - **Improved Bio/About Section Formatting:**
