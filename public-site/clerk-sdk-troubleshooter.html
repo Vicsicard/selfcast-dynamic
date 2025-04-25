@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clerk SDK Troubleshooter</title>
+    <!-- Load configuration file first -->
+    <script src="config.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        h2 {
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+            margin-top: 30px;
+            color: #444;
+        }
+        .status {
+            padding: 12px;
+            border-radius: 4px;
+            margin: 15px 0;
+            font-weight: 500;
+        }
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .warning {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        .test-panel {
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 25px;
+            background-color: white;
+        }
+        .test-panel h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 13px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-top: 10px;
+            font-weight: 500;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        button.secondary {
+            background-color: #6c757d;
+        }
+        button.secondary:hover {
+            background-color: #5a6268;
+        }
+        .log-container {
+            max-height: 200px;
+            overflow-y: auto;
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #eee;
+            margin-top: 15px;
+            font-family: monospace;
+            font-size: 13px;
+        }
+        .log-entry {
+            margin: 5px 0;
+            padding: 3px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .log-entry.error {
+            color: #dc3545;
+            background-color: #fff;
+            font-weight: bold;
+        }
+        .test-result {
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        .test-result.success {
+            color: #28a745;
+        }
+        .test-result.error {
+            color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Clerk SDK Troubleshooter</h1>
+        <div id="main-status" class="status info">Initializing troubleshooter...</div>
+        
+        <div>
+            <h2>Configuration</h2>
+            <div class="test-panel">
+                <h3>Current Configuration</h3>
+                <pre id="config-info"></pre>
+                <button id="update-config-btn">Update Configuration</button>
+            </div>
+        </div>
+        
+        <div>
+            <h2>Network Tests</h2>
+            <div class="test-panel">
+                <h3>CDN Availability Test</h3>
+                <p>Tests if the Clerk CDN domains are accessible from your network.</p>
+                <button id="test-cdn-btn">Test CDN Connectivity</button>
+                <div id="cdn-test-result" class="test-result"></div>
+            </div>
+            
+            <div class="test-panel">
+                <h3>CORS Test</h3>
+                <p>Tests if there are any CORS issues with Clerk domains.</p>
+                <button id="test-cors-btn">Test CORS</button>
+                <div id="cors-test-result" class="test-result"></div>
+            </div>
+        </div>
+        
+        <div>
+            <h2>SDK Loading Tests</h2>
+            
+            <div class="test-panel">
+                <h3>Method 1: Direct CDN Script</h3>
+                <p>Loads Clerk directly from the CDN using a script tag.</p>
+                <button id="test-cdn-script-btn">Test CDN Script</button>
+                <div id="cdn-script-result" class="test-result"></div>
+            </div>
+            
+            <div class="test-panel">
+                <h3>Method 2: UMD Build</h3>
+                <p>Loads Clerk using the UMD build from jsdelivr.</p>
+                <button id="test-umd-btn">Test UMD Build</button>
+                <div id="umd-result" class="test-result"></div>
+            </div>
+            
+            <div class="test-panel">
+                <h3>Method 3: ESM Import</h3>
+                <p>Loads Clerk using ES modules (may not work in all browsers).</p>
+                <button id="test-esm-btn">Test ESM Import</button>
+                <div id="esm-result" class="test-result"></div>
+            </div>
+            
+            <div class="test-panel">
+                <h3>Method 4: Delayed Loading</h3>
+                <p>Loads Clerk with a delay to ensure DOM is fully ready.</p>
+                <button id="test-delayed-btn">Test Delayed Loading</button>
+                <div id="delayed-result" class="test-result"></div>
+            </div>
+        </div>
+        
+        <div>
+            <h2>Authentication Tests</h2>
+            <div class="test-panel">
+                <h3>Initialize Clerk</h3>
+                <p>Tests if Clerk can be properly initialized with your publishable key.</p>
+                <button id="test-init-btn">Test Initialization</button>
+                <div id="init-result" class="test-result"></div>
+            </div>
+            
+            <div class="test-panel">
+                <h3>Sign-In Component</h3>
+                <p>Tests if the Clerk sign-in component can be mounted.</p>
+                <button id="test-signin-btn">Test Sign-In Component</button>
+                <div id="signin-container" style="margin-top: 15px;"></div>
+                <div id="signin-result" class="test-result"></div>
+            </div>
+        </div>
+        
+        <div>
+            <h2>Debug Log</h2>
+            <button id="clear-log-btn" class="secondary">Clear Log</button>
+            <div id="log-container" class="log-container"></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elements
+            const mainStatus = document.getElementById('main-status');
+            const configInfo = document.getElementById('config-info');
+            const updateConfigBtn = document.getElementById('update-config-btn');
+            const testCdnBtn = document.getElementById('test-cdn-btn');
+            const cdnTestResult = document.getElementById('cdn-test-result');
+            const testCorsBtn = document.getElementById('test-cors-btn');
+            const corsTestResult = document.getElementById('cors-test-result');
+            const testCdnScriptBtn = document.getElementById('test-cdn-script-btn');
+            const cdnScriptResult = document.getElementById('cdn-script-result');
+            const testUmdBtn = document.getElementById('test-umd-btn');
+            const umdResult = document.getElementById('umd-result');
+            const testEsmBtn = document.getElementById('test-esm-btn');
+            const esmResult = document.getElementById('esm-result');
+            const testDelayedBtn = document.getElementById('test-delayed-btn');
+            const delayedResult = document.getElementById('delayed-result');
+            const testInitBtn = document.getElementById('test-init-btn');
+            const initResult = document.getElementById('init-result');
+            const testSigninBtn = document.getElementById('test-signin-btn');
+            const signinContainer = document.getElementById('signin-container');
+            const signinResult = document.getElementById('signin-result');
+            const clearLogBtn = document.getElementById('clear-log-btn');
+            const logContainer = document.getElementById('log-container');
+            
+            // Configuration
+            let clerkConfig = {
+                publishableKey: window.CLERK_CONFIG ? window.CLERK_CONFIG.publishableKey : 'pk_test_Y3VyaW91cy1jYW1lbC01MC5jbGVyay5hY2NvdW50cy5kZXYk',
+                frontendApi: window.CLERK_CONFIG ? window.CLERK_CONFIG.frontendApi : 'https://curious-camel-50.clerk.accounts.dev',
+                cdnUrl: 'https://js.clerk.dev/v4/clerk.js',
+                umdUrl: 'https://cdn.jsdelivr.net/npm/@clerk/clerk-js@latest/dist/clerk.browser.js',
+                esmUrl: 'https://esm.sh/@clerk/clerk-js@latest'
+            };
+            
+            // Initialize
+            init();
+            
+            // Functions
+            function init() {
+                log('Initializing Clerk SDK Troubleshooter');
+                updateConfigDisplay();
+                mainStatus.textContent = 'Troubleshooter ready. Select a test to run.';
+                mainStatus.className = 'status info';
+            }
+            
+            function updateConfigDisplay() {
+                configInfo.textContent = JSON.stringify(clerkConfig, null, 2);
+            }
+            
+            function log(message, isError = false) {
+                const logEntry = document.createElement('div');
+                logEntry.className = isError ? 'log-entry error' : 'log-entry';
+                logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+                logContainer.appendChild(logEntry);
+                logContainer.scrollTop = logContainer.scrollHeight;
+                
+                if (isError) {
+                    console.error(message);
+                } else {
+                    console.log(message);
+                }
+            }
+            
+            function setTestResult(element, success, message) {
+                element.textContent = message;
+                element.className = success ? 'test-result success' : 'test-result error';
+            }
+            
+            // Test CDN Connectivity
+            async function testCdnConnectivity() {
+                log('Testing CDN connectivity...');
+                cdnTestResult.textContent = 'Testing...';
+                
+                try {
+                    // Test main Clerk CDN
+                    const clerkCdnResponse = await fetch(clerkConfig.cdnUrl, { method: 'HEAD', mode: 'no-cors' });
+                    log(`Clerk CDN response status: ${clerkCdnResponse.status || 'Unknown (no-cors)'}`);
+                    
+                    // Test jsdelivr CDN
+                    const jsdelivrResponse = await fetch(clerkConfig.umdUrl, { method: 'HEAD', mode: 'no-cors' });
+                    log(`jsDelivr CDN response status: ${jsdelivrResponse.status || 'Unknown (no-cors)'}`);
+                    
+                    setTestResult(cdnTestResult, true, 'CDN connectivity test passed. Both Clerk CDN and jsDelivr are accessible.');
+                } catch (error) {
+                    log(`CDN connectivity test error: ${error.message}`, true);
+                    setTestResult(cdnTestResult, false, `CDN connectivity test failed: ${error.message}`);
+                }
+            }
+            
+            // Test CORS
+            async function testCors() {
+                log('Testing CORS with Clerk domains...');
+                corsTestResult.textContent = 'Testing...';
+                
+                try {
+                    // Try to make a CORS request to Clerk's API
+                    const response = await fetch(`${clerkConfig.frontendApi}/.well-known/jwks.json`);
+                    
+                    if (response.ok) {
+                        log('CORS test passed. Successfully fetched JWKS from Clerk.');
+                        setTestResult(corsTestResult, true, 'CORS test passed. Successfully fetched JWKS from Clerk.');
+                    } else {
+                        log(`CORS test failed. Status: ${response.status}`, true);
+                        setTestResult(corsTestResult, false, `CORS test failed. Status: ${response.status}`);
+                    }
+                } catch (error) {
+                    log(`CORS test error: ${error.message}`, true);
+                    setTestResult(corsTestResult, false, `CORS test failed: ${error.message}`);
+                }
+            }
+            
+            // Test CDN Script Loading
+            function testCdnScriptLoading() {
+                log('Testing Clerk loading via CDN script...');
+                cdnScriptResult.textContent = 'Testing...';
+                
+                // Remove any existing Clerk instance
+                window.Clerk = undefined;
+                
+                // Create script element
+                const script = document.createElement('script');
+                script.src = clerkConfig.cdnUrl;
+                script.async = true;
+                
+                script.onload = function() {
+                    log('Clerk CDN script loaded successfully');
+                    
+                    if (window.Clerk) {
+                        log('Clerk object is available globally');
+                        setTestResult(cdnScriptResult, true, 'CDN script loading test passed. Clerk object is available globally.');
+                    } else {
+                        log('Clerk object is not available globally after script load', true);
+                        setTestResult(cdnScriptResult, false, 'CDN script loading test failed. Clerk object is not available globally.');
+                    }
+                };
+                
+                script.onerror = function(error) {
+                    log(`Clerk CDN script loading error: ${error}`, true);
+                    setTestResult(cdnScriptResult, false, `CDN script loading test failed: ${error}`);
+                };
+                
+                document.head.appendChild(script);
+            }
+            
+            // Test UMD Build Loading
+            function testUmdLoading() {
+                log('Testing Clerk loading via UMD build...');
+                umdResult.textContent = 'Testing...';
+                
+                // Remove any existing Clerk instance
+                window.Clerk = undefined;
+                
+                // Create script element
+                const script = document.createElement('script');
+                script.src = clerkConfig.umdUrl;
+                script.async = true;
+                
+                script.onload = function() {
+                    log('Clerk UMD script loaded successfully');
+                    
+                    if (window.Clerk) {
+                        log('Clerk object is available globally from UMD build');
+                        setTestResult(umdResult, true, 'UMD build loading test passed. Clerk object is available globally.');
+                    } else {
+                        log('Clerk object is not available globally after UMD script load', true);
+                        setTestResult(umdResult, false, 'UMD build loading test failed. Clerk object is not available globally.');
+                    }
+                };
+                
+                script.onerror = function(error) {
+                    log(`Clerk UMD script loading error: ${error}`, true);
+                    setTestResult(umdResult, false, `UMD build loading test failed: ${error}`);
+                };
+                
+                document.head.appendChild(script);
+            }
+            
+            // Test ESM Import
+            function testEsmImport() {
+                log('Testing Clerk loading via ESM import...');
+                esmResult.textContent = 'Testing...';
+                
+                // Create a dynamic import script
+                const script = document.createElement('script');
+                script.type = 'module';
+                script.textContent = `
+                    try {
+                        import('${clerkConfig.esmUrl}')
+                            .then(module => {
+                                window.ClerkESM = module.default;
+                                document.dispatchEvent(new CustomEvent('clerk-esm-loaded', { detail: { success: true } }));
+                            })
+                            .catch(error => {
+                                console.error('ESM import error:', error);
+                                document.dispatchEvent(new CustomEvent('clerk-esm-loaded', { 
+                                    detail: { success: false, error: error.message } 
+                                }));
+                            });
+                    } catch (error) {
+                        console.error('ESM script error:', error);
+                        document.dispatchEvent(new CustomEvent('clerk-esm-loaded', { 
+                            detail: { success: false, error: error.message } 
+                        }));
+                    }
+                `;
+                
+                // Listen for the custom event
+                document.addEventListener('clerk-esm-loaded', function(e) {
+                    if (e.detail.success) {
+                        log('Clerk ESM module loaded successfully');
+                        if (window.ClerkESM) {
+                            log('Clerk ESM object is available');
+                            setTestResult(esmResult, true, 'ESM import test passed. Clerk ESM object is available.');
+                        } else {
+                            log('Clerk ESM object is not available after import', true);
+                            setTestResult(esmResult, false, 'ESM import test failed. Clerk ESM object is not available.');
+                        }
+                    } else {
+                        log(`Clerk ESM import error: ${e.detail.error}`, true);
+                        setTestResult(esmResult, false, `ESM import test failed: ${e.detail.error}`);
+                    }
+                }, { once: true });
+                
+                document.head.appendChild(script);
+            }
+            
+            // Test Delayed Loading
+            function testDelayedLoading() {
+                log('Testing Clerk loading with delay...');
+                delayedResult.textContent = 'Testing...';
+                
+                // Remove any existing Clerk instance
+                window.Clerk = undefined;
+                
+                setTimeout(() => {
+                    // Create script element
+                    const script = document.createElement('script');
+                    script.src = clerkConfig.cdnUrl;
+                    script.async = true;
+                    
+                    script.onload = function() {
+                        log('Clerk script loaded successfully with delay');
+                        
+                        if (window.Clerk) {
+                            log('Clerk object is available globally after delayed loading');
+                            setTestResult(delayedResult, true, 'Delayed loading test passed. Clerk object is available globally.');
+                        } else {
+                            log('Clerk object is not available globally after delayed script load', true);
+                            setTestResult(delayedResult, false, 'Delayed loading test failed. Clerk object is not available globally.');
+                        }
+                    };
+                    
+                    script.onerror = function(error) {
+                        log(`Clerk delayed script loading error: ${error}`, true);
+                        setTestResult(delayedResult, false, `Delayed loading test failed: ${error}`);
+                    };
+                    
+                    document.head.appendChild(script);
+                }, 1000); // 1 second delay
+            }
+            
+            // Test Clerk Initialization
+            function testClerkInitialization() {
+                log('Testing Clerk initialization...');
+                initResult.textContent = 'Testing...';
+                
+                // Ensure Clerk is loaded
+                if (!window.Clerk) {
+                    log('Clerk object not available. Please run a loading test first.', true);
+                    setTestResult(initResult, false, 'Initialization test failed. Clerk object not available. Please run a loading test first.');
+                    return;
+                }
+                
+                try {
+                    // Initialize Clerk
+                    window.Clerk(clerkConfig.publishableKey)
+                        .then(clerk => {
+                            log('Clerk initialized successfully');
+                            window.clerkInstance = clerk; // Store for later use
+                            setTestResult(initResult, true, 'Initialization test passed. Clerk initialized successfully.');
+                        })
+                        .catch(error => {
+                            log(`Clerk initialization error: ${error.message}`, true);
+                            setTestResult(initResult, false, `Initialization test failed: ${error.message}`);
+                        });
+                } catch (error) {
+                    log(`Clerk initialization error: ${error.message}`, true);
+                    setTestResult(initResult, false, `Initialization test failed: ${error.message}`);
+                }
+            }
+            
+            // Test Sign-In Component
+            function testSignInComponent() {
+                log('Testing Clerk sign-in component...');
+                signinResult.textContent = 'Testing...';
+                signinContainer.innerHTML = '';
+                
+                // Ensure Clerk instance exists
+                if (!window.clerkInstance) {
+                    log('Clerk instance not available. Please run the initialization test first.', true);
+                    setTestResult(signinResult, false, 'Sign-in test failed. Clerk instance not available. Please run the initialization test first.');
+                    return;
+                }
+                
+                try {
+                    // Mount sign-in component
+                    window.clerkInstance.mountSignIn({
+                        elementId: 'signin-container',
+                        appearance: {
+                            elements: {
+                                rootBox: {
+                                    boxShadow: 'none',
+                                    width: '100%'
+                                }
+                            }
+                        }
+                    });
+                    
+                    log('Sign-in component mounted successfully');
+                    setTestResult(signinResult, true, 'Sign-in test passed. Component mounted successfully.');
+                } catch (error) {
+                    log(`Sign-in component error: ${error.message}`, true);
+                    setTestResult(signinResult, false, `Sign-in test failed: ${error.message}`);
+                }
+            }
+            
+            // Update Configuration
+            function updateConfiguration() {
+                const newPublishableKey = prompt('Enter Clerk Publishable Key:', clerkConfig.publishableKey);
+                if (newPublishableKey && newPublishableKey !== clerkConfig.publishableKey) {
+                    clerkConfig.publishableKey = newPublishableKey;
+                    log(`Updated publishable key to: ${newPublishableKey}`);
+                }
+                
+                const newFrontendApi = prompt('Enter Clerk Frontend API URL:', clerkConfig.frontendApi);
+                if (newFrontendApi && newFrontendApi !== clerkConfig.frontendApi) {
+                    clerkConfig.frontendApi = newFrontendApi;
+                    log(`Updated frontend API URL to: ${newFrontendApi}`);
+                }
+                
+                updateConfigDisplay();
+            }
+            
+            // Event Listeners
+            updateConfigBtn.addEventListener('click', updateConfiguration);
+            testCdnBtn.addEventListener('click', testCdnConnectivity);
+            testCorsBtn.addEventListener('click', testCors);
+            testCdnScriptBtn.addEventListener('click', testCdnScriptLoading);
+            testUmdBtn.addEventListener('click', testUmdLoading);
+            testEsmBtn.addEventListener('click', testEsmImport);
+            testDelayedBtn.addEventListener('click', testDelayedLoading);
+            testInitBtn.addEventListener('click', testClerkInitialization);
+            testSigninBtn.addEventListener('click', testSignInComponent);
+            clearLogBtn.addEventListener('click', () => {
+                logContainer.innerHTML = '';
+                log('Log cleared');
+            });
+        });
+    </script>
+</body>
+</html>

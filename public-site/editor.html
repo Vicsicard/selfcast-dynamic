@@ -21,7 +21,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SelfCast Content Editor</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
-    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <!-- Load configuration file first -->
+    <script src="config.js"></script>
+    <!-- Update Supabase script to latest version -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.38.4/dist/umd/supabase.min.js"></script>
+    <!-- Load custom Clerk loader instead of direct CDN -->
+    <script src="js/clerk-custom-loader.js"></script>
+    <!-- Add Clerk-Supabase integration helper -->
+    <script src="js/clerk-supabase.js"></script>
     <!-- Add Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -559,7 +566,6 @@
         
         .preview-heading {
             margin-top: 0;
-            margin-bottom: 10px;
         }
         
         .preview-text {
@@ -696,8 +702,21 @@
         <header>
             <h1><i class="fas fa-edit"></i> SelfCast Content Editor</h1>
             <div class="header-actions">
-                <button id="view-site-button" class="secondary"><i class="fas fa-external-link-alt"></i> View Site</button>
-                <button id="debug-toggle-button" class="secondary"><i class="fas fa-bug"></i> Debug</button>
+                <button id="save-button" class="primary-button">
+                    <i class="fas fa-save"></i> Save Changes
+                </button>
+                <button id="view-site-button" class="secondary-button">
+                    <i class="fas fa-external-link-alt"></i> View Your Website
+                </button>
+                <button id="debug-toggle-button" class="tertiary-button">
+                    <i class="fas fa-bug"></i>
+                </button>
+                <button id="sign-out-button" class="tertiary-button">
+                    <i class="fas fa-sign-out-alt"></i> Sign Out
+                </button>
+                <span id="user-info" class="user-info">
+                    <i class="fas fa-user"></i> <span id="user-email"></span>
+                </span>
             </div>
         </header>
         
@@ -1136,9 +1155,41 @@
         </div>
     </div>
     <script>
-        // Constants
-        const SUPABASE_URL = 'https://aqicztygjpmunfljjuto.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxaWN6dHlnanBtdW5mbGpqdXRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3MDU1ODIsImV4cCI6MjA1OTI4MTU4Mn0.5e2hvTckSSbTFLBjQiccrvjoBd6QQDX0X4tccFOc1rs';
+        // Get configuration from config.js
+        const SUPABASE_URL = window.SUPABASE_CONFIG ? window.SUPABASE_CONFIG.url : 'https://aqicztygjpmunfljjjuto.supabase.co';
+        const SUPABASE_KEY = window.SUPABASE_CONFIG ? window.SUPABASE_CONFIG.key : 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxaWN6dHlnanBtdW5mbGpqdXRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3MDU1ODIsImV4cCI6MjA1OTI4MTU4Mn0.5e2hvTckSSbTFLBjQiccrvjoBd6QQDX0X4tccFOc1rs';
+        
+        // Use the existing CLERK_CONFIG from config.js instead of redeclaring it
+        if (!window.CLERK_CONFIG) {
+            window.CLERK_CONFIG = {
+                publishableKey: 'pk_test_Y3VyaW91cy1jYW1lbC01MC5jbGVyay5hY2NvdW50cy5kZXYk',
+                accountPortal: 'https://curious-camel-50.accounts.dev',
+                redirects: {
+                    afterSignOut: '/login.html'
+                }
+            };
+        }
+        
+        // Use the existing APP_CONFIG from config.js instead of redeclaring it
+        if (!window.APP_CONFIG) {
+            window.APP_CONFIG = {
+                developmentMode: true,
+                adminEmails: ['admin@selfcaststudios.com', 'your-email@example.com'],
+                projectIdFormat: 'lastname-firstname-YYYYMMDD-HHMM'
+            };
+        }
+        
+        // Integration configuration
+        const INTEGRATION_CONFIG = window.INTEGRATION_CONFIG || {
+            clerkSupabase: {
+                enabled: true,
+                useRLS: true,
+                debug: true
+            }
+        };
+        
+        // Development mode flag
+        const DEVELOPMENT_MODE = window.APP_CONFIG.developmentMode;
         
         // Elements
         const statusElement = document.getElementById('status');
@@ -1148,13 +1199,21 @@
         const saveButton = document.getElementById('save-button');
         const debugToggle = document.getElementById('debug-toggle');
         const autoSaveIndicator = document.getElementById('auto-save-indicator');
+        const signOutButton = document.getElementById('sign-out-button');
+        const userEmailElement = document.getElementById('user-email');
         
-        // Initialize Supabase client
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        // User state variables
+        let clerkUser = null;
+        let isAdmin = DEVELOPMENT_MODE; // Default to admin in development mode
+        let userProjectId = null;
         
         // Global variables
         let currentProjectId = null;
         let autoSaveTimer = null;
+        
+        // Initialize Supabase client
+        let supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        let clerk = null;
         
         // Debug logging
         function log(message, data) {
@@ -1168,17 +1227,25 @@
             debugInfo.scrollTop = debugInfo.scrollHeight;
         }
         
-        // Load all projects without user filtering
+        // Load all projects with permission filtering
         async function loadAllProjects() {
             try {
                 showStatus(`<i class="fas fa-sync fa-spin"></i><span>Loading projects...</span>`, 'info');
                 
-                log('Fetching all projects');
+                log('Fetching projects');
                 
-                const { data, error } = await supabase
-                    .from('dynamic_content')
-                    .select('project_id')
-                    .order('project_id');
+                // If user is not admin, filter projects by user email
+                let query = supabase.from('dynamic_content').select('project_id');
+                
+                // Filter by user's project if not admin
+                if (!isAdmin && userProjectId) {
+                    log('Filtering projects for user', userProjectId);
+                    query = query.eq('project_id', userProjectId);
+                }
+                
+                query = query.order('project_id');
+                
+                const { data, error } = await query;
                 
                 if (error) throw error;
                 
@@ -1197,21 +1264,335 @@
                     projectSelect.appendChild(option);
                 });
                 
-                showStatus(`<i class="fas fa-check-circle"></i><span>Loaded ${projectIds.length} projects</span>`, 'success');
+                // If only one project and not admin, auto-select it
+                if (projectIds.length === 1 && !isAdmin) {
+                    projectSelect.value = projectIds[0];
+                    loadContent(projectIds[0]);
+                }
+                
+                // If admin, show all projects message
+                if (isAdmin) {
+                    showStatus(`<i class="fas fa-check-circle"></i><span>Loaded ${projectIds.length} projects (Admin Mode)</span>`, 'success');
+                } else {
+                    showStatus(`<i class="fas fa-check-circle"></i><span>Loaded your project</span>`, 'success');
+                }
                 
                 // Check URL for project_id parameter
                 const urlParams = new URLSearchParams(window.location.search);
                 const projectIdParam = urlParams.get('project_id');
                 
                 if (projectIdParam) {
+                    // For non-admin users, verify they have access to this project
+                    if (!isAdmin && projectIdParam !== userProjectId) {
+                        showStatus(`<i class="fas fa-exclamation-triangle"></i><span>You don't have access to this project</span>`, 'error');
+                        return;
+                    }
+                    
                     log('Project ID found in URL', projectIdParam);
-                    projectSelect.value = projectIdParam;
-                    loadContent(projectIdParam);
+                    // Wait for projects to load before selecting
+                    setTimeout(() => {
+                        projectSelect.value = projectIdParam;
+                        if (projectSelect.value === projectIdParam) {
+                            loadContent(projectIdParam);
+                        }
+                    }, 1000);
                 }
                 
             } catch (error) {
                 console.error('Error loading projects:', error);
                 log('Error loading projects', error.message);
+                showStatus(`<i class="fas fa-exclamation-triangle"></i><span>Error loading projects: ${error.message}</span>`, 'error');
+            }
+        }
+        
+        // Initialize the editor
+        document.addEventListener('DOMContentLoaded', function() {
+            log('Editor initializing...');
+            
+            if (DEVELOPMENT_MODE) {
+                // Development mode - skip authentication
+                log('DEVELOPMENT MODE: Using admin access without authentication');
+                showStatus(`<i class="fas fa-user-shield"></i><span>Development Mode (Admin Access)</span>`, 'info');
+                
+                // Set development user info
+                if (userEmailElement) {
+                    userEmailElement.textContent = 'Development Mode';
+                }
+                
+                // Hide sign-out button in development mode
+                if (signOutButton) {
+                    signOutButton.style.display = 'none';
+                }
+                
+                // Load all projects
+                loadAllProjects();
+            } else {
+                // Production mode - initialize Clerk
+                initializeClerk();
+            }
+            
+            // Setup event listeners
+            setupEventListeners();
+            setupAutoSave();
+            
+            // Initialize style preview
+            setTimeout(() => {
+                updateStylePreview();
+            }, 1500);
+            
+            // Set up debug toggle
+            const debugToggleButton = document.getElementById('debug-toggle-button');
+            const debugPanel = document.querySelector('.debug-panel');
+            if (debugToggleButton && debugPanel) {
+                debugToggleButton.addEventListener('click', function() {
+                    debugPanel.classList.toggle('visible');
+                });
+            }
+        });
+        
+        // Initialize Clerk
+        async function initializeClerk() {
+            try {
+                log('Initializing Clerk...');
+                showStatus(`<i class="fas fa-spinner fa-spin"></i><span>Initializing authentication...</span>`, 'info');
+                
+                // Check for Clerk token in URL
+                const urlParams = new URLSearchParams(window.location.search);
+                const clerkToken = urlParams.get('__clerk_token');
+                
+                if (clerkToken) {
+                    log('Authentication token detected');
+                    showStatus(`<i class="fas fa-user-check"></i><span>Authentication token detected</span>`, 'success');
+                    
+                    // Initialize Clerk using our custom loader
+                    try {
+                        // First try to load Clerk
+                        await window.ClerkLoader.load();
+                        log('Clerk loaded successfully');
+                        
+                        // Then initialize with the alternative method
+                        clerk = await window.ClerkLoader.initializeAlternative(CLERK_CONFIG.publishableKey);
+                        log('Clerk initialized successfully');
+                    } catch (loaderError) {
+                        log(`Error with custom loader: ${loaderError.message}`, true);
+                        
+                        // Fallback to direct initialization if available
+                        if (window.Clerk) {
+                            clerk = await window.Clerk(CLERK_CONFIG.publishableKey);
+                            log('Clerk initialized with fallback method');
+                        } else {
+                            throw new Error('Failed to initialize Clerk with all methods');
+                        }
+                    }
+                    
+                    if (clerk.user) {
+                        // User is authenticated
+                        clerkUser = clerk.user;
+                        log(`User authenticated: ${clerkUser.primaryEmailAddress.emailAddress}`);
+                        
+                        // Check if user is admin
+                        const userEmail = clerkUser.primaryEmailAddress.emailAddress;
+                        isAdmin = window.APP_CONFIG.adminEmails.includes(userEmail);
+                        
+                        // Update UI with user info
+                        if (userEmailElement) {
+                            userEmailElement.textContent = userEmail;
+                            if (isAdmin) {
+                                userEmailElement.innerHTML += ' <span class="badge">Admin</span>';
+                            }
+                        }
+                        
+                        // Set up sign out button
+                        if (signOutButton) {
+                            signOutButton.addEventListener('click', function() {
+                                window.location.href = `${CLERK_CONFIG.accountPortal}/sign-out?redirect_url=${encodeURIComponent(window.location.origin + CLERK_CONFIG.redirects.afterSignOut)}`;
+                            });
+                        }
+                        
+                        // Initialize Supabase with Clerk token if integration is enabled
+                        if (INTEGRATION_CONFIG.clerkSupabase.enabled) {
+                            initializeClerkSupabaseIntegration();
+                        }
+                        
+                        // Load projects based on user permissions
+                        if (isAdmin) {
+                            log('Loading all projects (admin access)');
+                            loadAllProjects();
+                        } else {
+                            log('Loading user projects');
+                            loadUserProjects();
+                        }
+                    } else {
+                        // No user - redirect to login
+                        log('No authenticated user, redirecting to login');
+                        window.location.href = 'login.html';
+                    }
+                } else {
+                    // No token - redirect to login
+                    log('No authentication token, redirecting to login');
+                    window.location.href = 'login.html';
+                }
+            } catch (error) {
+                console.error('Error initializing Clerk:', error);
+                log(`Authentication error: ${error.message}`);
+                showStatus(`<i class="fas fa-exclamation-triangle"></i><span>Authentication error: ${error.message}</span>`, 'error');
+                
+                // Fallback to development mode if there's an error
+                if (DEVELOPMENT_MODE) {
+                    log('Falling back to development mode');
+                    showStatus(`<i class="fas fa-user-shield"></i><span>Development Mode (Fallback)</span>`, 'warning');
+                    loadAllProjects();
+                }
+            }
+        }
+        
+        // Initialize Clerk-Supabase integration
+        async function initializeClerkSupabaseIntegration() {
+            try {
+                log('Initializing Clerk-Supabase integration...');
+                
+                if (!clerk || !clerk.session) {
+                    log('No Clerk session available for Supabase integration');
+                    return;
+                }
+                
+                // Get the session token
+                const token = await clerk.session.getToken();
+                
+                if (INTEGRATION_CONFIG.clerkSupabase.debug) {
+                    log(`Clerk token obtained: ${token.substring(0, 10)}...`);
+                }
+                
+                // Create a new Supabase client with the Clerk token
+                supabase = window.ClerkSupabase.createClient(clerk, SUPABASE_URL, SUPABASE_KEY);
+                
+                log('Clerk-Supabase integration initialized');
+                
+                // Add token to debug info
+                if (debugInfo) {
+                    debugInfo.innerHTML += `<p>Clerk-Supabase integration: Active</p>`;
+                    if (INTEGRATION_CONFIG.clerkSupabase.useRLS) {
+                        debugInfo.innerHTML += `<p>Row Level Security: Enabled</p>`;
+                    }
+                }
+            } catch (error) {
+                console.error('Error initializing Clerk-Supabase integration:', error);
+                log(`Clerk-Supabase integration error: ${error.message}`);
+                
+                // Fallback to regular Supabase client
+                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+                log('Fallback to regular Supabase client');
+            }
+        }
+        
+        // Load all projects (admin access)
+        async function loadAllProjects() {
+            try {
+                log('Loading all projects...');
+                showStatus(`<i class="fas fa-spinner fa-spin"></i><span>Loading projects...</span>`, 'info');
+                
+                // Clear the project select dropdown
+                projectSelect.innerHTML = '<option value="">Select a project</option>';
+                
+                // Fetch all projects from Supabase
+                const { data, error } = await supabase
+                    .from('dynamic_content')
+                    .select('project_id')
+                    .order('project_id');
+                
+                if (error) {
+                    throw new Error(error.message);
+                }
+                
+                if (!data || data.length === 0) {
+                    showStatus(`<i class="fas fa-exclamation-triangle"></i><span>No content found for project: ${projectId}</span>`, 'error');
+                    log('No content found for project', projectId);
+                    return;
+                }
+                
+                // Process content data
+                const content = {};
+                data.forEach(item => {
+                    content[item.key] = item.value;
+                });
+                
+                // Populate form fields
+                populateFormFields(content);
+                
+                // Enable view site button
+                viewSiteButton.style.display = 'inline-block';
+                
+                showStatus(`<i class="fas fa-check-circle"></i><span>Loaded ${data.length} content items for project: ${projectId}</span>`, 'success');
+                log('Content loaded successfully', data.length);
+                
+                // Update style preview if on styling tab
+                if (document.getElementById('style-preview') && document.querySelector('.tab[data-tab="styling"]').classList.contains('active')) {
+                    const updateEvent = new Event('change');
+                    document.getElementById('heading_font').dispatchEvent(updateEvent);
+                }
+                
+            } catch (error) {
+                console.error('Error loading content:', error);
+                log('Error loading content', error.message);
+                showStatus(`<i class="fas fa-exclamation-triangle"></i><span>Error loading content: ${error.message}</span>`, 'error');
+            }
+        }
+        
+        // Load user projects (client access)
+        async function loadUserProjects() {
+            try {
+                log('Loading user projects...');
+                showStatus(`<i class="fas fa-spinner fa-spin"></i><span>Loading your projects...</span>`, 'info');
+                
+                // Clear the project select dropdown
+                projectSelect.innerHTML = '<option value="">Select a project</option>';
+                
+                // Get the user ID from Clerk
+                const userId = clerk.user.id;
+                
+                // Fetch projects for this user from Supabase
+                // With RLS enabled, this will automatically filter to only show the user's projects
+                const { data, error } = await supabase
+                    .from('dynamic_content')
+                    .select('project_id')
+                    .eq('user_id', userId)
+                    .order('project_id');
+                
+                if (error) {
+                    throw new Error(error.message);
+                }
+                
+                if (data && data.length > 0) {
+                    // Add each project to the dropdown
+                    data.forEach(item => {
+                        const option = document.createElement('option');
+                        option.value = item.project_id;
+                        option.textContent = item.project_id;
+                        projectSelect.appendChild(option);
+                    });
+                    
+                    log(`Loaded ${data.length} projects for user`);
+                    showStatus(`<i class="fas fa-check-circle"></i><span>Loaded ${data.length} projects</span>`, 'success');
+                    
+                    // If there's only one project, select it automatically
+                    if (data.length === 1) {
+                        projectSelect.value = data[0].project_id;
+                        loadProject(data[0].project_id);
+                    }
+                    
+                    // Update debug info
+                    if (debugInfo) {
+                        debugInfo.innerHTML += `<p>Projects loaded: ${data.length}</p>`;
+                        debugInfo.innerHTML += `<p>Access level: Client (user projects only)</p>`;
+                        debugInfo.innerHTML += `<p>User ID: ${userId}</p>`;
+                    }
+                } else {
+                    log('No projects found for this user');
+                    showStatus(`<i class="fas fa-info-circle"></i><span>No projects found for your account</span>`, 'info');
+                }
+            } catch (error) {
+                console.error('Error loading user projects:', error);
+                log(`Error loading user projects: ${error.message}`);
                 showStatus(`<i class="fas fa-exclamation-triangle"></i><span>Error loading projects: ${error.message}</span>`, 'error');
             }
         }
@@ -1434,7 +1815,7 @@
                 
                 // Only save if there's a current project
                 if (contentItems.length > 0) {
-                    saveContent(currentProjectId, contentItems, true);
+                    saveContent(currentProjectId, contentItems);
                 }
             }
         }
@@ -1460,9 +1841,12 @@
                 content.classList.remove('active');
             });
             
-            // Activate selected tab
-            document.querySelector(`.tab[data-tab="${tabId}"]`).classList.add('active');
-            document.getElementById(tabId).classList.add('active');
+            // Activate selected tab - Add null check to prevent errors
+            const tabElement = document.querySelector(`.tab[data-tab="${tabId}"]`);
+            const contentElement = document.getElementById(tabId);
+            
+            if (tabElement) tabElement.classList.add('active');
+            if (contentElement) contentElement.classList.add('active');
         }
         
         // Toggle section collapse
@@ -1511,7 +1895,7 @@
                 // Process content data
                 const content = {};
                 data.forEach(item => {
-                    content[item.content_key] = item.content_value;
+                    content[item.key] = item.value;
                 });
                 
                 // Populate form fields
@@ -1573,8 +1957,8 @@
                     }
                     
                     contentItems.push({
-                        content_key: field.name,
-                        content_value: value
+                        key: field.name,
+                        value: value
                     });
                 }
             });
@@ -1590,9 +1974,9 @@
             const requiredFields = ['rendered_title'];
             
             requiredFields.forEach(fieldName => {
-                const item = contentItems.find(item => item.content_key === fieldName);
+                const item = contentItems.find(item => item.key === fieldName);
                 
-                if (!item || !item.content_value.trim()) {
+                if (!item || !item.value.trim()) {
                     errors.push(`${fieldName} is required`);
                 }
             });
@@ -1623,45 +2007,82 @@
                 
                 log('Saving content for project: ' + projectId, contentItems);
                 
-                // Convert content items to key-value pairs for storage
-                const contentData = {};
+                // First, get existing content to determine updates vs inserts
+                const { data: existingData, error: fetchError } = await supabase
+                    .from('dynamic_content')
+                    .select('key')
+                    .eq('project_id', projectId);
+                
+                if (fetchError) {
+                    throw fetchError;
+                }
+                
+                // Create sets of existing keys for faster lookup
+                const existingKeys = new Set(existingData.map(item => item.key));
+                
+                // Separate items into updates and inserts
+                const updates = [];
+                const inserts = [];
+                
                 contentItems.forEach(item => {
-                    contentData[item.content_key] = item.content_value;
+                    if (existingKeys.has(item.key)) {
+                        updates.push(item);
+                    } else {
+                        inserts.push({
+                            project_id: projectId,
+                            key: item.key,
+                            value: item.value
+                        });
+                    }
                 });
                 
-                // Save to Supabase
-                supabase
-                    .from('dynamic_content')
-                    .update({ content: contentData })
-                    .eq('project_id', projectId)
-                    .then(response => {
-                        if (response.error) {
-                            log('Error saving content', response.error);
-                            showStatus('Error saving content: ' + response.error.message, 'error');
-                            updateSaveIndicator('error');
-                        } else {
-                            log('Content saved successfully', response);
-                            if (!isAutoSave) {
-                                showStatus('Content saved successfully', 'success');
-                            }
-                            updateSaveIndicator('saved');
-                            
-                            // Update URL with project ID if not already there
-                            if (!window.location.search.includes('project_id=')) {
-                                const newUrl = window.location.pathname + '?project_id=' + projectId;
-                                history.pushState({ projectId: projectId }, '', newUrl);
-                            }
+                log('Updates:', updates.length);
+                log('Inserts:', inserts.length);
+                
+                // Process updates
+                if (updates.length > 0) {
+                    for (const item of updates) {
+                        const { error: updateError } = await supabase
+                            .from('dynamic_content')
+                            .update({ value: item.value })
+                            .eq('project_id', projectId)
+                            .eq('key', item.key);
+                        
+                        if (updateError) {
+                            log('Error updating item', { key: item.key, error: updateError });
+                            throw updateError;
                         }
-                    })
-                    .catch(error => {
-                        log('Error saving content', error);
-                        showStatus('Error saving content: ' + error.message, 'error');
-                        updateSaveIndicator('error');
-                    });
+                    }
+                }
+                
+                // Process inserts
+                if (inserts.length > 0) {
+                    const { error: insertError } = await supabase
+                        .from('dynamic_content')
+                        .insert(inserts);
+                    
+                    if (insertError) {
+                        log('Error inserting items', insertError);
+                        throw insertError;
+                    }
+                }
+                
+                log('Content saved successfully', { updates: updates.length, inserts: inserts.length });
+                if (!isAutoSave) {
+                    showStatus(`<i class="fas fa-check-circle"></i><span>Content saved successfully</span>`, 'success');
+                }
+                updateSaveIndicator('saved');
+                
+                // Update URL with project ID if not already there
+                if (!window.location.search.includes('project_id=')) {
+                    const newUrl = window.location.pathname + '?project_id=' + projectId;
+                    history.pushState({ projectId: projectId }, '', newUrl);
+                }
+                
             } catch (error) {
                 console.error('Error saving content:', error);
                 log('Error saving content', error.message);
-                showStatus('Error saving content: ' + error.message, 'error');
+                showStatus(`<i class="fas fa-exclamation-triangle"></i><span>Error saving content: ${error.message}</span>`, 'error');
                 updateSaveIndicator('error');
             }
         }
@@ -1702,138 +2123,6 @@
                 indicator.innerHTML = '<i class="fas fa-exclamation-circle"></i><span>Save failed</span>';
             }
         }
-        
-        // Functions for auto-save and UI updates
-        function setupAutoSave() {
-            // Set up event listeners for all form inputs
-            const formInputs = document.querySelectorAll('input, textarea, select');
-            formInputs.forEach(input => {
-                input.addEventListener('input', function() {
-                    resetAutoSaveTimer();
-                    updateSaveIndicator('saving');
-                });
-            });
-            
-            log('Auto-save setup complete');
-        }
-        
-        function resetAutoSaveTimer() {
-            if (window.autoSaveTimer) {
-                clearTimeout(window.autoSaveTimer);
-            }
-            
-            window.autoSaveTimer = setTimeout(function() {
-                autoSave();
-            }, 2000); // Auto-save after 2 seconds of inactivity
-        }
-        
-        function autoSave() {
-            if (!currentProjectId) {
-                log('Auto-save skipped: No project selected');
-                return;
-            }
-            
-            const contentItems = collectFormData();
-            saveContent(currentProjectId, contentItems, true);
-        }
-        
-        function updateStylePreview() {
-            // Get current style values
-            const primaryColor = document.getElementById('primary_color').value;
-            const secondaryColor = document.getElementById('secondary_color').value;
-            const accentColor = document.getElementById('accent_color').value;
-            const textColor = document.getElementById('text_color').value;
-            const backgroundColor = document.getElementById('background_color').value;
-            const headingFont = document.getElementById('heading_font').value;
-            const bodyFont = document.getElementById('body_font').value;
-            
-            // Update heading preview
-            const headingPreview = document.getElementById('heading-preview');
-            if (headingPreview) {
-                headingPreview.style.fontFamily = headingFont;
-                headingPreview.style.color = textColor;
-                
-                // Update individual headings
-                const headings = headingPreview.querySelectorAll('h1, h2, h3');
-                headings.forEach(heading => {
-                    heading.style.fontFamily = headingFont;
-                    heading.style.color = secondaryColor;
-                });
-                
-                // Make h1 use primary color
-                const h1 = headingPreview.querySelector('h1');
-                if (h1) {
-                    h1.style.color = primaryColor;
-                }
-            }
-            
-            // Update button preview
-            const buttonPreview = document.getElementById('button-preview');
-            if (buttonPreview) {
-                const buttons = buttonPreview.querySelectorAll('button');
-                if (buttons.length >= 3) {
-                    buttons[0].style.backgroundColor = primaryColor;
-                    buttons[1].style.backgroundColor = secondaryColor;
-                    buttons[2].style.backgroundColor = accentColor;
-                }
-            }
-            
-            // Update text preview
-            const textPreview = document.getElementById('text-preview');
-            if (textPreview) {
-                textPreview.style.fontFamily = bodyFont;
-                textPreview.style.color = textColor;
-                textPreview.style.backgroundColor = backgroundColor;
-                
-                // Update link color
-                const links = textPreview.querySelectorAll('a');
-                links.forEach(link => {
-                    link.style.color = primaryColor;
-                });
-            }
-            
-            // Reset auto-save timer when styles are updated
-            resetAutoSaveTimer();
-        }
-        
-        // Initialize the editor
-        document.addEventListener('DOMContentLoaded', function() {
-            log('Editor initializing...');
-            loadAllProjects();
-            setupEventListeners();
-            setupAutoSave();
-            
-            // Check for project_id in URL
-            const urlParams = new URLSearchParams(window.location.search);
-            const projectId = urlParams.get('project_id');
-            if (projectId) {
-                log('Project ID found in URL: ' + projectId);
-                // Wait for projects to load before selecting
-                setTimeout(() => {
-                    const projectSelect = document.getElementById('project-select');
-                    if (projectSelect) {
-                        projectSelect.value = projectId;
-                        if (projectSelect.value === projectId) {
-                            loadContent(projectId);
-                        }
-                    }
-                }, 1000);
-            }
-            
-            // Initialize style preview
-            setTimeout(() => {
-                updateStylePreview();
-            }, 1500);
-            
-            // Set up debug toggle
-            const debugToggleButton = document.getElementById('debug-toggle-button');
-            const debugPanel = document.querySelector('.debug-panel');
-            if (debugToggleButton && debugPanel) {
-                debugToggleButton.addEventListener('click', function() {
-                    debugPanel.classList.toggle('visible');
-                });
-            }
-        });
     </script>
 </body>
 </html>

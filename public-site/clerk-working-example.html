@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clerk Working Example</title>
+    <!-- Load configuration file first -->
+    <script src="config.js"></script>
+    <!-- Load custom Clerk loader -->
+    <script src="js/clerk-custom-loader.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        .status {
+            padding: 12px;
+            border-radius: 4px;
+            margin: 15px 0;
+            font-weight: 500;
+        }
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .warning {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-top: 10px;
+            font-weight: 500;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        button.secondary {
+            background-color: #6c757d;
+        }
+        button.secondary:hover {
+            background-color: #5a6268;
+        }
+        .log-container {
+            max-height: 200px;
+            overflow-y: auto;
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #eee;
+            margin-top: 15px;
+            font-family: monospace;
+            font-size: 13px;
+        }
+        .log-entry {
+            margin: 5px 0;
+            padding: 3px 0;
+            border-bottom: 1px solid #eee;
+        }
+        #auth-container {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        #user-info {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #f5f5f5;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Clerk Working Example</h1>
+        <div id="status" class="status info">Initializing...</div>
+        
+        <div>
+            <button id="load-clerk-btn">Load Clerk</button>
+            <button id="init-clerk-btn" disabled>Initialize Clerk</button>
+            <button id="mount-signin-btn" disabled>Mount Sign-In</button>
+            <button id="sign-out-btn" disabled>Sign Out</button>
+        </div>
+        
+        <div id="auth-container"></div>
+        
+        <div id="user-info">
+            <h3>User Information</h3>
+            <pre id="user-data"></pre>
+        </div>
+        
+        <h3>Log</h3>
+        <div id="log-container" class="log-container"></div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elements
+            const statusElement = document.getElementById('status');
+            const loadClerkBtn = document.getElementById('load-clerk-btn');
+            const initClerkBtn = document.getElementById('init-clerk-btn');
+            const mountSigninBtn = document.getElementById('mount-signin-btn');
+            const signOutBtn = document.getElementById('sign-out-btn');
+            const authContainer = document.getElementById('auth-container');
+            const userInfoContainer = document.getElementById('user-info');
+            const userDataElement = document.getElementById('user-data');
+            const logContainer = document.getElementById('log-container');
+            
+            // Configuration
+            const clerkConfig = window.CLERK_CONFIG || {
+                publishableKey: 'pk_test_Y3VyaW91cy1jYW1lbC01MC5jbGVyay5hY2NvdW50cy5kZXYk'
+            };
+            
+            // State
+            let clerkInstance = null;
+            
+            // Functions
+            function log(message) {
+                const logEntry = document.createElement('div');
+                logEntry.className = 'log-entry';
+                logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+                logContainer.appendChild(logEntry);
+                logContainer.scrollTop = logContainer.scrollHeight;
+                console.log(message);
+            }
+            
+            function updateStatus(message, type = 'info') {
+                statusElement.textContent = message;
+                statusElement.className = `status ${type}`;
+                log(message);
+            }
+            
+            function displayUserInfo(user) {
+                if (!user) {
+                    userInfoContainer.style.display = 'none';
+                    return;
+                }
+                
+                const userData = {
+                    id: user.id,
+                    email: user.primaryEmailAddress ? user.primaryEmailAddress.emailAddress : 'No email',
+                    firstName: user.firstName,
+                    lastName: user.lastName,
+                    fullName: user.fullName,
+                    imageUrl: user.imageUrl
+                };
+                
+                userDataElement.textContent = JSON.stringify(userData, null, 2);
+                userInfoContainer.style.display = 'block';
+            }
+            
+            // Event Handlers
+            loadClerkBtn.addEventListener('click', async function() {
+                updateStatus('Loading Clerk...', 'info');
+                
+                try {
+                    // Use the custom loader
+                    await window.ClerkLoader.load();
+                    
+                    updateStatus('Clerk loaded successfully!', 'success');
+                    initClerkBtn.disabled = false;
+                } catch (error) {
+                    updateStatus(`Failed to load Clerk: ${error.message}`, 'error');
+                }
+            });
+            
+            initClerkBtn.addEventListener('click', async function() {
+                updateStatus('Initializing Clerk...', 'info');
+                
+                try {
+                    // Try the alternative initialization method first
+                    clerkInstance = await window.ClerkLoader.initializeAlternative(clerkConfig.publishableKey);
+                    
+                    updateStatus('Clerk initialized successfully!', 'success');
+                    mountSigninBtn.disabled = false;
+                    
+                    // Check if user is already signed in
+                    if (clerkInstance.user) {
+                        log('User is already signed in');
+                        displayUserInfo(clerkInstance.user);
+                        signOutBtn.disabled = false;
+                    }
+                } catch (error) {
+                    updateStatus(`Failed to initialize Clerk: ${error.message}`, 'error');
+                    
+                    // Try the regular initialization as fallback
+                    try {
+                        log('Trying regular initialization as fallback...');
+                        clerkInstance = await window.ClerkLoader.initialize(clerkConfig.publishableKey);
+                        
+                        updateStatus('Clerk initialized successfully with fallback!', 'success');
+                        mountSigninBtn.disabled = false;
+                        
+                        // Check if user is already signed in
+                        if (clerkInstance.user) {
+                            log('User is already signed in');
+                            displayUserInfo(clerkInstance.user);
+                            signOutBtn.disabled = false;
+                        }
+                    } catch (fallbackError) {
+                        updateStatus(`All initialization methods failed: ${fallbackError.message}`, 'error');
+                    }
+                }
+            });
+            
+            mountSigninBtn.addEventListener('click', function() {
+                updateStatus('Mounting sign-in component...', 'info');
+                
+                try {
+                    // Clear the container first
+                    authContainer.innerHTML = '';
+                    
+                    // Mount the sign-in component
+                    clerkInstance.mountSignIn({
+                        elementId: 'auth-container',
+                        appearance: {
+                            elements: {
+                                rootBox: {
+                                    boxShadow: 'none',
+                                    width: '100%'
+                                }
+                            }
+                        }
+                    });
+                    
+                    updateStatus('Sign-in component mounted successfully', 'success');
+                    
+                    // Set up user change listener
+                    clerkInstance.addListener(({ user }) => {
+                        if (user) {
+                            log('User signed in');
+                            displayUserInfo(user);
+                            signOutBtn.disabled = false;
+                        } else {
+                            log('No user signed in');
+                            displayUserInfo(null);
+                            signOutBtn.disabled = true;
+                        }
+                    });
+                } catch (error) {
+                    updateStatus(`Failed to mount sign-in component: ${error.message}`, 'error');
+                }
+            });
+            
+            signOutBtn.addEventListener('click', async function() {
+                if (!clerkInstance) {
+                    updateStatus('Clerk not initialized', 'error');
+                    return;
+                }
+                
+                updateStatus('Signing out...', 'info');
+                
+                try {
+                    await clerkInstance.signOut();
+                    updateStatus('Signed out successfully', 'success');
+                    displayUserInfo(null);
+                    signOutBtn.disabled = true;
+                    
+                    // Re-mount the sign-in component
+                    setTimeout(() => {
+                        authContainer.innerHTML = '';
+                        clerkInstance.mountSignIn({
+                            elementId: 'auth-container',
+                            appearance: {
+                                elements: {
+                                    rootBox: {
+                                        boxShadow: 'none',
+                                        width: '100%'
+                                    }
+                                }
+                            }
+                        });
+                    }, 1000);
+                } catch (error) {
+                    updateStatus(`Failed to sign out: ${error.message}`, 'error');
+                }
+            });
+            
+            // Initialize
+            updateStatus('Ready. Click "Load Clerk" to begin.', 'info');
+        });
+    </script>
+</body>
+</html>
