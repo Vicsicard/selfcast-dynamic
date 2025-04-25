@@ -587,18 +587,39 @@
                 
                 showStatus('Assigning project to user...', 'info');
                 
-                // Update the project_display_names table with the user email
+                // Check if the relationship already exists
+                const { data: existingData, error: existingError } = await supabase
+                    .from('user_projects')
+                    .select('id')
+                    .eq('user_email', userEmail)
+                    .eq('project_id', projectId)
+                    .single();
+                
+                if (existingError && existingError.code !== 'PGRST116') { // PGRST116 is "no rows returned"
+                    console.error('Error checking existing relationship:', existingError);
+                    showStatus('Error checking existing relationship: ' + existingError.message, 'error');
+                    return;
+                }
+                
+                if (existingData) {
+                    showStatus(`Project ${projectId} is already assigned to ${userEmail}`, 'info');
+                    return;
+                }
+                
+                // Insert the new relationship
                 const { data, error } = await supabase
-                    .from('project_display_names')
-                    .update({ user_email: userEmail })
-                    .eq('project_id', projectId);
+                    .from('user_projects')
+                    .insert({
+                        user_email: userEmail,
+                        project_id: projectId
+                    });
                 
                 if (error) {
                     console.error('Error assigning project to user:', error);
                     
-                    // If the user_email column doesn't exist yet, show a helpful message
-                    if (error.code === '42703') {
-                        showStatus('The user_email column does not exist in the project_display_names table. Please run the SQL migration script first.', 'error');
+                    // If the user_projects table doesn't exist yet, show a helpful message
+                    if (error.code === '42P01') {
+                        showStatus('The user_projects table does not exist yet. Please run the SQL migration script first.', 'error');
                         return;
                     }
                     
@@ -621,18 +642,26 @@
             try {
                 showStatus('Loading user-project relationships...', 'info');
                 
-                // Query the project_display_names table to get all user-project relationships
+                // Try to join user_projects with project_display_names to get display names
                 const { data, error } = await supabase
-                    .from('project_display_names')
-                    .select('project_id, display_name, user_email, created_at')
+                    .from('user_projects')
+                    .select(`
+                        id,
+                        user_email,
+                        project_id,
+                        created_at,
+                        project_display_names (
+                            display_name
+                        )
+                    `)
                     .order('user_email');
                 
                 if (error) {
                     console.error('Error loading user-project relationships:', error);
                     
-                    // If the table or column doesn't exist yet, show a helpful message
-                    if (error.code === '42P01' || error.code === '42703') {
-                        showStatus('The project_display_names table or user_email column does not exist yet. Please run the SQL migration script first.', 'error');
+                    // If the table doesn't exist yet, show a helpful message
+                    if (error.code === '42P01') {
+                        showStatus('The user_projects table does not exist yet. Please run the SQL migration script first.', 'error');
                         return;
                     }
                     
@@ -651,14 +680,15 @@
                         
                         // Format date
                         const createdAt = item.created_at ? new Date(item.created_at).toLocaleString() : 'N/A';
+                        const displayName = item.project_display_names ? item.project_display_names.display_name : item.project_id;
                         
                         row.innerHTML = `
                             <td>${item.user_email || 'N/A'}</td>
                             <td>${item.project_id}</td>
-                            <td>${item.display_name || item.project_id}</td>
+                            <td>${displayName || item.project_id}</td>
                             <td>${createdAt}</td>
                             <td>
-                                <button class="remove-project-button" data-project-id="${item.project_id}">
+                                <button class="remove-project-button" data-id="${item.id}">
                                     <i class="fas fa-trash"></i> Remove
                                 </button>
                             </td>
@@ -670,8 +700,8 @@
                     // Add event listeners to remove buttons
                     document.querySelectorAll('.remove-project-button').forEach(button => {
                         button.addEventListener('click', function() {
-                            const projectId = this.getAttribute('data-project-id');
-                            removeUserFromProject(projectId);
+                            const id = this.getAttribute('data-id');
+                            removeUserProject(id);
                         });
                     });
                     
@@ -690,45 +720,39 @@
         }
         
         // Remove user from project
-        async function removeUserFromProject(projectId) {
+        async function removeUserProject(id) {
             try {
-                if (!projectId) {
-                    showStatus('Project ID is required', 'error');
+                if (!id) {
+                    showStatus('Relationship ID is required', 'error');
                     return;
                 }
                 
-                if (!confirm(`Are you sure you want to remove the user from project ${projectId}?`)) {
+                if (!confirm('Are you sure you want to remove this user-project relationship?')) {
                     return;
                 }
                 
-                showStatus('Removing user from project...', 'info');
+                showStatus('Removing user-project relationship...', 'info');
                 
-                // Set the user_email to the default admin email
-                const { data, error } = await supabase
-                    .from('project_display_names')
-                    .update({ user_email: 'vicsicard@gmail.com' })
-                    .eq('project_id', projectId);
+                // Delete the relationship
+                const { error } = await supabase
+                    .from('user_projects')
+                    .delete()
+                    .eq('id', id);
                 
                 if (error) {
-                    console.error('Error removing user from project:', error);
-                    showStatus('Error removing user from project: ' + error.message, 'error');
+                    console.error('Error removing user-project relationship:', error);
+                    showStatus('Error removing user-project relationship: ' + error.message, 'error');
                     return;
                 }
                 
-                showStatus(`User removed from project ${projectId}`, 'success');
+                showStatus('User-project relationship removed successfully', 'success');
                 
                 // Refresh the user-projects table
                 loadUserProjects();
             } catch (err) {
-                console.error('Error in removeUserFromProject:', err);
+                console.error('Error in removeUserProject:', err);
                 showStatus('An unexpected error occurred', 'error');
             }
-        }
-        
-        // Validate email format
-        function validateEmail(email) {
-            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            return re.test(email);
         }
         
         // Load admin users

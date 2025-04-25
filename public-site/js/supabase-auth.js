@@ -144,90 +144,116 @@ async function getUserProjects() {
     
     try {
       if (adminStatus) {
-        // Admin user - get all projects with display names
+        // Admin user - get all projects
+        // First try to join user_projects with project_display_names to get display names
         const { data, error } = await supabase
-          .from('project_display_names')
-          .select('project_id, display_name')
-          .order('display_name');
+          .from('user_projects')
+          .select(`
+            project_id,
+            project_display_names (
+              display_name
+            )
+          `)
+          .order('project_id');
           
         if (error) {
-          console.error('Error fetching projects for admin:', error);
+          console.error('Error fetching projects for admin with join:', error);
           
-          // Fallback to getting projects from dynamic_content if project_display_names table doesn't exist
-          if (error.code === '42P01') {
-            console.log('DEVELOPMENT MODE: project_display_names table not found, falling back to dynamic_content');
+          // Fallback to just getting project IDs from user_projects
+          const { data: fallbackData, error: fallbackError } = await supabase
+            .from('user_projects')
+            .select('project_id')
+            .order('project_id');
             
-            const { data: fallbackData, error: fallbackError } = await supabase
+          if (fallbackError) {
+            console.error('Error fetching projects for admin from user_projects:', fallbackError);
+            
+            // Final fallback to getting projects from dynamic_content
+            const { data: contentData, error: contentError } = await supabase
               .from('dynamic_content')
               .select('project_id')
               .order('project_id');
               
-            if (fallbackError) {
-              return { data: [], error: fallbackError };
+            if (contentError) {
+              return { data: [], error: contentError };
             }
             
             // Extract unique project IDs
-            const uniqueProjects = [...new Set(fallbackData.map(item => item.project_id))];
+            const uniqueProjects = [...new Set(contentData.map(item => item.project_id))];
             return { data: uniqueProjects.map(id => ({ project_id: id })), error: null };
           }
           
-          return { data: [], error };
+          return { data: fallbackData, error: null };
         }
         
-        return { data, error: null };
+        // Format the data to have a consistent structure
+        const formattedData = data.map(item => ({
+          project_id: item.project_id,
+          display_name: item.project_display_names ? item.project_display_names.display_name : item.project_id
+        }));
+        
+        return { data: formattedData, error: null };
       } else {
         // Regular user - get only their projects
+        // First try to join user_projects with project_display_names to get display names
         const { data, error } = await supabase
-          .from('project_display_names')
-          .select('project_id, display_name')
+          .from('user_projects')
+          .select(`
+            project_id,
+            project_display_names (
+              display_name
+            )
+          `)
           .eq('user_email', email)
-          .order('display_name');
+          .order('project_id');
           
         if (error) {
-          console.error('Error fetching projects for user:', error);
+          console.error('Error fetching projects for user with join:', error);
           
-          // Fallback to checking user_projects table if project_display_names doesn't have user_email column
-          if (error.code === '42703') { // Column doesn't exist
-            console.log('DEVELOPMENT MODE: user_email column not found in project_display_names, checking user_projects');
+          // Fallback to just getting project IDs from user_projects
+          const { data: fallbackData, error: fallbackError } = await supabase
+            .from('user_projects')
+            .select('project_id')
+            .eq('user_email', email)
+            .order('project_id');
             
-            const { data: userProjectsData, error: userProjectsError } = await supabase
-              .from('user_projects')
-              .select('project_id')
-              .eq('user_email', email)
-              .order('project_id');
+          if (fallbackError) {
+            console.error('Error fetching projects for user from user_projects:', fallbackError);
+            
+            // If user_projects table doesn't exist, check for projects with matching email
+            if (fallbackError.code === '42P01') {
+              console.log('DEVELOPMENT MODE: user_projects table not found, checking for email match in dynamic_content');
               
-            if (userProjectsError) {
-              // If user_projects table doesn't exist, check for email match in dynamic_content
-              if (userProjectsError.code === '42P01') {
-                console.log('DEVELOPMENT MODE: user_projects table not found, checking for email match in dynamic_content');
+              const { data: emailData, error: emailError } = await supabase
+                .from('dynamic_content')
+                .select('project_id')
+                .eq('key', 'email_address')
+                .eq('content', email)
+                .order('project_id');
                 
-                const { data: emailData, error: emailError } = await supabase
-                  .from('dynamic_content')
-                  .select('project_id')
-                  .eq('key', 'email_address')
-                  .eq('content', email)
-                  .order('project_id');
-                  
-                if (emailError) {
-                  console.error('Error finding projects by email:', emailError);
-                  return { data: [], error: emailError };
-                }
-                
-                // Extract unique project IDs
-                const uniqueProjects = [...new Set(emailData.map(item => item.project_id))];
-                return { data: uniqueProjects.map(id => ({ project_id: id })), error: null };
+              if (emailError) {
+                console.error('Error finding projects by email:', emailError);
+                return { data: [], error: emailError };
               }
               
-              return { data: [], error: userProjectsError };
+              // Extract unique project IDs
+              const uniqueProjects = [...new Set(emailData.map(item => item.project_id))];
+              return { data: uniqueProjects.map(id => ({ project_id: id })), error: null };
             }
             
-            return { data: userProjectsData, error: null };
+            return { data: [], error: fallbackError };
           }
           
-          return { data: [], error };
+          return { data: fallbackData, error: null };
         }
         
-        return { data, error: null };
+        // Format the data to have a consistent structure
+        const formattedData = data.map(item => ({
+          project_id: item.project_id,
+          display_name: item.project_display_names ? item.project_display_names.display_name : item.project_id
+        }));
+        
+        return { data: formattedData, error: null };
       }
     } catch (err) {
       console.error('Error getting user projects:', err);
