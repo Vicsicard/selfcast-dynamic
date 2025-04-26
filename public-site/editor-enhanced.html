@@ -1350,7 +1350,8 @@
                 log('Loading content for project', projectId);
                 
                 // Use direct fetch request instead of Supabase client
-                const response = await fetch(`${SUPABASE_URL}/rest/v1/dynamic_content?project_id=eq.${encodeURIComponent(projectId)}&select=*`, {
+                // Specifically request key and value columns
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/dynamic_content?project_id=eq.${encodeURIComponent(projectId)}&select=key,value`, {
                     method: 'GET',
                     headers: {
                         'apikey': SUPABASE_KEY,
@@ -1375,6 +1376,9 @@
                 data.forEach(item => {
                     content[item.key] = item.value;
                 });
+                
+                // Debug output to see what keys were found
+                log('Content keys found:', Object.keys(content));
                 
                 // Populate form fields
                 populateFormFields(content);
@@ -1406,8 +1410,15 @@
         function populateFormFields(content) {
             log('Populating form fields with content');
             
-            // Get all input, textarea, and select elements in the form
+            // Debug: Count of form elements found
             const formElements = document.querySelectorAll('#contentForm input, #contentForm textarea, #contentForm select');
+            log(`Found ${formElements.length} form elements to populate`);
+            
+            // Track matches and misses for debugging
+            let matchCount = 0;
+            let missCount = 0;
+            let matchedFields = [];
+            let missingFields = [];
             
             // Loop through each form element
             formElements.forEach(element => {
@@ -1418,6 +1429,9 @@
                 
                 // If content exists for this field, set the value
                 if (content.hasOwnProperty(fieldName)) {
+                    matchCount++;
+                    matchedFields.push(fieldName);
+                    
                     if (element.type === 'checkbox') {
                         element.checked = content[fieldName] === 'true' || content[fieldName] === true;
                     } else if (element.type === 'color') {
@@ -1436,10 +1450,93 @@
                         const event = new Event('change');
                         element.dispatchEvent(event);
                     }
+                } else {
+                    missCount++;
+                    missingFields.push(fieldName);
                 }
             });
             
+            // Log match statistics
+            log(`Field mapping stats: ${matchCount} matches, ${missCount} misses`);
+            log('Matched fields:', matchedFields);
+            log('Missing fields:', missingFields);
+            
+            // Check for any content keys that don't have corresponding form fields
+            const contentKeys = Object.keys(content);
+            const formFieldIds = Array.from(formElements).map(el => el.id || el.name).filter(id => id);
+            const unmappedKeys = contentKeys.filter(key => !formFieldIds.includes(key));
+            
+            log(`Found ${unmappedKeys.length} content keys with no matching form fields`);
+            if (unmappedKeys.length > 0) {
+                log('Unmapped content keys:', unmappedKeys);
+            }
+            
+            // Force update of any special fields that might need it
+            updateSpecialFields(content);
+            
             log('Form fields populated successfully');
+        }
+        
+        // Update any special fields that might need extra handling
+        function updateSpecialFields(content) {
+            // Force update of style preview if we're on the styling tab
+            if (document.querySelector('.tab[data-tab="styling"]')?.classList.contains('active')) {
+                updateStylePreview();
+            }
+            
+            // Special handling for bio content which might be in different fields
+            if (content.rendered_bio_html) {
+                const bioField = document.getElementById('rendered_bio_html');
+                if (bioField) {
+                    bioField.value = content.rendered_bio_html;
+                }
+            }
+            
+            // Special handling for color fields to ensure they have # prefix
+            ['primary_color', 'secondary_color', 'accent_color', 'text_color', 'background_color', 'link_color'].forEach(colorField => {
+                if (content[colorField]) {
+                    const field = document.getElementById(colorField);
+                    if (field) {
+                        let colorValue = content[colorField];
+                        if (colorValue && !colorValue.startsWith('#') && colorValue.length === 6) {
+                            colorValue = '#' + colorValue;
+                        }
+                        field.value = colorValue;
+                    }
+                }
+            });
+            
+            // Force display of all form elements
+            ensureFormElementsVisible();
+        }
+        
+        // Make sure all form elements are visible
+        function ensureFormElementsVisible() {
+            // Make sure all tab content sections are visible
+            document.querySelectorAll('.tab-content').forEach(tabContent => {
+                // Make sure the element is visible
+                tabContent.style.display = 'block';
+                
+                // Make sure all sections within the tab are visible
+                tabContent.querySelectorAll('.section').forEach(section => {
+                    section.style.display = 'block';
+                    
+                    // Make sure the section content is visible
+                    const sectionContent = section.querySelector('.section-content');
+                    if (sectionContent) {
+                        sectionContent.style.display = 'block';
+                    }
+                });
+            });
+            
+            // Make sure the first tab is active
+            const firstTab = document.querySelector('.tab-content');
+            if (firstTab) {
+                firstTab.classList.add('active');
+            }
+            
+            // Log visibility status
+            log('Form visibility ensured');
         }
         
         // Show status message
@@ -1490,8 +1587,9 @@
             // View site button
             if (viewSiteButton) {
                 viewSiteButton.addEventListener('click', function() {
-                    if (currentProjectId) {
-                        window.open(`/index.html?project_id=${currentProjectId}`, '_blank');
+                    const selectedProjectId = projectSelect ? projectSelect.value : null;
+                    if (selectedProjectId) {
+                        window.open(`/index.html?project_id=${selectedProjectId}`, '_blank');
                     } else {
                         showStatus('Please select a project first', 'error');
                     }
@@ -1552,8 +1650,25 @@
             loadAllProjects();
             setupEventListeners();
             
-            // Initialize tabs
-            activateTab('main-content');
+            // Initialize tabs - make sure main content tab is active
+            const mainContentTab = document.getElementById('main-content');
+            if (mainContentTab) {
+                // Make all other tabs inactive
+                document.querySelectorAll('.tab-content').forEach(tab => {
+                    tab.classList.remove('active');
+                });
+                
+                // Make main content tab active
+                mainContentTab.classList.add('active');
+                mainContentTab.style.display = 'block';
+                
+                // Make sure all sections within the tab are visible
+                mainContentTab.querySelectorAll('.section').forEach(section => {
+                    section.style.display = 'block';
+                });
+                
+                log('Main content tab activated');
+            }
             
             // Check for project_id in URL
             const urlParams = new URLSearchParams(window.location.search);
@@ -1576,6 +1691,9 @@
             // Initialize style preview
             setTimeout(() => {
                 updateStylePreview();
+                
+                // Force display of all form elements
+                ensureFormElementsVisible();
             }, 1500);
         });
         
