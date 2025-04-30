@@ -1630,8 +1630,46 @@
                 }
             });
             
+            // Map old social media fields to new numbered format fields
+            mapSocialMediaFields(content);
+            
             // Force display of all form elements
             ensureFormElementsVisible();
+        }
+        
+        // Map old social media fields to new numbered format
+        function mapSocialMediaFields(content) {
+            // Platforms to process
+            const platforms = ['facebook', 'twitter', 'instagram', 'linkedin'];
+            
+            platforms.forEach(platform => {
+                // Check if we have the old format
+                if (content[`${platform}_post`]) {
+                    // Map to first entry of the new format
+                    const postField = document.getElementById(`${platform}_post_1`);
+                    if (postField) {
+                        postField.value = content[`${platform}_post`];
+                        log(`Mapped ${platform}_post to ${platform}_post_1`);
+                    }
+                }
+                
+                // Map old title if it exists
+                if (content[`${platform}_title`]) {
+                    const titleField = document.getElementById(`${platform}_title_1`);
+                    if (titleField) {
+                        titleField.value = content[`${platform}_title`];
+                        log(`Mapped ${platform}_title to ${platform}_title_1`);
+                    }
+                }
+                
+                // Map URLs
+                if (content[`${platform}_url`]) {
+                    const urlField = document.getElementById(`${platform}_url`);
+                    if (urlField) {
+                        urlField.value = content[`${platform}_url`];
+                    }
+                }
+            });
         }
         
         // Make sure all form elements are visible
