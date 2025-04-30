@@ -33,17 +33,41 @@ This document provides a comprehensive list of all field names (keys) used in th
 | Field Name (key) | Description | HTML Element ID |
 |------------------|-------------|-----------------|
 | `facebook_url` | Facebook profile URL | `#facebook_url` |
-| `facebook_title` | Title for Facebook section | `#facebook_title` |
-| `facebook_post` | Facebook post content | `#facebook_post` |
+| `facebook_title_1` | Title for Facebook post 1 | `#facebook_title_1` |
+| `facebook_post_1` | Facebook post 1 content | `#facebook_post_1` |
+| `facebook_title_2` | Title for Facebook post 2 | `#facebook_title_2` |
+| `facebook_post_2` | Facebook post 2 content | `#facebook_post_2` |
+| `facebook_title_3` | Title for Facebook post 3 | `#facebook_title_3` |
+| `facebook_post_3` | Facebook post 3 content | `#facebook_post_3` |
+| `facebook_title_4` | Title for Facebook post 4 | `#facebook_title_4` |
+| `facebook_post_4` | Facebook post 4 content | `#facebook_post_4` |
 | `twitter_url` | Twitter/X profile URL | `#twitter_url` |
-| `twitter_title` | Title for Twitter/X section | `#twitter_title` |
-| `twitter_post` | Twitter/X post content | `#twitter_post` |
+| `twitter_title_1` | Title for Twitter/X post 1 | `#twitter_title_1` |
+| `twitter_post_1` | Twitter/X post 1 content | `#twitter_post_1` |
+| `twitter_title_2` | Title for Twitter/X post 2 | `#twitter_title_2` |
+| `twitter_post_2` | Twitter/X post 2 content | `#twitter_post_2` |
+| `twitter_title_3` | Title for Twitter/X post 3 | `#twitter_title_3` |
+| `twitter_post_3` | Twitter/X post 3 content | `#twitter_post_3` |
+| `twitter_title_4` | Title for Twitter/X post 4 | `#twitter_title_4` |
+| `twitter_post_4` | Twitter/X post 4 content | `#twitter_post_4` |
 | `instagram_url` | Instagram profile URL | `#instagram_url` |
-| `instagram_title` | Title for Instagram section | `#instagram_title` |
-| `instagram_post` | Instagram post content | `#instagram_post` |
+| `instagram_title_1` | Title for Instagram post 1 | `#instagram_title_1` |
+| `instagram_post_1` | Instagram post 1 content | `#instagram_post_1` |
+| `instagram_title_2` | Title for Instagram post 2 | `#instagram_title_2` |
+| `instagram_post_2` | Instagram post 2 content | `#instagram_post_2` |
+| `instagram_title_3` | Title for Instagram post 3 | `#instagram_title_3` |
+| `instagram_post_3` | Instagram post 3 content | `#instagram_post_3` |
+| `instagram_title_4` | Title for Instagram post 4 | `#instagram_title_4` |
+| `instagram_post_4` | Instagram post 4 content | `#instagram_post_4` |
 | `linkedin_url` | LinkedIn profile URL | `#linkedin_url` |
-| `linkedin_title` | Title for LinkedIn section | `#linkedin_title` |
-| `linkedin_post` | LinkedIn post content | `#linkedin_post` |
+| `linkedin_title_1` | Title for LinkedIn post 1 | `#linkedin_title_1` |
+| `linkedin_post_1` | LinkedIn post 1 content | `#linkedin_post_1` |
+| `linkedin_title_2` | Title for LinkedIn post 2 | `#linkedin_title_2` |
+| `linkedin_post_2` | LinkedIn post 2 content | `#linkedin_post_2` |
+| `linkedin_title_3` | Title for LinkedIn post 3 | `#linkedin_title_3` |
+| `linkedin_post_3` | LinkedIn post 3 content | `#linkedin_post_3` |
+| `linkedin_title_4` | Title for LinkedIn post 4 | `#linkedin_title_4` |
+| `linkedin_post_4` | LinkedIn post 4 content | `#linkedin_post_4` |
 
 ## Blog Content Fields
 

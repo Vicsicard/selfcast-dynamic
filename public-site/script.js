@@ -121,6 +121,9 @@ async function loadContent() {
             // Debug: Log all keys and values
             console.log(`Processing key: ${item.key}, value: ${item.value}`);
             
+            // Generate excerpts for social media posts
+            generateSocialExcerpt(item.key, item.value, themeData);
+            
             // Special handling for profile image
             if (item.key === 'profile_image_url') {
                 const profileImg = document.querySelector('img[data-key="profile_image_url"]');
@@ -274,6 +277,31 @@ function addViewAllBlogsLink() {
         }
     } else {
         console.log('Blog grid section not found');
+    }
+}
+
+// Function to generate excerpts for social media posts
+function generateSocialExcerpt(key, value, contentData) {
+    // Check if this is a social media post
+    if (key.includes('_post_')) {
+        // Extract the platform and post number
+        // Example: "facebook_post_1" -> platform = "facebook", postNum = "1"
+        const parts = key.split('_');
+        if (parts.length >= 3) {
+            const platform = parts[0];
+            const postNum = parts[2];
+            
+            // Create the excerpt key (e.g., "facebook_excerpt_1")
+            const excerptKey = `${platform}_excerpt_${postNum}`;
+            
+            // Create an excerpt (first 150 characters with ellipsis if needed)
+            const excerpt = value.length > 150 ? value.substring(0, 150) + '...' : value;
+            
+            // Store the excerpt in the content data
+            contentData[excerptKey] = excerpt;
+            
+            console.log(`Generated excerpt for ${key} -> ${excerptKey}: ${excerpt}`);
+        }
     }
 }
 
