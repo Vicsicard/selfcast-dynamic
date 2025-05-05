@@ -240,9 +240,20 @@ function extractAndProcessBlogPosts(contentData) {
             const dateKey = `blog_post_${blogNumber}_date`;
             const featuredKey = `blog_post_${blogNumber}_featured`;
             
+            // Debug logging
+            console.log(`Processing blog ${blogNumber}, looking for description key: ${descriptionKey}`);
+            
             // Find corresponding content items
             const titleItem = contentData.find(item => item.key === titleKey);
             const descriptionItem = contentData.find(item => item.key === descriptionKey);
+            
+            // Debug logging for description
+            if (descriptionItem) {
+                console.log(`Found description for blog ${blogNumber}: ${descriptionItem.value.substring(0, 50)}...`);
+            } else {
+                console.log(`No description found for blog ${blogNumber}, will generate from content`);
+            }
+            
             const dateItem = contentData.find(item => item.key === dateKey);
             const featuredItem = contentData.find(item => item.key === featuredKey);
             
@@ -345,9 +356,12 @@ function displayBlogPosts(page) {
         postElement.className = 'grid-item blog-card';
         if (post.featured) postElement.classList.add('featured');
         
+        // Get the actual excerpt from the description field, NOT the content field
+        const excerptText = post.description || '';
+        
         postElement.innerHTML = `
             <h3 class="blog-title">${post.title}</h3>
-            <p class="excerpt blog-excerpt">${post.description}</p>
+            <p class="excerpt blog-excerpt">${excerptText}</p>
             <button class="action-button" onclick="openModal('blog-${post.number}')">Read More</button>
         `;
         
@@ -1140,6 +1154,9 @@ function extractAndProcessBlogPosts(contentData) {
             const descriptionItem = contentData.find(i => i.key === `blog_${blogNumber}_description`);
             const dateItem = contentData.find(i => i.key === `blog_${blogNumber}_date`);
             const featuredItem = contentData.find(i => i.key === `blog_${blogNumber}_featured`);
+            
+            // Debug logging
+            console.log(`Processing blog ${blogNumber}, looking for description key: ${descriptionItem ? descriptionItem.key : 'Not found'}`);
             
             // Add blog post to our collection
             allBlogPosts.push({
