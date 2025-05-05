@@ -1048,30 +1048,86 @@ function extractAndProcessSocialPosts(contentData) {
         
         // Process each platform
         Object.keys(platformPosts).forEach(platform => {
-            // Match platform_X pattern (e.g., facebook_1, twitter_3)
-            const postMatch = key.match(new RegExp(`^${platform}_(\\d+)$`));
-            if (postMatch) {
-                const postNumber = parseInt(postMatch[1]);
+            // Try multiple key formats to find posts
+            
+            // Format 1: platform_post_X (e.g., facebook_post_1)
+            const postMatchFormat1 = key.match(new RegExp(`^${platform}_post_(\\d+)$`));
+            if (postMatchFormat1) {
+                const postNumber = parseInt(postMatchFormat1[1]);
                 
-                // Find related metadata (date, title, etc)
-                const dateItem = contentData.find(i => i.key === `${platform}_${postNumber}_date`);
-                const titleItem = contentData.find(i => i.key === `${platform}_${postNumber}_title`);
+                // Find related metadata (title, date, etc.)
+                const titleItem = contentData.find(i => i.key === `${platform}_title_${postNumber}`);
+                const dateItem = contentData.find(i => i.key === `${platform}_date_${postNumber}`) || 
+                                contentData.find(i => i.key === `${platform}_${postNumber}_date`);
                 
                 // Add post to platform collection
                 platformPosts[platform].posts.push({
                     number: postNumber,
                     content: value,
                     date: dateItem ? new Date(dateItem.value) : new Date(),
-                    title: titleItem ? titleItem.value : `${platform.charAt(0).toUpperCase() + platform.slice(1)} Update`
+                    title: titleItem ? titleItem.value : `${platform.charAt(0).toUpperCase() + platform.slice(1)} Update ${postNumber}`
+                });
+                
+                return; // Skip checking the other formats for this key
+            }
+            
+            // Format 2: platform_X (e.g., facebook_1)
+            const postMatchFormat2 = key.match(new RegExp(`^${platform}_(\\d+)$`));
+            if (postMatchFormat2) {
+                const postNumber = parseInt(postMatchFormat2[1]);
+                
+                // Find related metadata (title, date, etc.)
+                const titleItem = contentData.find(i => i.key === `${platform}_${postNumber}_title`) || 
+                                contentData.find(i => i.key === `${platform}_title_${postNumber}`);
+                const dateItem = contentData.find(i => i.key === `${platform}_${postNumber}_date`) || 
+                                contentData.find(i => i.key === `${platform}_date_${postNumber}`);
+                
+                // Add post to platform collection
+                platformPosts[platform].posts.push({
+                    number: postNumber,
+                    content: value,
+                    date: dateItem ? new Date(dateItem.value) : new Date(),
+                    title: titleItem ? titleItem.value : `${platform.charAt(0).toUpperCase() + platform.slice(1)} Update ${postNumber}`
+                });
+                
+                return; // Skip checking the other formats for this key
+            }
+            
+            // Format 3: platform_X_post (e.g., facebook_1_post)
+            const postMatchFormat3 = key.match(new RegExp(`^${platform}_(\\d+)_post$`));
+            if (postMatchFormat3) {
+                const postNumber = parseInt(postMatchFormat3[1]);
+                
+                // Find related metadata (title, date, etc.)
+                const titleItem = contentData.find(i => i.key === `${platform}_${postNumber}_title`) || 
+                                contentData.find(i => i.key === `${platform}_title_${postNumber}`);
+                const dateItem = contentData.find(i => i.key === `${platform}_${postNumber}_date`) || 
+                                contentData.find(i => i.key === `${platform}_date_${postNumber}`);
+                
+                // Add post to platform collection
+                platformPosts[platform].posts.push({
+                    number: postNumber,
+                    content: value,
+                    date: dateItem ? new Date(dateItem.value) : new Date(),
+                    title: titleItem ? titleItem.value : `${platform.charAt(0).toUpperCase() + platform.slice(1)} Update ${postNumber}`
                 });
             }
         });
     }
     
+    // Debug output
+    console.log('Extracted platform posts:', platformPosts);
+    
     // Sort all platform posts by newest first
     Object.keys(platformPosts).forEach(platform => {
         platformPosts[platform].posts.sort((a, b) => b.date - a.date);
+        
+        // Log how many posts were extracted for each platform
+        console.log(`Found ${platformPosts[platform].posts.length} posts for ${platform}`);
     });
+    
+    // Initialize platform pagination
+    setupPlatformPagination();
 }
 
 // Main function to load content from Supabase
