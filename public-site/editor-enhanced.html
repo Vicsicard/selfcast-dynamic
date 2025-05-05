@@ -1780,10 +1780,26 @@
             
             // View site button
             if (viewSiteButton) {
-                viewSiteButton.addEventListener('click', function() {
+                viewSiteButton.addEventListener('click', async function() {
                     const selectedProjectId = projectSelect ? projectSelect.value : null;
                     if (selectedProjectId) {
-                        window.open(`/index.html?project_id=${selectedProjectId}`, '_blank');
+                        // Save content before viewing the site
+                        if (currentProjectId && currentProjectId === selectedProjectId) {
+                            showStatus('Saving content before viewing site...', 'info');
+                            const contentItems = collectFormData();
+                            try {
+                                await saveContent(currentProjectId, contentItems);
+                                showStatus('Content saved successfully! Opening site...', 'success');
+                                setTimeout(() => {
+                                    window.open(`/index.html?project_id=${selectedProjectId}`, '_blank');
+                                }, 1000);
+                            } catch (error) {
+                                showStatus('Error saving content: ' + error.message, 'error');
+                                console.error('Error saving content:', error);
+                            }
+                        } else {
+                            window.open(`/index.html?project_id=${selectedProjectId}`, '_blank');
+                        }
                     } else {
                         showStatus('Please select a project first', 'error');
                     }
@@ -2056,6 +2072,131 @@
             } catch (error) {
                 console.error('Error uploading profile image:', error);
                 showStatus(`Upload failed: ${error.message || 'Unknown error'}`, 'error');
+            }
+        }
+        
+        // Collect form data for saving
+        function collectFormData() {
+            log('Collecting form data...');
+            const contentItems = [];
+            const formElements = document.querySelectorAll('#contentForm input, #contentForm textarea, #contentForm select');
+            
+            // Process each form element
+            formElements.forEach(element => {
+                const key = element.id || element.name;
+                if (!key) return;
+                
+                let value;
+                if (element.type === 'checkbox') {
+                    value = element.checked.toString();
+                } else if (element.type === 'color') {
+                    // Remove # from color values to stay consistent
+                    value = element.value.replace('#', '');
+                } else {
+                    value = element.value || '';
+                }
+                
+                // Add to content items array
+                contentItems.push({
+                    key: key,
+                    value: value
+                });
+            });
+            
+            log(`Collected ${contentItems.length} form items`);
+            return contentItems;
+        }
+        
+        // Save content to Supabase
+        async function saveContent(projectId, contentItems) {
+            if (!projectId || !contentItems || contentItems.length === 0) {
+                showStatus('Nothing to save', 'error');
+                return;
+            }
+            
+            try {
+                showStatus('Saving content...', 'info');
+                log(`Saving ${contentItems.length} items for project ${projectId}`);
+                
+                // Save indicator
+                const saveIndicator = document.getElementById('save-indicator');
+                if (saveIndicator) {
+                    saveIndicator.className = 'indicator saving';
+                    saveIndicator.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Saving...</span>';
+                }
+                
+                // Process each item and create Supabase upsert operations
+                const upsertPromises = contentItems.map(async (item) => {
+                    // Check if the item already exists
+                    const { data, error } = await supabase
+                        .from('dynamic_content')
+                        .select('*')
+                        .eq('project_id', projectId)
+                        .eq('key', item.key)
+                        .maybeSingle();
+                    
+                    if (error) {
+                        console.error('Error checking existing content:', error);
+                        throw error;
+                    }
+                    
+                    // If item exists, update it
+                    if (data) {
+                        const { error: updateError } = await supabase
+                            .from('dynamic_content')
+                            .update({ value: item.value })
+                            .eq('project_id', projectId)
+                            .eq('key', item.key);
+                            
+                        if (updateError) {
+                            console.error('Error updating content:', updateError);
+                            throw updateError;
+                        }
+                    } 
+                    // If item doesn't exist, insert it
+                    else {
+                        const { error: insertError } = await supabase
+                            .from('dynamic_content')
+                            .insert([
+                                { 
+                                    project_id: projectId, 
+                                    key: item.key, 
+                                    value: item.value 
+                                }
+                            ]);
+                            
+                        if (insertError) {
+                            console.error('Error inserting content:', insertError);
+                            throw insertError;
+                        }
+                    }
+                });
+                
+                // Wait for all operations to complete
+                await Promise.all(upsertPromises);
+                
+                // Update save indicator
+                if (saveIndicator) {
+                    saveIndicator.className = 'indicator saved';
+                    saveIndicator.innerHTML = '<i class="fas fa-check-circle"></i><span>All changes saved</span>';
+                }
+                
+                showStatus('Content saved successfully!', 'success');
+                log('Content saved successfully');
+                
+                return true;
+            } catch (error) {
+                console.error('Error saving content:', error);
+                
+                // Update save indicator
+                const saveIndicator = document.getElementById('save-indicator');
+                if (saveIndicator) {
+                    saveIndicator.className = 'indicator error';
+                    saveIndicator.innerHTML = '<i class="fas fa-times-circle"></i><span>Save failed</span>';
+                }
+                
+                showStatus(`Error saving content: ${error.message || 'Unknown error'}`, 'error');
+                throw error;
             }
         }
     </script>
