@@ -633,11 +633,93 @@ function openModal(modalId) {
             .join('');
     }
     
+    // Helper function to find the best matching content
+    function findBestMatchingContent(platform, postNumber) {
+        // Try different key patterns for content
+        const possibleContentKeys = [
+            `${platform}_post_${postNumber}`,      // Format 1: facebook_post_1
+            `${platform}_${postNumber}`,           // Format 2: facebook_1
+            `${platform}_${postNumber}_post`       // Format 3: facebook_1_post
+        ];
+        
+        // Try different key patterns for title
+        const possibleTitleKeys = [
+            `${platform}_title_${postNumber}`,     // Format 1: facebook_title_1
+            `${platform}_${postNumber}_title`      // Format 2: facebook_1_title
+        ];
+        
+        // Find the first available content
+        let contentKey = null;
+        for (const key of possibleContentKeys) {
+            if (window.siteContent[key]) {
+                contentKey = key;
+                console.log(`Found content with key: ${key}`);
+                break;
+            }
+        }
+        
+        // Find the first available title
+        let titleKey = null;
+        for (const key of possibleTitleKeys) {
+            if (window.siteContent[key]) {
+                titleKey = key;
+                console.log(`Found title with key: ${key}`);
+                break;
+            }
+        }
+        
+        // If no title found, use a default one
+        if (!titleKey) {
+            titleKey = `${platform}_title_${postNumber}`;
+            window.siteContent[titleKey] = `${platform.charAt(0).toUpperCase() + platform.slice(1)} Update ${postNumber}`;
+        }
+        
+        return { contentKey, titleKey };
+    }
+    
     // Handle blog posts
     if (modalId.startsWith('blog-')) {
         const blogNumber = modalId.split('-')[1];
-        const titleKey = `blog_post_${blogNumber}_title`;
-        const contentKey = `blog_post_${blogNumber}`;
+        
+        // Try different key patterns for blog posts
+        const possibleContentKeys = [
+            `blog_post_${blogNumber}`,
+            `blog_${blogNumber}`,
+            `blog_content_${blogNumber}`
+        ];
+        
+        const possibleTitleKeys = [
+            `blog_post_${blogNumber}_title`,
+            `blog_${blogNumber}_title`,
+            `blog_title_${blogNumber}`
+        ];
+        
+        // Find the best matching keys
+        let contentKey = null;
+        for (const key of possibleContentKeys) {
+            if (window.siteContent[key]) {
+                contentKey = key;
+                break;
+            }
+        }
+        
+        let titleKey = null;
+        for (const key of possibleTitleKeys) {
+            if (window.siteContent[key]) {
+                titleKey = key;
+                break;
+            }
+        }
+        
+        // Default fallback for content key
+        if (!contentKey) {
+            contentKey = possibleContentKeys[0];
+        }
+        
+        // Default fallback for title key
+        if (!titleKey) {
+            titleKey = possibleTitleKeys[0];
+        }
         
         const modal = document.getElementById(modalId);
         if (!modal) {
@@ -656,6 +738,9 @@ function openModal(modalId) {
         if (contentElement && window.siteContent[contentKey]) {
             // Format content with proper paragraph breaks
             contentElement.innerHTML = formatContent(window.siteContent[contentKey]);
+            console.log('Set modal content to:', window.siteContent[contentKey].substring(0, 100) + '...');
+        } else {
+            console.warn(`Content not found for key: ${contentKey}`);
         }
         
         // Use the active class for flexbox centering
@@ -672,7 +757,51 @@ function openModal(modalId) {
         // Prevent body scrolling when modal is open
         document.body.style.overflow = 'hidden';
     }
-    // Handle social media posts
+    // Handle social media posts with platform-number format (e.g., facebook-1)
+    else if (modalId.match(/^(facebook|twitter|instagram|linkedin)-\d+$/)) {
+        const [platform, postNumber] = modalId.split('-');
+        
+        // Find the best matching content and title keys
+        const { contentKey, titleKey } = findBestMatchingContent(platform, postNumber);
+        
+        const modal = document.getElementById(modalId);
+        if (!modal) {
+            console.error('Modal not found:', modalId);
+            return;
+        }
+        
+        // Set modal content from stored data
+        const titleElement = modal.querySelector('h2');
+        const contentElement = modal.querySelector('.social-content');
+        
+        if (titleElement && window.siteContent[titleKey]) {
+            titleElement.textContent = window.siteContent[titleKey];
+        }
+        
+        if (contentElement && window.siteContent[contentKey]) {
+            // Format content with proper paragraph breaks
+            contentElement.innerHTML = formatContent(window.siteContent[contentKey]);
+            console.log('Set social modal content to:', window.siteContent[contentKey].substring(0, 100) + '...');
+        } else {
+            console.warn(`Social content not found for key: ${contentKey}`);
+            console.log('Available site content keys:', Object.keys(window.siteContent).filter(k => k.startsWith(platform)));
+        }
+        
+        // Use the active class for flexbox centering
+        modal.classList.add('active');
+        
+        // Add a small delay to trigger the transform animation
+        setTimeout(() => {
+            const modalContent = modal.querySelector('.modal-content');
+            if (modalContent) {
+                modalContent.style.transform = 'translateY(0)';
+            }
+        }, 10);
+        
+        // Prevent body scrolling when modal is open
+        document.body.style.overflow = 'hidden';
+    }
+    // Handle platform-only modals (e.g., facebook, twitter)
     else if (['facebook', 'twitter', 'instagram', 'linkedin'].includes(modalId)) {
         const titleKey = `${modalId}_title`;
         const contentKey = `${modalId}_post`;
