@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logging Out...</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
+    <meta http-equiv="refresh" content="1;url=login.html">
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            text-align: center;
+        }
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: #09f;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .redirect-link {
+            margin-top: 20px;
+        }
+    </style>
+    <script>
+        // Clear all Supabase-related items from localStorage immediately
+        Object.keys(localStorage).forEach(key => {
+            if (key.startsWith('sb-')) {
+                console.log('Removing localStorage item:', key);
+                localStorage.removeItem(key);
+            }
+        });
+        
+        // Immediate redirect
+        window.location.replace('login.html');
+        
+        // Fallback redirect
+        setTimeout(function() {
+            window.location.href = 'login.html';
+        }, 1000);
+    </script>
+</head>
+<body>
+    <h1>Logging Out</h1>
+    <div class="spinner"></div>
+    <p>Please wait while we log you out...</p>
+    <div class="redirect-link">
+        <p>If you are not redirected automatically, <a href="login.html">click here</a> to go to the login page.</p>
+    </div>
+</body>
+</html>

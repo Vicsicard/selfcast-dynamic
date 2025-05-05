@@ -4,6 +4,22 @@ const supabase = window.supabase;
 // Initialize site content storage
 window.siteContent = {};
 
+// Global blog post and pagination variables (expanding existing variables)
+let blogSortOrder = 'newest';
+let currentPage = 1;
+let totalPages = 1;
+let allBlogPosts = [];
+const postsPerPage = 4;
+const platformPostsPerPage = 4;
+
+// Platform posts storage
+let platformPosts = {
+    facebook: { posts: [], currentPage: 1 },
+    twitter: { posts: [], currentPage: 1 },
+    instagram: { posts: [], currentPage: 1 },
+    linkedin: { posts: [], currentPage: 1 }
+};
+
 // Load Google Fonts
 function loadFonts(headingFont, bodyFont) {
     const link = document.createElement('link');
@@ -73,6 +89,9 @@ async function loadContent() {
         const themeData = {};
         contentData.forEach(item => {
             themeData[item.key] = item.value;
+            
+            // Store content for modal use
+            window.siteContent[item.key] = item.value;
         });
 
         // For every element with a data-key, set its content to the project value or blank if missing
@@ -100,64 +119,66 @@ async function loadContent() {
                 // If the key is missing, clear the content
                 if (element.tagName === 'IMG') {
                     element.src = '';
+                    element.alt = 'Image not available';
+                } else if (key.endsWith('_html')) {
+                    element.innerHTML = '';
                 } else {
                     element.textContent = '';
                 }
             }
         });
 
-        // Load fonts and inject styles
-        loadFonts(themeData.heading_font || 'Roboto', themeData.body_font || 'Open Sans');
-        injectStyles(themeData);
+        // Apply theme styles
+        const styles = {
+            primary_color: themeData.primary_color || '#007bff',
+            secondary_color: themeData.secondary_color || '#6c757d',
+            accent_color: themeData.accent_color || '#333',
+            text_color: themeData.text_color || '#333',
+            background_color: themeData.background_color || '#ffffff',
+            heading_font: themeData.heading_font || 'Montserrat',
+            body_font: themeData.body_font || 'Open Sans',
+            style_package: themeData.style_package || 'standard-preset'
+        };
 
-        // Add "View All Blog Posts" link to the blog section
-        addViewAllBlogsLink();
-
-        // Process each content item and store for modal use
-        contentData.forEach(item => {
-            // Store content for modal use
-            window.siteContent[item.key] = item.value;
-            
-            // Debug: Log all keys and values
-            console.log(`Processing key: ${item.key}, value: ${item.value}`);
-            
-            // Special handling for profile image
-            if (item.key === 'profile_image_url') {
-                const profileImg = document.querySelector('img[data-key="profile_image_url"]');
-                if (profileImg) {
-                    // Only update if the image is a placeholder or matches the old URL
-                    if (profileImg.src.includes('placeholder') || 
-                        profileImg.src.includes('image06.jpg')) {
-                        console.log('Setting profile image src to:', item.value);
-                        profileImg.src = item.value;
-                    } else {
-                        console.log('Keeping existing profile image:', profileImg.src);
+        // Apply theme
+        injectStyles(styles);
+        
+        // Load fonts
+        loadFonts(styles.heading_font, styles.body_font);
+        
+        // Process blog posts for pagination
+        extractAndProcessBlogPosts(contentData);
+        
+        // Update blog post grid with first page of posts
+        displayBlogPosts(1);
+        
+        // Process social media posts for pagination
+        extractAndProcessSocialPosts(contentData);
+        
+        // Set up pagination event listeners
+        setupPaginationControls();
+        
+        // Special handling for email address
+        if (themeData.email_address) {
+            const emailLink = document.querySelector('a[data-key="email_address"]');
+            if (emailLink) {
+                emailLink.href = `mailto:${themeData.email_address}`;
+                
+                // Clear any text nodes to prevent email from showing
+                Array.from(emailLink.childNodes).forEach(node => {
+                    if (node.nodeType === Node.TEXT_NODE) {
+                        emailLink.removeChild(node);
                     }
-                } else {
-                    console.error('Profile image element not found');
-                }
+                });
             }
-            
-            // Special handling for email address
-            if (item.key === 'email_address') {
-                const emailLink = document.querySelector('a[data-key="email_address"]');
-                if (emailLink && item.value) {
-                    emailLink.href = `mailto:${item.value}`;
-                    
-                    // Clear any text nodes to prevent email from showing
-                    Array.from(emailLink.childNodes).forEach(node => {
-                        if (node.nodeType === Node.TEXT_NODE) {
-                            emailLink.removeChild(node);
-                        }
-                    });
-                }
-            }
-            
-            // Special handling for social media URLs
-            if (item.key.endsWith('_url') && ['facebook_url', 'twitter_url', 'instagram_url', 'linkedin_url'].includes(item.key)) {
-                const socialLink = document.querySelector(`a[data-key="${item.key}"]`);
-                if (socialLink && item.value) {
-                    socialLink.href = item.value;
+        }
+        
+        // Special handling for social media URLs
+        ['facebook_url', 'twitter_url', 'instagram_url', 'linkedin_url'].forEach(socialKey => {
+            if (themeData[socialKey]) {
+                const socialLink = document.querySelector(`a[data-key="${socialKey}"]`);
+                if (socialLink) {
+                    socialLink.href = themeData[socialKey];
                     
                     // Clear any text nodes to prevent URL from showing
                     Array.from(socialLink.childNodes).forEach(node => {
@@ -167,141 +188,434 @@ async function loadContent() {
                     });
                 }
             }
-            
-            // Find elements with matching data-key
-            const elements = document.querySelectorAll(`[data-key="${item.key}"]`);
-            console.log(`Found ${elements.length} elements with data-key="${item.key}"`);
-            
-            elements.forEach(element => {
-                if (item.key === 'rendered_bio_html') {
-                    // Format bio content with proper paragraph breaks
-                    if (item.value) {
-                        // Split content by newline characters and create paragraphs
-                        const paragraphs = item.value.split(/\n\s*\n/);
-                        const formattedContent = paragraphs
-                            .map(p => `<p>${p.trim().replace(/\n/g, '<br>')}</p>`)
-                            .join('');
-                        element.innerHTML = formattedContent;
-                    } else {
-                        element.innerHTML = '';
-                    }
-                } else if (item.key === 'email_address') {
-                    // Handle email links specially
-                    const mailtoLink = `mailto:${item.value}`;
-                    element.href = mailtoLink;
-                } else if (item.key.includes('_url')) {
-                    // Handle URLs differently based on element type
-                    if (element.tagName === 'IMG') {
-                        // For image elements, set the src attribute
-                        console.log(`Setting image src for ${item.key}:`, element, item.value);
-                        element.src = item.value;
-                    } else {
-                        // For link elements, set the href attribute
-                        element.href = item.value;
-                    }
-                } else if (item.key.endsWith('_post')) {
-                    // For social media posts, create excerpt
-                    console.log('Creating excerpt for social post:', item.key);
-                    
-                    // Check if this is a social media post
-                    const platform = item.key.replace('_post', '');
-                    const excerptKey = `${platform}_excerpt`;
-                    
-                    // Find excerpt elements for this platform
-                    const excerptElements = document.querySelectorAll(`[data-key="${excerptKey}"]`);
-                    
-                    if (excerptElements.length > 0) {
-                        // Create excerpt by truncating to 150 characters
-                        const excerpt = item.value.length > 150 ? item.value.substring(0, 150) + '...' : item.value;
-                        
-                        // Apply excerpt to all matching elements
-                        excerptElements.forEach(excerptElement => {
-                            excerptElement.textContent = excerpt;
-                        });
-                    } else {
-                        // If no specific excerpt element, use the post element for the excerpt
-                        element.textContent = item.value.length > 150 ? item.value.substring(0, 150) + '...' : item.value;
-                    }
-                } else if (item.key.includes('_description')) {
-                    // For blog post descriptions, use as excerpt
-                    console.log('Using description as excerpt for:', item.key);
-                    element.textContent = item.value;
-                } else {
-                    // For other content (titles, text, etc.)
-                    element.textContent = item.value;
-                }
-            });
         });
-
-    } catch (error) {
-        console.error('Error loading content:', error);
-    }
-}
-
-// Function to add "View All Blog Posts" link to the blog section
-function addViewAllBlogsLink() {
-    const blogGrid = document.querySelector('.blog-grid');
-    if (blogGrid) {
-        // Check if the container already exists to avoid duplicates
-        if (!blogGrid.querySelector('.view-all-blogs-container')) {
-            // Create container
-            const container = document.createElement('div');
-            container.className = 'view-all-blogs-container';
-            
-            // Create link
-            const link = document.createElement('a');
-            link.href = 'blog.html';
-            link.className = 'view-all-blogs-button';
-            
-            // Create span for text (for styling purposes)
-            const span = document.createElement('span');
-            span.textContent = 'View All Blog Posts →';
-            link.appendChild(span);
-            
-            // Add link to container
-            container.appendChild(link);
-            
-            // Add container after the grid-2x2 but before the next section
-            const gridElement = blogGrid.querySelector('.grid-2x2');
-            if (gridElement) {
-                gridElement.after(container);
-            } else {
-                // If grid not found, append to the end of blog-grid
-                blogGrid.appendChild(container);
-            }
-            
-            console.log('Added "View All Blog Posts" link to blog section');
+        
+        // Specialized processing for social media excerpts
+        processKeysWithPrefix(contentData, '_post');
+        
+        // Add bio cards
+        const bioElement = document.querySelector('[data-key="rendered_bio_html"]');
+        if (bioElement && themeData.rendered_bio_html) {
+            createBioCards(themeData.rendered_bio_html, bioElement);
         }
-    } else {
-        console.log('Blog grid section not found');
+        
+        // After content is loaded, initialize parallax effect
+        initParallax();
+        
+    } catch (error) {
+        console.error('Error:', error);
     }
 }
 
-// Create fun fact cards from bio content
-function createBioCards(bioContent, element) {
-    // Use static words for the cards
-    const words = ['Mind', 'Body', 'Soul'];
-    
-    // Create a container for the cards
-    const cardsContainer = document.createElement('div');
-    cardsContainer.className = 'bio-cards';
-    
-    // Create a card for each word
-    words.forEach(word => {
-        const card = document.createElement('div');
-        card.className = 'bio-card';
+// Process all keys that end with a specific suffix
+function processKeysWithPrefix(contentData, suffix) {
+    contentData.forEach(item => {
+        const key = item.key;
+        const value = item.value;
         
-        // Gradient styled word
-        const wordElem = document.createElement('span');
-        wordElem.className = 'bio-card-title';
-        wordElem.textContent = word;
-        card.appendChild(wordElem);
+        if (key.endsWith(suffix)) {
+            generateSocialExcerpt(key, value, contentData);
+        }
+    });
+}
+
+// Extract and process all blog posts
+function extractAndProcessBlogPosts(contentData) {
+    // Reset allBlogPosts array
+    allBlogPosts = [];
+    
+    // Process each content item
+    contentData.forEach(item => {
+        const key = item.key;
+        const value = item.value;
         
-        cardsContainer.appendChild(card);
+        // Match blog post pattern (blog_1, blog_2, etc.)
+        const blogPostMatch = key.match(/^blog_(\d+)$/);
+        if (blogPostMatch) {
+            const blogNumber = parseInt(blogPostMatch[1]);
+            
+            // Find matching title and description
+            const titleKey = `blog_post_${blogNumber}_title`;
+            const descriptionKey = `blog_post_${blogNumber}_description`;
+            const dateKey = `blog_post_${blogNumber}_date`;
+            const featuredKey = `blog_post_${blogNumber}_featured`;
+            
+            // Find corresponding content items
+            const titleItem = contentData.find(item => item.key === titleKey);
+            const descriptionItem = contentData.find(item => item.key === descriptionKey);
+            const dateItem = contentData.find(item => item.key === dateKey);
+            const featuredItem = contentData.find(item => item.key === featuredKey);
+            
+            // If we have the core content, add to blog posts array
+            if (value) {
+                allBlogPosts.push({
+                    number: blogNumber,
+                    title: titleItem ? titleItem.value : `Blog Post ${blogNumber}`,
+                    description: descriptionItem ? descriptionItem.value : generateExcerpt(value),
+                    content: value,
+                    date: dateItem ? new Date(dateItem.value) : new Date(),
+                    featured: featuredItem ? featuredItem.value === 'true' : false
+                });
+            }
+        }
     });
     
-    // Insert the cards after the bio content
-    element.parentNode.insertBefore(cardsContainer, element.nextSibling);
+    // Sort blog posts (newest first by default)
+    sortBlogPosts(blogSortOrder);
+    
+    // Calculate total pages
+    totalPages = Math.ceil(allBlogPosts.length / postsPerPage);
+    
+    console.log(`Extracted ${allBlogPosts.length} blog posts, total pages: ${totalPages}`);
+}
+
+// Generate excerpt from content
+function generateExcerpt(content, maxLength = 150) {
+    // Remove HTML tags
+    const plainText = content.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+    
+    // Truncate to maxLength characters
+    if (plainText.length <= maxLength) return plainText;
+    
+    // Find the last space before maxLength
+    const truncated = plainText.substring(0, maxLength);
+    const lastSpace = truncated.lastIndexOf(' ');
+    
+    // If no space found, just truncate at maxLength
+    if (lastSpace === -1) return truncated + '...';
+    
+    // Truncate at the last space
+    return truncated.substring(0, lastSpace) + '...';
+}
+
+// Sort blog posts based on the selected order
+function sortBlogPosts(order) {
+    blogSortOrder = order;
+    
+    switch (order) {
+        case 'newest':
+            allBlogPosts.sort((a, b) => b.date - a.date);
+            break;
+        case 'oldest':
+            allBlogPosts.sort((a, b) => a.date - b.date);
+            break;
+        case 'featured':
+            // First featured (true before false), then newest within each group
+            allBlogPosts.sort((a, b) => {
+                if (a.featured && !b.featured) return -1;
+                if (!a.featured && b.featured) return 1;
+                return b.date - a.date;
+            });
+            break;
+    }
+    
+    // Update the display if we're already showing blog posts
+    if (document.getElementById('blog-post-grid')) {
+        displayBlogPosts(currentPage);
+    }
+}
+
+// Display blog posts for the specified page
+function displayBlogPosts(page) {
+    currentPage = page;
+    
+    // Calculate start and end index
+    const startIndex = (page - 1) * postsPerPage;
+    const endIndex = startIndex + postsPerPage;
+    
+    // Get blog posts for this page
+    const postsToShow = allBlogPosts.slice(startIndex, endIndex);
+    
+    // Get the grid container
+    const gridContainer = document.getElementById('blog-post-grid');
+    if (!gridContainer) return;
+    
+    // Clear existing content
+    gridContainer.innerHTML = '';
+    
+    // If no posts, show a message
+    if (postsToShow.length === 0) {
+        gridContainer.innerHTML = '<div class="no-content-message">No blog posts yet. Check back soon!</div>';
+        return;
+    }
+    
+    // Add posts to the grid
+    postsToShow.forEach(post => {
+        const postElement = document.createElement('div');
+        postElement.className = 'grid-item blog-card';
+        if (post.featured) postElement.classList.add('featured');
+        
+        postElement.innerHTML = `
+            <h3 class="blog-title">${post.title}</h3>
+            <p class="excerpt blog-excerpt">${post.description}</p>
+            <button class="action-button" onclick="openModal('blog-${post.number}')">Read More</button>
+        `;
+        
+        gridContainer.appendChild(postElement);
+    });
+    
+    // Update pagination information
+    updateBlogPagination();
+}
+
+// Update blog pagination information and button states
+function updateBlogPagination() {
+    // Update current page and total pages display
+    document.getElementById('blog-current-page').textContent = currentPage;
+    document.getElementById('blog-total-pages').textContent = totalPages || 1;
+    
+    // Update button states
+    const prevButton = document.getElementById('blog-prev-page');
+    const nextButton = document.getElementById('blog-next-page');
+    
+    if (prevButton) {
+        prevButton.disabled = currentPage <= 1;
+    }
+    
+    if (nextButton) {
+        nextButton.disabled = currentPage >= totalPages;
+    }
+}
+
+// Process social media platform posts for pagination
+function processPlatformPosts(contentData) {
+    // Reset platform posts
+    Object.keys(platformPosts).forEach(platform => {
+        platformPosts[platform].posts = [];
+        platformPosts[platform].currentPage = 1;
+    });
+    
+    // Process each content item
+    contentData.forEach(item => {
+        const key = item.key;
+        const value = item.value;
+        
+        // Check for platform post patterns
+        Object.keys(platformPosts).forEach(platform => {
+            // Match patterns like facebook_1, twitter_2, etc.
+            const postMatch = key.match(new RegExp(`^${platform}_(\\d+)$`));
+            if (postMatch) {
+                const postNumber = parseInt(postMatch[1]);
+                
+                // Find matching title (if exists)
+                const titleKey = `${platform}_title_${postNumber}`;
+                const titleItem = contentData.find(item => item.key === titleKey);
+                
+                // If we have content, add to platform posts array
+                if (value) {
+                    platformPosts[platform].posts.push({
+                        number: postNumber,
+                        title: titleItem ? titleItem.value : `${platform.charAt(0).toUpperCase() + platform.slice(1)} Update ${postNumber}`,
+                        content: value
+                    });
+                }
+            }
+        });
+    });
+    
+    // Sort all platform posts by number (most recent first assuming higher numbers are newer)
+    Object.keys(platformPosts).forEach(platform => {
+        platformPosts[platform].posts.sort((a, b) => b.number - a.number);
+        console.log(`Extracted ${platformPosts[platform].posts.length} ${platform} posts`);
+    });
+}
+
+// Set up pagination event listeners
+function setupPaginationControls() {
+    // Blog pagination
+    const blogPrevButton = document.getElementById('blog-prev-page');
+    const blogNextButton = document.getElementById('blog-next-page');
+    const blogSortSelect = document.getElementById('blog-sort-by');
+    
+    if (blogPrevButton) {
+        blogPrevButton.addEventListener('click', () => {
+            if (currentPage > 1) {
+                displayBlogPosts(currentPage - 1);
+            }
+        });
+    }
+    
+    if (blogNextButton) {
+        blogNextButton.addEventListener('click', () => {
+            if (currentPage < totalPages) {
+                displayBlogPosts(currentPage + 1);
+            }
+        });
+    }
+    
+    if (blogSortSelect) {
+        blogSortSelect.addEventListener('change', () => {
+            sortBlogPosts(blogSortSelect.value);
+        });
+    }
+    
+    // Social media platform pagination
+    setupPlatformPagination();
+}
+
+// Set up platform pagination for all social media platforms
+function setupPlatformPagination() {
+    // For each platform (facebook, twitter, instagram, linkedin)
+    Object.keys(platformPosts).forEach(platform => {
+        // Get pagination buttons
+        const prevButton = document.getElementById(`${platform}-prev-page`);
+        const nextButton = document.getElementById(`${platform}-next-page`);
+        
+        if (prevButton) {
+            prevButton.addEventListener('click', () => {
+                if (platformPosts[platform].currentPage > 1) {
+                    displayPlatformPosts(platform, platformPosts[platform].currentPage - 1);
+                }
+            });
+        }
+        
+        if (nextButton) {
+            nextButton.addEventListener('click', () => {
+                const totalPages = Math.ceil(platformPosts[platform].posts.length / platformPostsPerPage);
+                if (platformPosts[platform].currentPage < totalPages) {
+                    displayPlatformPosts(platform, platformPosts[platform].currentPage + 1);
+                }
+            });
+        }
+        
+        // Initial display of platform posts
+        displayPlatformPosts(platform, 1);
+    });
+}
+
+// Display platform posts for a specific page
+function displayPlatformPosts(platform, page) {
+    // Set current page for this platform
+    platformPosts[platform].currentPage = page;
+    
+    // Calculate start and end index
+    const startIndex = (page - 1) * platformPostsPerPage;
+    const endIndex = startIndex + platformPostsPerPage;
+    
+    // Get posts for this page
+    const postsToShow = platformPosts[platform].posts.slice(startIndex, endIndex);
+    
+    // Get the grid container
+    const gridContainer = document.getElementById(`${platform}-post-grid`);
+    if (!gridContainer) return;
+    
+    // Clear existing content
+    gridContainer.innerHTML = '';
+    
+    // If no posts, show a message
+    if (postsToShow.length === 0) {
+        gridContainer.innerHTML = `<div class="no-content-message">No ${platform} posts yet. Check back soon!</div>`;
+        return;
+    }
+    
+    // Add posts to the grid
+    postsToShow.forEach(post => {
+        const postElement = document.createElement('div');
+        postElement.className = `grid-item social-card ${platform}`;
+        
+        // Create card structure based on platform
+        postElement.innerHTML = `
+            <div class="social-card-header">
+                <div class="social-card-icon">
+                    ${getPlatformIcon(platform)}
+                </div>
+                <span class="social-date">Latest Update</span>
+            </div>
+            <div class="social-content">
+                <p class="excerpt">${generateExcerpt(post.content)}</p>
+            </div>
+            <button class="action-button" onclick="openModal('${platform}-${post.number}')">Read More</button>
+        `;
+        
+        gridContainer.appendChild(postElement);
+    });
+    
+    // Update pagination information
+    updatePlatformPagination(platform);
+}
+
+// Update platform pagination information and button states
+function updatePlatformPagination(platform) {
+    const currentPage = platformPosts[platform].currentPage;
+    const totalPages = Math.ceil(platformPosts[platform].posts.length / platformPostsPerPage);
+    
+    // Update current page and total pages display
+    const currentPageElement = document.getElementById(`${platform}-current-page`);
+    const totalPagesElement = document.getElementById(`${platform}-total-pages`);
+    
+    if (currentPageElement) {
+        currentPageElement.textContent = currentPage;
+    }
+    
+    if (totalPagesElement) {
+        totalPagesElement.textContent = totalPages || 1;
+    }
+    
+    // Update button states
+    const prevButton = document.getElementById(`${platform}-prev-page`);
+    const nextButton = document.getElementById(`${platform}-next-page`);
+    
+    if (prevButton) {
+        prevButton.disabled = currentPage <= 1;
+    }
+    
+    if (nextButton) {
+        nextButton.disabled = currentPage >= totalPages;
+    }
+}
+
+// Get the SVG icon for a platform
+function getPlatformIcon(platform) {
+    switch (platform) {
+        case 'facebook':
+            return `<svg class="social-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512">
+                <path fill="currentColor" d="M279.14 288l14.22-92.66h-88.91v-60.13c0-25.35 12.42-50.06 52.24-50.06h40.42V6.26S260.43 0 225.36 0c-73.22 0-121.08 44.38-121.08 124.72v70.62H22.89V288h81.39v224h100.17V288z"/>
+            </svg>`;
+        case 'twitter':
+            return `<svg class="social-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+                <path fill="currentColor" d="M459.37 151.716c.325 4.548.325 9.097.325 13.645 0 138.72-105.583 298.558-298.558 298.558-59.452 0-114.68-17.219-161.137-47.106 8.447.974 16.568 1.299 25.34 1.299 49.055 0 94.213-16.568 130.274-44.832-46.132-.975-84.792-31.188-98.112-72.772 6.498.974 12.995 1.624 19.818 1.624 9.421 0 18.843-1.3 27.614-3.573-48.081-9.747-84.143-51.98-84.143-102.985v-1.299c13.969 7.797 30.214 12.67 47.431 13.319-28.264-18.843-46.781-51.005-46.781-87.391 0-19.492 5.197-37.36 14.294-52.954 51.655 63.675 129.3 105.258 216.365 109.807-1.624-7.797-2.599-15.918-2.599-24.04 0-57.828 46.782-104.934 104.934-104.934 30.213 0 57.502 12.67 76.67 33.137 23.715-4.548 46.456-13.32 66.599-25.34-7.798 24.366-24.366 44.833-46.132 57.827 21.117-2.273 41.584-8.122 60.426-16.243-14.292 20.791-32.161 39.308-52.628 54.253z"/>
+            </svg>`;
+        case 'instagram':
+            return `<svg class="social-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
+                <path fill="currentColor" d="M224.1 141c-63.6 0-114.9 51.3-114.9 114.9s51.3 114.9 114.9 114.9S339 319.5 339 255.9 287.7 141 224.1 141zm0 189.6c-41.1 0-74.7-33.5-74.7-74.7s33.5-74.7 74.7-74.7 74.7 33.5 74.7 74.7-33.6 74.7-74.7 74.7zm146.4-194.3c0 14.9-12 26.8-26.8 26.8-14.9 0-26.8-12-26.8-26.8s12-26.8 26.8-26.8 26.8 12 26.8 26.8zm76.1 27.2c-1.7-35.9-9.9-67.7-36.2-93.9-26.2-26.2-58-34.4-93.9-36.2-37-2.1-147.9-2.1-184.9 0-35.8 1.7-67.6 9.9-93.9 36.1s-34.4 58-36.2 93.9c-2.1 37-2.1 147.9 0 184.9 1.7 35.9 9.9 67.7 36.2 93.9s58 34.4 93.9 36.2c37 2.1 147.9 2.1 184.9 0 35.9-1.7 67.7-9.9 93.9-36.2 26.2-26.2 34.4-58 36.2-93.9 2.1-37 2.1-147.8 0-184.8zM398.8 388c-7.8 19.6-22.9 34.7-42.6 42.6-29.5 11.7-99.5 9-132.1 9s-102.7 2.6-132.1-9c-19.6-7.8-34.7-22.9-42.6-42.6-11.7-29.5-9-99.5-9-132.1s-2.6-102.7 9-132.1c7.8-19.6 22.9-34.7 42.6-42.6 29.5-11.7 99.5-9 132.1-9s102.7-2.6 132.1 9c19.6 7.8 34.7 22.9 42.6 42.6 11.7 29.5 9 99.5 9 132.1s2.7 102.7-9 132.1z"/>
+            </svg>`;
+        case 'linkedin':
+            return `<svg class="social-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
+                <path fill="currentColor" d="M416 32H31.9C14.3 32 0 46.5 0 64.3v383.4C0 465.5 14.3 480 31.9 480H416c17.6 0 32-14.5 32-32.3V64.3c0-17.8-14.4-32.3-32-32.3zM135.4 416H69V202.2h66.5V416zm-33.2-243c-21.3 0-38.5-17.3-38.5-38.5S80.9 96 102.2 96c21.2 0 38.5 17.3 38.5 38.5 0 21.3-17.2 38.5-38.5 38.5zm282.1 243h-66.4V312c0-24.8-.5-56.7-34.5-56.7-34.6 0-39.9 27-39.9 54.9V416h-66.4V202.2h63.7v29.2h.9c8.9-16.8 30.6-34.5 62.9-34.5 67.2 0 79.7 44.3 79.7 101.9V416z"/>
+            </svg>`;
+        default:
+            return '';
+    }
+}
+
+// Function to generate social media excerpts
+function generateSocialExcerpt(key, value, contentData) {
+    // Check if this is a platform post (e.g., facebook_1, twitter_2)
+    const platforms = Object.keys(platformPosts);
+    
+    // Try to match platform and number pattern
+    for (const platform of platforms) {
+        const postMatch = key.match(new RegExp(`^${platform}_(\\d+)$`));
+        if (postMatch) {
+            const postNumber = postMatch[1];
+            const excerptKey = `${platform}_excerpt_${postNumber}`;
+            const excerptElements = document.querySelectorAll(`[data-key="${excerptKey}"]`);
+            
+            // If we have excerpt elements, create and set the excerpt
+            if (excerptElements.length > 0) {
+                const excerpt = generateExcerpt(value);
+                
+                // Apply excerpt to all matching elements
+                excerptElements.forEach(element => {
+                    element.textContent = excerpt;
+                });
+            }
+            
+            // Add corresponding data to window.siteContent for modal use
+            window.siteContent[excerptKey] = generateExcerpt(value);
+            break;
+        }
+    }
 }
 
 // Modal Functions
@@ -401,10 +715,11 @@ function openModal(modalId) {
 
 // All Blogs Modal Functions
 // Variables for pagination
-let allBlogPosts = [];
-let currentPage = 1;
-let postsPerPage = 6;
-let totalPages = 1;
+// Already declared globally, so not re-declaring here
+// let allBlogPosts = [];
+// let currentPage = 1;
+// const postsPerPage = 4;
+// let totalPages = 1;
 
 // Function to open the All Blogs modal
 function openAllBlogsModal() {
@@ -676,3 +991,154 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Also run it after a short delay to catch any dynamic changes
 setTimeout(fixSocialIcons, 1000);
+
+// Extract and process all blog posts from content data
+function extractAndProcessBlogPosts(contentData) {
+    allBlogPosts = [];
+    
+    // Extract blog posts
+    for (const item of contentData) {
+        const key = item.key;
+        const value = item.value;
+        
+        // If this is a blog post (matches blog_X pattern)
+        const blogMatch = key.match(/^blog_(\d+)$/);
+        if (blogMatch) {
+            const blogNumber = parseInt(blogMatch[1]);
+            
+            // Find related blog metadata (title, description, date, featured)
+            const titleItem = contentData.find(i => i.key === `blog_${blogNumber}_title`);
+            const descriptionItem = contentData.find(i => i.key === `blog_${blogNumber}_description`);
+            const dateItem = contentData.find(i => i.key === `blog_${blogNumber}_date`);
+            const featuredItem = contentData.find(i => i.key === `blog_${blogNumber}_featured`);
+            
+            // Add blog post to our collection
+            allBlogPosts.push({
+                number: blogNumber,
+                title: titleItem ? titleItem.value : `Blog Post ${blogNumber}`,
+                description: descriptionItem ? descriptionItem.value : generateExcerpt(value),
+                content: value,
+                date: dateItem ? new Date(dateItem.value) : new Date(),
+                featured: featuredItem ? featuredItem.value === 'true' : false
+            });
+        }
+    }
+    
+    // Sort by newest first (default)
+    allBlogPosts.sort((a, b) => b.date - a.date);
+    
+    // Calculate total pages
+    totalPages = Math.ceil(allBlogPosts.length / postsPerPage);
+    
+    // Display first page
+    displayBlogPosts(1);
+}
+
+// Extract and process all social media posts from content data
+function extractAndProcessSocialPosts(contentData) {
+    // Reset platform posts
+    Object.keys(platformPosts).forEach(platform => {
+        platformPosts[platform].posts = [];
+    });
+    
+    // Extract posts for each platform
+    for (const item of contentData) {
+        const key = item.key;
+        const value = item.value;
+        
+        // Process each platform
+        Object.keys(platformPosts).forEach(platform => {
+            // Match platform_X pattern (e.g., facebook_1, twitter_3)
+            const postMatch = key.match(new RegExp(`^${platform}_(\\d+)$`));
+            if (postMatch) {
+                const postNumber = parseInt(postMatch[1]);
+                
+                // Find related metadata (date, title, etc)
+                const dateItem = contentData.find(i => i.key === `${platform}_${postNumber}_date`);
+                const titleItem = contentData.find(i => i.key === `${platform}_${postNumber}_title`);
+                
+                // Add post to platform collection
+                platformPosts[platform].posts.push({
+                    number: postNumber,
+                    content: value,
+                    date: dateItem ? new Date(dateItem.value) : new Date(),
+                    title: titleItem ? titleItem.value : `${platform.charAt(0).toUpperCase() + platform.slice(1)} Update`
+                });
+            }
+        });
+    }
+    
+    // Sort all platform posts by newest first
+    Object.keys(platformPosts).forEach(platform => {
+        platformPosts[platform].posts.sort((a, b) => b.date - a.date);
+    });
+}
+
+// Main function to load content from Supabase
+async function loadContent() {
+    // Get the project ID from the URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const projectId = urlParams.get('project_id');
+    
+    if (!projectId) {
+        console.error('No project ID provided');
+        return;
+    }
+    
+    try {
+        // Initialize Supabase client
+        const supabase = window.supabase;
+        
+        // Get content for the project
+        const { data: contentData, error: contentError } = await supabase
+            .from('dynamic_content')
+            .select('*')
+            .eq('project_id', projectId);
+            
+        if (contentError) {
+            throw contentError;
+        }
+        
+        if (!contentData || contentData.length === 0) {
+            console.error('No content found for this project');
+            return;
+        }
+        
+        // Store content for modal reference
+        window.siteContent = {};
+        contentData.forEach(item => {
+            window.siteContent[item.key] = item.value;
+        });
+        
+        // Process content and inject into page
+        contentData.forEach(item => {
+            const key = item.key;
+            const value = item.value;
+            
+            // Find elements with matching data-key attribute
+            const elements = document.querySelectorAll(`[data-key="${key}"]`);
+            
+            // Update elements
+            elements.forEach(element => {
+                // Check if element is an image
+                if (element.tagName === 'IMG') {
+                    element.src = value;
+                } else {
+                    element.innerHTML = value;
+                }
+            });
+        });
+        
+        // Extract and process blog posts for pagination
+        extractAndProcessBlogPosts(contentData);
+        
+        // Extract and process social media posts for pagination
+        extractAndProcessSocialPosts(contentData);
+        
+        // Set up pagination event listeners
+        setupPaginationControls();
+        
+    } catch (error) {
+        console.error('Error loading content:', error);
+    }
+}
