@@ -234,24 +234,36 @@ function extractAndProcessBlogPosts(contentData) {
         if (blogPostMatch) {
             const blogNumber = parseInt(blogPostMatch[1]);
             
-            // Find matching title and description
+            // Find matching title and description - use both formats for descriptions
             const titleKey = `blog_post_${blogNumber}_title`;
+            
+            // Try both possible description key formats
             const descriptionKey = `blog_post_${blogNumber}_description`;
+            const excerptKey = `blog_${blogNumber}_excerpt`;  // This is what's saved in the editor
+            
             const dateKey = `blog_post_${blogNumber}_date`;
             const featuredKey = `blog_post_${blogNumber}_featured`;
             
             // Debug logging
-            console.log(`Processing blog ${blogNumber}, looking for description key: ${descriptionKey}`);
+            console.log(`Processing blog ${blogNumber}, looking for description keys: ${descriptionKey} or ${excerptKey}`);
             
             // Find corresponding content items
             const titleItem = contentData.find(item => item.key === titleKey);
-            const descriptionItem = contentData.find(item => item.key === descriptionKey);
+            
+            // Try both formats for description/excerpt
+            let descriptionItem = contentData.find(item => item.key === descriptionKey);
+            if (!descriptionItem) {
+                descriptionItem = contentData.find(item => item.key === excerptKey);
+                if (descriptionItem) {
+                    console.log(`Found excerpt with key ${excerptKey}`);
+                }
+            }
             
             // Debug logging for description
             if (descriptionItem) {
-                console.log(`Found description for blog ${blogNumber}: ${descriptionItem.value.substring(0, 50)}...`);
+                console.log(`Found description/excerpt for blog ${blogNumber}: ${descriptionItem.value.substring(0, 50)}...`);
             } else {
-                console.log(`No description found for blog ${blogNumber}, will generate from content`);
+                console.log(`No description/excerpt found for blog ${blogNumber}, will generate from content`);
             }
             
             const dateItem = contentData.find(item => item.key === dateKey);
