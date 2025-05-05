@@ -2031,6 +2031,13 @@
             showStatus('Uploading profile image...', 'info');
             
             try {
+                // Get a reference to the Supabase client 
+                const supabase = window.SupabaseAuth.getSupabaseClient();
+                
+                if (!supabase) {
+                    throw new Error('Supabase client not available');
+                }
+                
                 // Create a unique file name using project ID to avoid collisions
                 const fileName = `profile_${projectId}_${new Date().getTime()}.${file.name.split('.').pop()}`;
                 const filePath = `profile-images/${fileName}`;
@@ -2049,7 +2056,7 @@
                 }
                 
                 // Get public URL for the file
-                const { data: urlData } = supabase
+                const { data: urlData } = await supabase
                     .storage
                     .from('site-content')
                     .getPublicUrl(filePath);
@@ -2123,6 +2130,13 @@
                 if (saveIndicator) {
                     saveIndicator.className = 'indicator saving';
                     saveIndicator.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Saving...</span>';
+                }
+                
+                // Get a reference to the Supabase client 
+                const supabase = window.SupabaseAuth.getSupabaseClient();
+                
+                if (!supabase) {
+                    throw new Error('Supabase client not available');
                 }
                 
                 // Process each item and create Supabase upsert operations

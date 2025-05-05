@@ -384,5 +384,6 @@ window.SupabaseAuth = {
   getUser,
   isAdmin,
   getUserProjects,
-  associateUserWithProject
+  associateUserWithProject,
+  getSupabaseClient
 };
