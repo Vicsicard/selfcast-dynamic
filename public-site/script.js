@@ -106,6 +106,23 @@ async function loadContent() {
                 return; // Skip the rest of the processing for social buttons
             }
             
+            // Special handling for blog excerpts to handle key format mismatches
+            if (key.match(/^blog_(\d+)_description$/)) {
+                const blogNumber = key.match(/^blog_(\d+)_description$/)[1];
+                const alternateKey = `blog_${blogNumber}_excerpt`;
+                
+                // Check if we have content in the alternate key format
+                if (themeData[alternateKey] !== undefined && themeData[alternateKey] !== null && themeData[alternateKey] !== '') {
+                    console.log(`Using alternate excerpt key ${alternateKey} for ${key}`);
+                    if (key.endsWith('_html')) {
+                        element.innerHTML = themeData[alternateKey];
+                    } else {
+                        element.textContent = themeData[alternateKey];
+                    }
+                    return; // Skip the rest of processing for this element
+                }
+            }
+            
             if (themeData[key] !== undefined && themeData[key] !== null && themeData[key] !== '') {
                 // If the key exists for this project, set the value
                 if (element.tagName === 'IMG') {
