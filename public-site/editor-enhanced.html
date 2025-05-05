@@ -789,6 +789,37 @@
                                 </div>
                             </div>
                         </div>
+                        
+                        <!-- Profile Image Section -->
+                        <div class="section">
+                            <div class="section-header">
+                                <h2>Profile Image</h2>
+                                <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
+                            </div>
+                            <div class="section-content">
+                                <div class="form-group">
+                                    <label for="profile_image_url">Profile Image URL</label>
+                                    <input type="text" id="profile_image_url" name="profile_image_url" placeholder="Enter direct URL to your profile image">
+                                    <p class="help-text">Enter a direct link to your profile image (JPG, PNG, or WebP format)</p>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label>Upload New Image</label>
+                                    <div class="image-upload-container">
+                                        <div id="profile-image-preview" class="image-preview">
+                                            <img id="profile-preview" src="" alt="Profile preview" style="max-width: 100%; max-height: 200px; display: none;">
+                                            <div id="profile-placeholder" class="placeholder">No image selected</div>
+                                        </div>
+                                        <input type="file" id="profile_image_upload" accept="image/*" style="display: none;">
+                                        <div class="button-group">
+                                            <button type="button" class="secondary" onclick="document.getElementById('profile_image_upload').click()">Select Image</button>
+                                            <button type="button" class="secondary" id="upload-profile-image">Upload Image</button>
+                                        </div>
+                                    </div>
+                                    <p class="help-text">Recommended size: 400x400 pixels. Maximum file size: 2MB</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     
                     <!-- Blog Posts Tab -->
@@ -1604,7 +1635,7 @@
         // Update any special fields that might need extra handling
         function updateSpecialFields(content) {
             // Force update of style preview if we're on the styling tab
-            if (document.querySelector('.tab[data-tab="styling"]')?.classList.contains('active')) {
+            if (document.getElementById('styling').classList.contains('active')) {
                 updateStylePreview();
             }
             
@@ -1770,6 +1801,53 @@
                 });
             }
             
+            // Profile Image Upload Preview
+            const profileImageUpload = document.getElementById('profile_image_upload');
+            const profilePreview = document.getElementById('profile-preview');
+            const profilePlaceholder = document.getElementById('profile-placeholder');
+            const uploadProfileButton = document.getElementById('upload-profile-image');
+            
+            if (profileImageUpload) {
+                profileImageUpload.addEventListener('change', function() {
+                    const file = this.files[0];
+                    if (file) {
+                        // Check file size (2MB limit)
+                        if (file.size > 2 * 1024 * 1024) {
+                            showStatus('Image is too large. Maximum size is 2MB.', 'error');
+                            return;
+                        }
+                        
+                        // Check file type
+                        if (!file.type.match('image.*')) {
+                            showStatus('Selected file is not an image.', 'error');
+                            return;
+                        }
+                        
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            profilePreview.src = e.target.result;
+                            profilePreview.style.display = 'block';
+                            profilePlaceholder.style.display = 'none';
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+            }
+            
+            // Profile Image Upload Button
+            if (uploadProfileButton) {
+                uploadProfileButton.addEventListener('click', function() {
+                    const file = profileImageUpload ? profileImageUpload.files[0] : null;
+                    if (file && currentProjectId) {
+                        uploadProfileImage(file, currentProjectId);
+                    } else if (!file) {
+                        showStatus('Please select an image first.', 'error');
+                    } else {
+                        showStatus('No project selected.', 'error');
+                    }
+                });
+            }
+            
             // Tab navigation
             document.querySelectorAll('.tab').forEach(tab => {
                 tab.addEventListener('click', function() {
@@ -1924,6 +2002,60 @@
             stylePreview.style.setProperty('--body-font', bodyFont);
             
             log('Style preview updated');
+        }
+        
+        // Upload profile image to Supabase storage
+        async function uploadProfileImage(file, projectId) {
+            if (!file || !projectId) {
+                showStatus('Missing file or project ID', 'error');
+                return;
+            }
+            
+            showStatus('Uploading profile image...', 'info');
+            
+            try {
+                // Create a unique file name using project ID to avoid collisions
+                const fileName = `profile_${projectId}_${new Date().getTime()}.${file.name.split('.').pop()}`;
+                const filePath = `profile-images/${fileName}`;
+                
+                // Upload file to Supabase Storage
+                const { data, error } = await supabase
+                    .storage
+                    .from('site-content')
+                    .upload(filePath, file, {
+                        cacheControl: '3600',
+                        upsert: true
+                    });
+                
+                if (error) {
+                    throw error;
+                }
+                
+                // Get public URL for the file
+                const { data: urlData } = supabase
+                    .storage
+                    .from('site-content')
+                    .getPublicUrl(filePath);
+                
+                if (!urlData || !urlData.publicUrl) {
+                    throw new Error('Failed to get public URL');
+                }
+                
+                // Update the profile image URL field
+                const profileImageUrlField = document.getElementById('profile_image_url');
+                if (profileImageUrlField) {
+                    profileImageUrlField.value = urlData.publicUrl;
+                }
+                
+                // Save the content with the new profile image URL
+                const contentItems = collectFormData();
+                await saveContent(projectId, contentItems);
+                
+                showStatus('Profile image uploaded and saved!', 'success');
+            } catch (error) {
+                console.error('Error uploading profile image:', error);
+                showStatus(`Upload failed: ${error.message || 'Unknown error'}`, 'error');
+            }
         }
     </script>
 </body>
