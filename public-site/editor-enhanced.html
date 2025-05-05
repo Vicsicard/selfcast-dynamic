@@ -1422,9 +1422,10 @@
                 showStatus('Loading projects...', 'info');
                 
                 // Get projects for current user
-                const { data: projects, error } = await window.SupabaseAuth.getUserProjects();
+                const { data: projects, error, partial } = await window.SupabaseAuth.getUserProjects();
                 
-                if (error) {
+                // Only show error if we have no projects AND there's an error
+                if (error && (!projects || projects.length === 0)) {
                     log('Error loading projects:', error);
                     showStatus('Error loading projects: ' + error.message, 'error');
                     return;
