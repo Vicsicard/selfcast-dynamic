@@ -529,143 +529,6 @@
             color: var(--success-color);
         }
         
-        .style-preview {
-            margin-top: 20px;
-            padding: 20px;
-            border-radius: var(--border-radius);
-            border: 1px solid var(--border-color);
-            transition: all var(--transition-speed);
-        }
-        
-        .style-preview h3 {
-            margin-top: 0;
-        }
-        
-        .style-preview-content {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-        
-        .preview-item {
-            padding: 15px;
-            border-radius: var(--border-radius);
-            background-color: white;
-            box-shadow: var(--box-shadow);
-        }
-        
-        .preview-heading {
-            margin-top: 0;
-            margin-bottom: 10px;
-        }
-        
-        .preview-text {
-            margin: 0;
-        }
-        
-        .button-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-        
-        @media (max-width: 768px) {
-            .editor-main {
-                flex-direction: column;
-            }
-            
-            .sidebar {
-                width: 100%;
-                border-right: none;
-                border-bottom: 1px solid var(--border-color);
-            }
-            
-            .tabs {
-                flex-direction: row;
-                flex-wrap: wrap;
-                border-bottom: 1px solid var(--border-color);
-            }
-            
-            .tab {
-                border-left: none;
-                border-bottom: 3px solid transparent;
-                border-radius: var(--border-radius) var(--border-radius) 0 0;
-            }
-            
-            .tab.active {
-                border-bottom-color: var(--primary-color);
-                border-left-color: transparent;
-            }
-        }
-        
-        /* Style Preview Section */
-        .style-preview {
-            background: white;
-            border-radius: var(--border-radius);
-            padding: 20px;
-            margin-top: 20px;
-            box-shadow: var(--box-shadow);
-        }
-        
-        .style-preview h3 {
-            margin-top: 0;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 10px;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-        }
-        
-        .style-preview h3 i {
-            margin-right: 8px;
-            color: var(--primary-color);
-        }
-        
-        .preview-item {
-            margin-bottom: 15px;
-        }
-        
-        .preview-item h4 {
-            margin-bottom: 5px;
-            font-size: 1rem;
-            color: var(--secondary-color);
-        }
-        
-        .preview-sample {
-            padding: 15px;
-            border: 1px solid var(--border-color);
-            border-radius: var(--border-radius);
-        }
-        
-        /* Auto-save indicator */
-        .auto-save-indicator {
-            display: none;
-            align-items: center;
-            padding: 5px 10px;
-            background-color: rgba(243, 156, 18, 0.2);
-            color: var(--warning-color);
-            border-radius: var(--border-radius);
-            font-size: 0.9rem;
-            animation: pulse 1.5s infinite;
-        }
-        
-        .auto-save-indicator i {
-            margin-right: 5px;
-            animation: spin 1.5s linear infinite;
-        }
-        
-        @keyframes pulse {
-            0% { opacity: 0.7; }
-            50% { opacity: 1; }
-            100% { opacity: 0.7; }
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
         .save-button {
             display: flex;
             align-items: center;
@@ -740,7 +603,6 @@
                     <li><a href="#main-content" class="active" onclick="activateTab('main-content')"><i class="fas fa-home"></i>Main Content</a></li>
                     <li><a href="#blog-posts" onclick="activateTab('blog-posts')"><i class="fas fa-blog"></i>Blog Posts</a></li>
                     <li><a href="#social-media" onclick="activateTab('social-media')"><i class="fas fa-share-alt"></i>Social Media</a></li>
-                    <li><a href="#styling" onclick="activateTab('styling')"><i class="fas fa-palette"></i>Styling</a></li>
                     <li><a href="#quotes" onclick="activateTab('quotes')"><i class="fas fa-quote-right"></i>Quotes</a></li>
                     <li><a href="#contact" onclick="activateTab('contact')"><i class="fas fa-envelope"></i>Contact</a></li>
                     <li><a href="#misc" onclick="activateTab('misc')"><i class="fas fa-cog"></i>Miscellaneous</a></li>
@@ -1080,137 +942,6 @@
                         </div>
                     </div>
                     
-                    <!-- Styling Tab -->
-                    <div class="tab-content" id="styling">
-                        <!-- Colors Section -->
-                        <div class="section">
-                            <div class="section-header">
-                                <h2>Colors</h2>
-                                <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
-                            </div>
-                            <div class="section-content">
-                                <div class="form-row">
-                                    <div class="form-col">
-                                        <div class="form-group">
-                                            <label for="primary_color">Primary Color:</label>
-                                            <input type="color" id="primary_color" name="primary_color" value="#3498db" oninput="updateStylePreview()">
-                                        </div>
-                                    </div>
-                                    <div class="form-col">
-                                        <div class="form-group">
-                                            <label for="secondary_color">Secondary Color:</label>
-                                            <input type="color" id="secondary_color" name="secondary_color" value="#2c3e50" oninput="updateStylePreview()">
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="form-row">
-                                    <div class="form-col">
-                                        <div class="form-group">
-                                            <label for="accent_color">Accent Color:</label>
-                                            <input type="color" id="accent_color" name="accent_color" value="#e74c3c" oninput="updateStylePreview()">
-                                        </div>
-                                    </div>
-                                    <div class="form-col">
-                                        <div class="form-group">
-                                            <label for="text_color">Text Color:</label>
-                                            <input type="color" id="text_color" name="text_color" value="#333333" oninput="updateStylePreview()">
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="form-row">
-                                    <div class="form-col">
-                                        <div class="form-group">
-                                            <label for="background_color">Background Color:</label>
-                                            <input type="color" id="background_color" name="background_color" value="#f5f5f5" oninput="updateStylePreview()">
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Fonts Section -->
-                        <div class="section">
-                            <div class="section-header">
-                                <h2>Fonts</h2>
-                                <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
-                            </div>
-                            <div class="section-content">
-                                <div class="form-row">
-                                    <div class="form-col">
-                                        <div class="form-group">
-                                            <label for="heading_font">Heading Font:</label>
-                                            <select id="heading_font" name="heading_font" oninput="updateStylePreview()">
-                                                <option value="Arial, sans-serif">Arial</option>
-                                                <option value="Helvetica, sans-serif">Helvetica</option>
-                                                <option value="Georgia, serif">Georgia</option>
-                                                <option value="'Times New Roman', serif">Times New Roman</option>
-                                                <option value="Verdana, sans-serif">Verdana</option>
-                                                <option value="'Courier New', monospace">Courier New</option>
-                                                <option value="'Open Sans', sans-serif">Open Sans</option>
-                                                <option value="'Roboto', sans-serif">Roboto</option>
-                                                <option value="'Montserrat', sans-serif">Montserrat</option>
-                                                <option value="'Lato', sans-serif">Lato</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="form-col">
-                                        <div class="form-group">
-                                            <label for="body_font">Body Font:</label>
-                                            <select id="body_font" name="body_font" oninput="updateStylePreview()">
-                                                <option value="Arial, sans-serif">Arial</option>
-                                                <option value="Helvetica, sans-serif">Helvetica</option>
-                                                <option value="Georgia, serif">Georgia</option>
-                                                <option value="'Times New Roman', serif">Times New Roman</option>
-                                                <option value="Verdana, sans-serif">Verdana</option>
-                                                <option value="'Courier New', monospace">Courier New</option>
-                                                <option value="'Open Sans', sans-serif">Open Sans</option>
-                                                <option value="'Roboto', sans-serif">Roboto</option>
-                                                <option value="'Montserrat', sans-serif">Montserrat</option>
-                                                <option value="'Lato', sans-serif">Lato</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Style Preview Section -->
-                        <div class="style-preview">
-                            <h3><i class="fas fa-eye"></i> Live Style Preview</h3>
-                            
-                            <div class="preview-item">
-                                <h4>Heading Styles</h4>
-                                <div class="preview-sample" id="heading-preview">
-                                    <h1 style="margin-top: 0;">Heading 1</h1>
-                                    <h2>Heading 2</h2>
-                                    <h3>Heading 3</h3>
-                                </div>
-                            </div>
-                            
-                            <div class="preview-item">
-                                <h4>Button Styles</h4>
-                                <div class="preview-sample" id="button-preview">
-                                    <button style="background-color: var(--primary-color); color: white; border: none; padding: 10px 20px; border-radius: 4px; margin-right: 10px;">Primary Button</button>
-                                    <button style="background-color: var(--secondary-color); color: white; border: none; padding: 10px 20px; border-radius: 4px; margin-right: 10px;">Secondary Button</button>
-                                    <button style="background-color: var(--accent-color); color: white; border: none; padding: 10px 20px; border-radius: 4px;">Accent Button</button>
-                                </div>
-                            </div>
-                            
-                            <div class="preview-item">
-                                <h4>Text Styles</h4>
-                                <div class="preview-sample" id="text-preview">
-                                    <p>This is a paragraph of text that demonstrates how your body text will look on your website. The font family, size, and color can all be customized to match your brand's style.</p>
-                                    <p>Here's a <a href="#" style="color: var(--primary-color);">hyperlink</a> styled with your primary color.</p>
-                                    <p><strong>This text is bold</strong> and <em>this text is italicized</em>.</p>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <button type="button" class="save-button" onclick="saveContent(currentProjectId, collectFormData())">
-                            <i class="fas fa-save"></i> Save Style Changes
-                        </button>
-                    </div>
-                    
                     <!-- Quotes Tab -->
                     <div class="tab-content" id="quotes">
                         <!-- Quote 1 Section -->
@@ -1269,63 +1000,12 @@
                                     <label for="contact_email">Email Address</label>
                                     <input type="email" id="contact_email" name="contact_email">
                                 </div>
-                                <div class="form-group">
-                                    <label for="contact_phone">Phone Number</label>
-                                    <input type="tel" id="contact_phone" name="contact_phone">
-                                </div>
-                                <div class="form-group">
-                                    <label for="contact_address">Address</label>
-                                    <textarea id="contact_address" name="contact_address" rows="3"></textarea>
-                                </div>
-                                <div class="form-group">
-                                    <label for="contact_hours">Business Hours</label>
-                                    <textarea id="contact_hours" name="contact_hours" rows="3"></textarea>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Contact Form Section -->
-                        <div class="section">
-                            <div class="section-header">
-                                <h2>Contact Form Settings</h2>
-                                <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
-                            </div>
-                            <div class="section-content">
-                                <div class="form-group">
-                                    <label for="contact_form_title">Form Title</label>
-                                    <input type="text" id="contact_form_title" name="contact_form_title">
-                                </div>
-                                <div class="form-group">
-                                    <label for="contact_form_subtitle">Form Subtitle</label>
-                                    <input type="text" id="contact_form_subtitle" name="contact_form_subtitle">
-                                </div>
-                                <div class="form-group">
-                                    <label for="contact_form_success">Success Message</label>
-                                    <textarea id="contact_form_success" name="contact_form_success" rows="2"></textarea>
-                                </div>
                             </div>
                         </div>
                     </div>
                     
                     <!-- Miscellaneous Tab -->
                     <div class="tab-content" id="misc">
-                        <!-- Onboarding Information Section -->
-                        <div class="section">
-                            <div class="section-header">
-                                <h2>Onboarding Information</h2>
-                                <button type="button" class="collapse-toggle" onclick="toggleSection(this)">−</button>
-                            </div>
-                            <div class="section-content">
-                                <div class="form-group">
-                                    <label for="onboarding_title">Onboarding Title</label>
-                                    <input type="text" id="onboarding_title" name="onboarding_title">
-                                </div>
-                                <div class="form-group">
-                                    <label for="onboarding_text">Onboarding Text</label>
-                                    <textarea id="onboarding_text" name="onboarding_text" rows="4"></textarea>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 </form>
             </div>
@@ -1545,16 +1225,6 @@
                 showStatus(`Loaded ${data.length} content items for project: ${projectId}`, 'success');
                 log('Content loaded successfully', data.length);
                 
-                // Update style preview if on styling tab
-                const stylePreview = document.getElementById('style-preview');
-                const stylingTab = document.querySelector('.tab[data-tab="styling"]');
-                const headingFont = document.getElementById('heading_font');
-                
-                if (stylePreview && stylingTab && stylingTab.classList.contains('active') && headingFont) {
-                    const updateEvent = new Event('change');
-                    headingFont.dispatchEvent(updateEvent);
-                }
-                
             } catch (error) {
                 console.error('Error loading content:', error);
                 log('Error loading content', error.message);
@@ -1635,11 +1305,6 @@
         
         // Update any special fields that might need extra handling
         function updateSpecialFields(content) {
-            // Force update of style preview if we're on the styling tab
-            if (document.getElementById('styling').classList.contains('active')) {
-                updateStylePreview();
-            }
-            
             // Special handling for bio content which might be in different fields
             if (content.rendered_bio_html) {
                 const bioField = document.getElementById('rendered_bio_html');
@@ -1944,14 +1609,6 @@
                     }
                 }, 1000);
             }
-            
-            // Initialize style preview
-            setTimeout(() => {
-                updateStylePreview();
-                
-                // Force display of all form elements
-                ensureFormElementsVisible();
-            }, 1500);
         });
         
         // Helper function to load script dynamically
@@ -1991,34 +1648,6 @@
                 activeTab.classList.add('active');
                 activeContent.classList.add('active');
             }
-        }
-        
-        // Update style preview
-        function updateStylePreview() {
-            const stylePreview = document.getElementById('style-preview');
-            if (!stylePreview) return;
-            
-            // Get style values
-            const primaryColor = document.getElementById('primary_color')?.value || '#3498db';
-            const secondaryColor = document.getElementById('secondary_color')?.value || '#2c3e50';
-            const accentColor = document.getElementById('accent_color')?.value || '#e74c3c';
-            const textColor = document.getElementById('text_color')?.value || '#333333';
-            const backgroundColor = document.getElementById('background_color')?.value || '#ffffff';
-            
-            // Get font values
-            const headingFont = document.getElementById('heading_font')?.value || 'Arial, sans-serif';
-            const bodyFont = document.getElementById('body_font')?.value || 'Arial, sans-serif';
-            
-            // Update preview styles
-            stylePreview.style.setProperty('--primary-color', primaryColor);
-            stylePreview.style.setProperty('--secondary-color', secondaryColor);
-            stylePreview.style.setProperty('--accent-color', accentColor);
-            stylePreview.style.setProperty('--text-color', textColor);
-            stylePreview.style.setProperty('--background-color', backgroundColor);
-            stylePreview.style.setProperty('--heading-font', headingFont);
-            stylePreview.style.setProperty('--body-font', bodyFont);
-            
-            log('Style preview updated');
         }
         
         // Upload profile image to Supabase storage
