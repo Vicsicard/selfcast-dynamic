@@ -142,10 +142,16 @@ async function getUserProjects() {
     // Check if admin first (admins see all projects)
     const adminStatus = await isAdmin(email);
     
+    // Store all found projects here for deduplication
+    const allProjects = new Map();
+    let hasErrors = false;
+    
     try {
       if (adminStatus) {
+        console.log('User is admin, fetching all projects');
         // Admin user - get all projects
-        // First try to join user_projects with project_display_names to get display names
+        
+        // First attempt: Join user_projects with project_display_names
         const { data, error } = await supabase
           .from('user_projects')
           .select(`
@@ -156,46 +162,63 @@ async function getUserProjects() {
           `)
           .order('project_id');
           
-        if (error) {
-          console.error('Error fetching projects for admin with join:', error);
+        if (!error && data) {
+          data.forEach(item => {
+            allProjects.set(item.project_id, {
+              project_id: item.project_id,
+              display_name: item.project_display_names ? item.project_display_names.display_name : item.project_id
+            });
+          });
+        } else {
+          console.error('Error fetching projects with join:', error);
+          hasErrors = true;
+        }
           
-          // Fallback to just getting project IDs from user_projects
-          const { data: fallbackData, error: fallbackError } = await supabase
-            .from('user_projects')
-            .select('project_id')
-            .order('project_id');
-            
-          if (fallbackError) {
-            console.error('Error fetching projects for admin from user_projects:', fallbackError);
-            
-            // Final fallback to getting projects from dynamic_content
-            const { data: contentData, error: contentError } = await supabase
-              .from('dynamic_content')
-              .select('project_id')
-              .order('project_id');
-              
-            if (contentError) {
-              return { data: [], error: contentError };
+        // Second attempt: Get projects from user_projects table
+        const { data: projectData, error: projectError } = await supabase
+          .from('user_projects')
+          .select('project_id')
+          .order('project_id');
+          
+        if (!projectError && projectData) {
+          projectData.forEach(item => {
+            if (!allProjects.has(item.project_id)) {
+              allProjects.set(item.project_id, {
+                project_id: item.project_id,
+                display_name: item.project_id
+              });
             }
-            
-            // Extract unique project IDs
-            const uniqueProjects = [...new Set(contentData.map(item => item.project_id))];
-            return { data: uniqueProjects.map(id => ({ project_id: id })), error: null };
-          }
-          
-          return { data: fallbackData, error: null };
+          });
+        } else {
+          console.error('Error fetching projects from user_projects:', projectError);
+          hasErrors = true;
         }
         
-        // Format the data to have a consistent structure
-        const formattedData = data.map(item => ({
-          project_id: item.project_id,
-          display_name: item.project_display_names ? item.project_display_names.display_name : item.project_id
-        }));
-        
-        return { data: formattedData, error: null };
+        // Third attempt: Get all unique projects from dynamic_content table
+        const { data: contentData, error: contentError } = await supabase
+          .from('dynamic_content')
+          .select('project_id')
+          .order('project_id');
+          
+        if (!contentError && contentData) {
+          const uniqueProjects = [...new Set(contentData.map(item => item.project_id))];
+          uniqueProjects.forEach(id => {
+            if (!allProjects.has(id)) {
+              allProjects.set(id, {
+                project_id: id,
+                display_name: id
+              });
+            }
+          });
+        } else {
+          console.error('Error fetching projects from dynamic_content:', contentError);
+          hasErrors = true;
+        }
       } else {
+        console.log('Regular user, fetching assigned projects');
         // Regular user - get only their projects
-        // First try to join user_projects with project_display_names to get display names
+        
+        // First attempt: Join user_projects with project_display_names
         const { data, error } = await supabase
           .from('user_projects')
           .select(`
@@ -207,79 +230,107 @@ async function getUserProjects() {
           .eq('user_email', email)
           .order('project_id');
           
-        if (error) {
-          console.error('Error fetching projects for user with join:', error);
-          
-          // Fallback to just getting project IDs from user_projects
-          const { data: fallbackData, error: fallbackError } = await supabase
-            .from('user_projects')
-            .select('project_id')
-            .eq('user_email', email)
-            .order('project_id');
-            
-          if (fallbackError) {
-            console.error('Error fetching projects for user from user_projects:', fallbackError);
-            
-            // If user_projects table doesn't exist, check for projects with matching email
-            if (fallbackError.code === '42P01') {
-              console.log('DEVELOPMENT MODE: user_projects table not found, checking for email match in dynamic_content');
-              
-              const { data: emailData, error: emailError } = await supabase
-                .from('dynamic_content')
-                .select('project_id')
-                .eq('key', 'email_address')
-                .eq('content', email)
-                .order('project_id');
-                
-              if (emailError) {
-                console.error('Error finding projects by email:', emailError);
-                return { data: [], error: emailError };
-              }
-              
-              // Extract unique project IDs
-              const uniqueProjects = [...new Set(emailData.map(item => item.project_id))];
-              return { data: uniqueProjects.map(id => ({ project_id: id })), error: null };
-            }
-            
-            return { data: [], error: fallbackError };
-          }
-          
-          return { data: fallbackData, error: null };
+        if (!error && data) {
+          data.forEach(item => {
+            allProjects.set(item.project_id, {
+              project_id: item.project_id,
+              display_name: item.project_display_names ? item.project_display_names.display_name : item.project_id
+            });
+          });
+        } else {
+          console.error('Error fetching user projects with join:', error);
+          hasErrors = true;
         }
         
-        // Format the data to have a consistent structure
-        const formattedData = data.map(item => ({
-          project_id: item.project_id,
-          display_name: item.project_display_names ? item.project_display_names.display_name : item.project_id
-        }));
-        
-        return { data: formattedData, error: null };
-      }
-    } catch (err) {
-      console.error('Error getting user projects:', err);
-      
-      // DEVELOPMENT FALLBACK: If all else fails, show all projects for admins
-      if (adminStatus) {
-        console.log('DEVELOPMENT FALLBACK: Showing all projects for admin user');
-        const { data, error } = await supabase
-          .from('dynamic_content')
+        // Second attempt: Get projects from user_projects table
+        const { data: projectData, error: projectError } = await supabase
+          .from('user_projects')
           .select('project_id')
+          .eq('user_email', email)
           .order('project_id');
           
-        if (error) {
-          return { data: [], error };
+        if (!projectError && projectData) {
+          projectData.forEach(item => {
+            if (!allProjects.has(item.project_id)) {
+              allProjects.set(item.project_id, {
+                project_id: item.project_id,
+                display_name: item.project_id
+              });
+            }
+          });
+        } else if (projectError) {
+          console.error('Error fetching user projects from user_projects:', projectError);
+          hasErrors = true;
         }
         
-        // Extract unique project IDs
-        const uniqueProjects = [...new Set(data.map(item => item.project_id))];
-        return { data: uniqueProjects.map(id => ({ project_id: id })), error: null };
+        // Third attempt: Check for email match in dynamic_content
+        const { data: emailData, error: emailError } = await supabase
+          .from('dynamic_content')
+          .select('project_id')
+          .eq('key', 'email_address')
+          .eq('value', email)
+          .order('project_id');
+          
+        if (!emailError && emailData) {
+          emailData.forEach(item => {
+            if (!allProjects.has(item.project_id)) {
+              allProjects.set(item.project_id, {
+                project_id: item.project_id,
+                display_name: item.project_id
+              });
+            }
+          });
+        } else {
+          console.error('Error finding projects by email match:', emailError);
+          hasErrors = true;
+        }
+        
+        // Fourth attempt for regular users: Check project_owner field as a fallback
+        const { data: ownerData, error: ownerError } = await supabase
+          .from('dynamic_content')
+          .select('project_id')
+          .eq('key', 'project_owner')
+          .eq('value', email)
+          .order('project_id');
+          
+        if (!ownerError && ownerData) {
+          ownerData.forEach(item => {
+            if (!allProjects.has(item.project_id)) {
+              allProjects.set(item.project_id, {
+                project_id: item.project_id,
+                display_name: item.project_id
+              });
+            }
+          });
+        } else {
+          console.error('Error finding projects by owner match:', ownerError);
+          hasErrors = true;
+        }
       }
       
-      return { data: [], error: err };
+      // Convert map to array
+      const projectArray = Array.from(allProjects.values());
+      
+      // Sort by display name
+      projectArray.sort((a, b) => {
+        return a.display_name.localeCompare(b.display_name);
+      });
+      
+      console.log(`Found ${projectArray.length} total projects`, projectArray);
+      
+      return { 
+        data: projectArray, 
+        error: hasErrors ? { message: 'Some project retrieval methods encountered errors (see console)' } : null,
+        partial: hasErrors
+      };
+      
+    } catch (error) {
+      console.error('Unexpected error in getUserProjects:', error);
+      return { data: [], error };
     }
-  } catch (err) {
-    console.error('Error in getUserProjects:', err);
-    return { data: [], error: err };
+  } catch (error) {
+    console.error('Error getting user:', error);
+    return { data: [], error };
   }
 }
 
